@@ -68,6 +68,12 @@ window.CHALK_NOTES = [
     skills: ["git", "github", "https", "personal access token", "xxd", "pacman"],
   },
   {
+    id: "meta-01-site-build", project: "meta", n: 1, date: "2026-10-12",
+    title: "Site & Workflow Build",
+    summary: "Rename to Chalk Book, memory-dump pointer skill, HTML notes, dark static site with search, private pages, push.",
+    skills: ["html", "css", "javascript", "static site", "postMessage", "file://", "search", "claude code skills", "git", "gitignore", "pymupdf"],
+  },
+  {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",
     title: "Chalk Book Guide",
     summary: "Purpose, structure and conventions of the chalk book. Read-only copy of CLAUDE.md.",
