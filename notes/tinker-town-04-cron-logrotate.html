@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinker Town 04 — Cron &amp; Logrotate</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Tinker Town 04 — Cron & Logrotate · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Project Tinker Town · 04 · Module 1 · 2026-08-30</span>
+  <h1>Cron &amp; <span>Logrotate</span></h1>
+  <p class="sub">Scheduled jobs &amp; log rotation</p>
+  <p>Built a scheduled disk-usage report (<code>disk-report.sh</code>) via cron, then set up logrotate so its log never
+    grows unbounded.</p>
+  <p>Along the way, migrated the whole pipeline to a dedicated <code>svc-disk-report</code> service account — verified
+    end-to-end with a real forced rotation.</p>
+</header>
+
+<div class="legend">
+  <span class="chip remote">Remote — the server</span>
+  <span class="chip config">Config file</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Wrote <code>disk-report.sh</code> — timestamp + <code>df -h</code> output</li>
+  <li>Scheduled it with <code>crontab -e</code> — 5-field time syntax, per-user schedules</li>
+  <li>Why unbounded logs are a real problem, and how <code>logrotate</code> solves it</li>
+  <li>Built a <code>/etc/logrotate.d/</code> config: daily rotation, compression, 7-day retention</li>
+  <li>Debugged real logrotate errors (inline comments, insecure directory permissions)</li>
+  <li>Migrated the entire pipeline — script, log folder, cron entry, logrotate <code>su</code> — to run as <code>svc-disk-report</code></li>
+  <li>Verified with a forced rotation: <code>disk-report.log.1.gz</code> was created</li>
+</ul>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>The script</h3>
+  <div class="block remote"><pre>sudo nano /usr/local/bin/disk-report.sh    <span class="cmt"># create the script as root</span></pre></div>
+  <div class="block config annotated wide">
+    <div class="file">/usr/local/bin/disk-report.sh</div>
+    <div class="row"><pre>#!/bin/bash</pre><span>run with bash</span></div>
+    <div class="row"><pre>echo "Disk report at $(date)" &gt;&gt; /var/log/disk-report/disk-report.log</pre><span>timestamp header</span></div>
+    <div class="row"><pre>df -h &gt;&gt; /var/log/disk-report/disk-report.log</pre><span>-h: human-readable sizes</span></div>
+    <div class="row"><pre>echo "---" &gt;&gt; /var/log/disk-report/disk-report.log</pre><span>separator line</span></div>
+  </div>
+  <div class="block remote"><pre>sudo chmod +x /usr/local/bin/disk-report.sh    <span class="cmt"># +x: make it executable</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>Cron's 5-field syntax</h3>
+  <div class="block concept"><pre>*    *    *    *    *    command
+│    │    │    │    │
+│    │    │    │    └─ day of week     (0-7, 0 and 7 = Sunday)
+│    │    │    └────── month           (1-12)
+│    │    └─────────── day of month    (1-31)
+│    └──────────────── hour            (0-23)
+└───────────────────── minute          (0-59)</pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Schedule it</h3>
+  <div class="block remote"><pre>crontab -e    <span class="cmt"># -e: edit your own crontab</span></pre></div>
+  <div class="block config annotated">
+    <div class="file">crontab entry</div>
+    <div class="row"><pre>0 * * * * /usr/local/bin/disk-report.sh</pre><span>minute 0 of every hour = hourly, on the hour</span></div>
+  </div>
+  <div class="block remote"><pre>crontab -l    <span class="cmt"># -l: list what's scheduled</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Logrotate config</h3>
+  <div class="block remote"><pre>sudo nano /etc/logrotate.d/disk-report    <span class="cmt"># create the rotation rule</span></pre></div>
+  <div class="block config annotated">
+    <div class="file">/etc/logrotate.d/disk-report</div>
+    <div class="row"><pre>/var/log/disk-report/disk-report.log {</pre><span>which log this rule covers</span></div>
+    <div class="row"><pre>    su svc-disk-report svc-disk-report</pre><span>rotate as this user + group</span></div>
+    <div class="row"><pre>    daily</pre><span>rotate once a day</span></div>
+    <div class="row"><pre>    rotate 7</pre><span>keep 7 old copies</span></div>
+    <div class="row"><pre>    compress</pre><span>gzip old copies</span></div>
+    <div class="row"><pre>    missingok</pre><span>no error if the log is missing</span></div>
+    <div class="row"><pre>    notifempty</pre><span>skip rotation if it's empty</span></div>
+    <div class="row"><pre>    copytruncate</pre><span>copy, then empty the live file</span></div>
+    <div class="row"><pre>}</pre><span></span></div>
+  </div>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+
+<div class="bug">
+  <h4>Bug · inline comments broke the config</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>Unlike bash, logrotate doesn't treat <code>#</code> as “ignore the rest of the line” —
+      <code>rotate 7 # comment</code> was read as one invalid value.</dd>
+    <dt class="fix">FIX</dt><dd>Comments go on their own line, never after a setting.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · insecure directory permissions</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>logrotate (running as root) refused to touch a log whose parent directory wasn't strictly root-owned.</dd>
+    <dt class="fix">FIX</dt><dd>Added the <code>su &lt;user&gt; &lt;group&gt;</code> directive so logrotate rotates as the account that owns the log.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · file owned, but not the directory</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>Rotation <i>creates</i> a new file (<code>disk-report.log.1</code>) in the parent directory —
+      owning only the log file wasn't enough.</dd>
+    <dt class="fix">FIX</dt><dd>Gave the log its own dedicated subfolder, owned entirely by the service account.</dd>
+  </dl>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Migrate to svc-disk-report</h3>
+  <div class="block remote"><pre>cd /var/log                                                             <span class="cmt"># work in /var/log</span>
+sudo mkdir -p disk-report                                               <span class="cmt"># -p: no error if it exists</span>
+sudo chown svc-disk-report:svc-disk-report disk-report                  <span class="cmt"># hand folder to the svc</span>
+sudo mv disk-report.log disk-report/disk-report.log                     <span class="cmt"># move log into its folder</span>
+sudo chown svc-disk-report:svc-disk-report disk-report/disk-report.log  <span class="cmt"># hand log to the svc</span>
+sudo crontab -u svc-disk-report -e                                      <span class="cmt"># -u: the svc's crontab</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Test the full pipeline</h3>
+  <div class="block remote"><pre>sudo logrotate -d /etc/logrotate.d/disk-report    <span class="cmt"># -d: dry run, checks syntax only</span>
+sudo logrotate -f /etc/logrotate.d/disk-report    <span class="cmt"># -f: force a real rotation now</span>
+ls -la /var/log/disk-report/                      <span class="cmt"># -la: list all, long format; look for .log.1.gz</span></pre></div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>Report script</td><td><code>/usr/local/bin/disk-report.sh</code></td></tr>
+    <tr><td>Log directory (own folder per service)</td><td><code>/var/log/disk-report/</code></td></tr>
+    <tr><td>Logrotate config</td><td><code>/etc/logrotate.d/disk-report</code></td></tr>
+    <tr><td>Personal crontab</td><td><code>crontab -e</code> / <code>crontab -l</code></td></tr>
+    <tr><td>Another user's crontab</td><td><code>sudo crontab -u &lt;user&gt; -e</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="best">Best practices</h2>
+  <div class="cards">
+    <div><b>Plan rotation up front</b>Any log that grows unattended needs a rotation policy — decide it before it's a problem.</div>
+    <div><b>One log folder per service</b>Matches real-world convention (<code>nginx</code>, <code>postgres</code> and others).</div>
+    <div><b>Check comment rules per tool</b>Config files aren't always inline-comment-safe like bash — read each tool's syntax rules.</div>
+    <div><b>Dry-run first</b>Always <code>logrotate -d</code> before forcing a real rotation.</div>
+    <div><b>Jobs run as their service</b>Background jobs belong to their dedicated service account, not your personal sudo account.</div>
+    <div><b>Use full paths in cron</b>Cron runs with a minimal environment, so absolute paths avoid “command not found”.</div>
+  </div>
+</div>
+
+<p class="part-of">Part of Project Tinker Town · see
+  <a href="../index.html#tinker-town-05-naming-conventions" target="_top">05 Naming Conventions</a> for the full naming reference</p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

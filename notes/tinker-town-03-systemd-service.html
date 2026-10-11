@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinker Town 03 — Systemd Service</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Tinker Town 03 — Systemd Service · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Project Tinker Town · 03 · Module 1 · 2026-08-30</span>
+  <h1>Systemd <span>Service</span></h1>
+  <p class="sub">Building a custom background service</p>
+  <p>Built <code>hello-loop.service</code> — a small custom systemd unit running a self-trimming logger script, from scratch.</p>
+  <p>Along the way, hit and fixed three real bugs (broken shebang, log permissions, restart rate-limiting) — exactly the
+    kind of troubleshooting loop real systemd work involves.</p>
+</header>
+
+<div class="legend">
+  <span class="chip remote">Remote — the server</span>
+  <span class="chip config">Config file</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Wrote <code>hello-loop.sh</code> — a script logging a timestamp on an interval</li>
+  <li>Placed it in <code>/usr/local/bin/</code> — the convention for sysadmin-authored scripts</li>
+  <li>Built a systemd unit file with <code>[Unit]</code> / <code>[Service]</code> / <code>[Install]</code> sections</li>
+  <li>Learned the <code>daemon-reload</code> → <code>enable</code> → <code>start</code> → <code>status</code> workflow</li>
+  <li>Debugged a broken shebang line, a log permissions error, and a restart rate-limit lockout</li>
+  <li>Refactored the log to self-trim to the last 5 lines, in memory, with no temp file</li>
+</ul>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Create the script</h3>
+  <div class="block remote"><pre>sudo nano /usr/local/bin/hello-loop.sh    <span class="cmt"># create the script as root</span></pre></div>
+  <div class="block config annotated wide">
+    <div class="file">/usr/local/bin/hello-loop.sh</div>
+    <div class="row"><pre>#!/bin/bash</pre><span>run with bash</span></div>
+    <div class="row"><pre>while true; do</pre><span>loop forever</span></div>
+    <div class="row"><pre>    echo "Hello from systemd at $(date)" &gt;&gt; /var/log/hello-loop.log</pre><span>&gt;&gt;: append a line</span></div>
+    <div class="row"><pre>    echo "$(tail -n 5 /var/log/hello-loop.log)" &gt; /var/log/hello-loop.log</pre><span>keep the last 5 lines</span></div>
+    <div class="row"><pre>    sleep 60</pre><span>wait 60 seconds</span></div>
+    <div class="row"><pre>done</pre><span></span></div>
+  </div>
+  <div class="block remote"><pre>sudo chmod +x /usr/local/bin/hello-loop.sh    <span class="cmt"># +x: make it executable</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Create the systemd unit file</h3>
+  <div class="block remote"><pre>sudo nano /etc/systemd/system/hello-loop.service    <span class="cmt"># create the unit file</span></pre></div>
+  <div class="block config annotated">
+    <div class="file">/etc/systemd/system/hello-loop.service</div>
+    <div class="row"><pre>[Unit]</pre><span>metadata + ordering</span></div>
+    <div class="row"><pre>Description=Hello Loop Test Service</pre><span>shown in systemctl status</span></div>
+    <div class="row"><pre>After=network.target</pre><span>start after networking is up</span></div>
+    <div class="gap"></div>
+    <div class="row"><pre>[Service]</pre><span>how to run it</span></div>
+    <div class="row"><pre>ExecStart=/usr/local/bin/hello-loop.sh</pre><span>the command to run</span></div>
+    <div class="row"><pre>Restart=always</pre><span>restart it whenever it stops</span></div>
+    <div class="row"><pre>User=adm-fkar</pre><span>run as this user, not root</span></div>
+    <div class="gap"></div>
+    <div class="row"><pre>[Install]</pre><span>how it hooks into boot</span></div>
+    <div class="row"><pre>WantedBy=multi-user.target</pre><span>start in the normal boot state</span></div>
+  </div>
+</div>
+<div class="callout gotcha"><b>Gotcha ·</b> Unit files only allow comments on their own line. Text after a value is read as part of the
+  value, so the notes sit beside the file here instead of inside it.</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Enable, start, verify</h3>
+  <div class="block remote"><pre>sudo systemctl daemon-reload                <span class="cmt"># pick up the new unit file</span>
+sudo systemctl enable hello-loop.service    <span class="cmt"># start on boot</span>
+sudo systemctl start hello-loop.service     <span class="cmt"># start now</span>
+sudo systemctl status hello-loop.service    <span class="cmt"># check it's running</span>
+cat /var/log/hello-loop.log                 <span class="cmt"># confirm it's writing</span></pre></div>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+
+<div class="bug">
+  <h4>Bug · broken shebang from an inline comment</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>#!/bin/bash # comment</code> — the kernel treats the whole shebang line as one interpreter
+      path plus argument, so it tried to run bash with <code># comment</code> and failed with <b>exit code 127</b>.</dd>
+    <dt class="fix">FIX</dt><dd>Comments go on their own line — never on the shebang line itself.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · log permission denied</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>The service ran as <code>adm-fkar</code>, but <code>/var/log/</code> is root-owned — the user
+      couldn't create files there.</dd>
+    <dt class="fix">FIX</dt><dd>Create the log file as root, then hand that one file to the service user:</dd>
+  </dl>
+  <div class="block remote"><pre>sudo touch /var/log/hello-loop.log                      <span class="cmt"># create the empty log file</span>
+sudo chown adm-fkar:adm-fkar /var/log/hello-loop.log    <span class="cmt"># give it to the service user</span></pre></div>
+</div>
+
+<div class="bug">
+  <h4>Bug · restart rate-limit lockout</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>After several failed starts, systemd refused further attempts (“Start request repeated too quickly”).</dd>
+    <dt class="fix">FIX</dt><dd>Clear the failed state, then start again:</dd>
+  </dl>
+  <div class="block remote"><pre>sudo systemctl reset-failed hello-loop.service    <span class="cmt"># clear the crash counter</span>
+sudo systemctl start hello-loop.service           <span class="cmt"># try again</span></pre></div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>Custom scripts (sysadmin-authored)</td><td><code>/usr/local/bin/</code></td></tr>
+    <tr><td>Distro-managed binaries</td><td><code>/usr/bin/</code></td></tr>
+    <tr><td>Systemd unit files</td><td><code>/etc/systemd/system/</code></td></tr>
+    <tr><td>hello-loop's log</td><td><code>/var/log/hello-loop.log</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="best">Best practices</h2>
+  <div class="cards">
+    <div><b>No comments on the shebang</b>The kernel reads the whole line as the interpreter path.</div>
+    <div><b>Own the log file up front</b>Give a service's log file explicit ownership before the service ever runs, not after it fails.</div>
+    <div><b>Unstick a crash loop</b>Run <code>systemctl reset-failed</code> when a crash-looped service refuses to restart.</div>
+    <div><b>Trim in memory</b>Prefer <code>echo "$(tail ...)" &gt; file</code> over a temp-file-and-move dance when the directory isn't writable by the service user.</div>
+    <div><b>Always daemon-reload</b>Run it after creating or editing any unit file.</div>
+    <div><b>Scripts in /usr/local/bin</b>Keep your own scripts apart from distro binaries in <code>/usr/bin/</code>.</div>
+  </div>
+</div>
+
+<p class="part-of">Part of Project Tinker Town · see
+  <a href="../index.html#tinker-town-05-naming-conventions" target="_top">05 Naming Conventions</a> for the full naming reference</p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

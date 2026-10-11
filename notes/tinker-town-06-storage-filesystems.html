@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinker Town 06 — Storage &amp; Filesystems</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Tinker Town 06 — Storage & Filesystems · " counter(page) " / " counter(pages); } }
+  .fields th { text-transform: none; letter-spacing: 0; font-family: "DejaVu Sans Mono", monospace; }
+  .fields td { font-weight: 400; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Project Tinker Town · 06 · Module 2 · 2026-08-30</span>
+  <h1>Storage &amp; <span>Filesystems</span></h1>
+  <p class="sub">EBS volumes &amp; LVM</p>
+  <p>Attached a second EBS volume, formatted it, mounted it permanently via <code>/etc/fstab</code>, and grew it live
+    from 5 GB to 6 GB.</p>
+  <p>Then built a full LVM stack from scratch on a third volume — Physical Volume, Volume Group, Logical Volume — grew it
+    live, and cleanly tore it all down afterward.</p>
+</header>
+
+<div class="legend">
+  <span class="chip remote">Remote — the server</span>
+  <span class="chip config">Config file</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip console">AWS Console</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Created and attached a second EBS volume, matching the instance's Availability Zone</li>
+  <li>AWS device names (<code>/dev/sdd</code>) vs. the actual Linux/NVMe names (<code>/dev/nvme1n1</code>)</li>
+  <li>Formatted with ext4, mounted manually, then made it permanent via <code>/etc/fstab</code> using the UUID</li>
+  <li>Verified the fstab entry safely with <code>umount</code> + <code>mount -a</code> before trusting a reboot</li>
+  <li>Grew the volume in the AWS Console (5 GB → 6 GB) and live-resized the filesystem to match</li>
+  <li>Built a full LVM stack on a third volume: PV → VG → LV</li>
+  <li>Hit and resolved a real extent-rounding error when extending an LV</li>
+  <li>Live-extended the LV using all remaining free space in the pool</li>
+  <li>Cleanly tore down the LVM stack and removed the test volume</li>
+</ul>
+
+<h2 class="local">Part 1 — EBS volume, ext4 &amp; fstab</h2>
+
+<div class="keep">
+  <h3><span class="tag console">AWS Console</span>Create &amp; attach the volume</h3>
+  <div class="callout config"><b>Key rule ·</b> The volume's Availability Zone must exactly match the instance's AZ
+    (e.g. <code>eu-north-1b</code>) — otherwise it can't be attached.</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Identify the new disk</h3>
+  <div class="block remote"><pre>lsblk    <span class="cmt"># list all block devices</span></pre></div>
+  <div class="block output"><pre>nvme1n1    259:5    0    5G    0 disk    <span class="cmt"># the new, empty volume — AWS called it /dev/sdd</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Format &amp; mount</h3>
+  <div class="block remote"><pre>sudo mkfs.ext4 /dev/nvme1n1          <span class="cmt"># create an ext4 filesystem on the raw disk</span>
+sudo mkdir -p /mnt/data              <span class="cmt"># -p: create the mountpoint</span>
+sudo mount /dev/nvme1n1 /mnt/data    <span class="cmt"># mount it</span>
+df -h /mnt/data                      <span class="cmt"># -h: confirm it's mounted, human sizes</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Make the mount permanent</h3>
+  <div class="block remote"><pre>sudo blkid /dev/nvme1n1    <span class="cmt"># get the filesystem's UUID</span>
+sudo nano /etc/fstab       <span class="cmt"># add the mount line</span></pre></div>
+  <div class="block config">
+    <div class="file">/etc/fstab</div>
+<pre>UUID=f707c3d8-b4d8-4932-b350-4776695c932d  /mnt/data  ext4  defaults  0  2</pre>
+  </div>
+  <table class="fields">
+    <tr><th>UUID=…</th><th>/mnt/data</th><th>ext4</th><th>defaults</th><th>0</th><th>2</th></tr>
+    <tr><td>which filesystem</td><td>where to mount</td><td>filesystem type</td><td>standard options</td><td>dump: skip backup</td><td>fsck order (after root)</td></tr>
+  </table>
+</div>
+<div class="callout gotcha"><b>Gotcha ·</b> fstab only documents comments as lines that start with <code>#</code> — keep notes on their own
+  line, never after the fields. The field table above does the explaining instead.</div>
+<div class="block remote"><pre>sudo umount /mnt/data    <span class="cmt"># unmount (note: "umount", no "n")</span>
+sudo mount -a            <span class="cmt"># -a: mount all fstab entries, like a boot</span>
+df -h /mnt/data          <span class="cmt"># confirm it came back via fstab</span></pre></div>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>Why UUID, not device name</h3>
+  <div class="callout concept"><b>Concept ·</b> Device names like <code>/dev/nvme1n1</code> can shift when disks are added or removed.
+    A filesystem's UUID is permanent and unique, so fstab always finds the right disk regardless of the order disks are detected in.</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Live resize after growing the volume in AWS</h3>
+  <div class="block remote"><pre>lsblk                          <span class="cmt"># confirm the kernel sees the new size (6G)</span>
+sudo resize2fs /dev/nvme1n1    <span class="cmt"># grow the filesystem to fill the disk</span>
+df -h /mnt/data                <span class="cmt"># confirm ~6G, no unmount needed</span></pre></div>
+</div>
+
+<h2 class="local">Part 2 — Full LVM stack</h2>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>The LVM stack</h3>
+  <div class="chain"><span>Disk</span><i>→</i><span>Physical Volume (PV)</span><i>→</i><span>Volume Group (VG)</span><i>→</i><span>Logical Volume (LV)</span><i>→</i><span>Filesystem</span><i>→</i><span>Mount</span></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Build PV → VG → LV on a third volume</h3>
+  <div class="block remote"><pre>sudo pvcreate /dev/nvme2n1                <span class="cmt"># mark the disk as LVM-managed</span>
+sudo vgcreate vg-data /dev/nvme2n1        <span class="cmt"># create a pool from the PV</span>
+sudo lvcreate -L 3G -n lv-data vg-data    <span class="cmt"># -L: size, -n: name of the new LV</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Format &amp; mount the LV</h3>
+  <div class="block remote"><pre>sudo mkfs.ext4 /dev/vg-data/lv-data              <span class="cmt"># ext4 filesystem on the LV</span>
+sudo mkdir -p /mnt/lvm-data                      <span class="cmt"># -p: create the mountpoint</span>
+sudo mount /dev/vg-data/lv-data /mnt/lvm-data    <span class="cmt"># mount it</span>
+df -h /mnt/lvm-data                              <span class="cmt"># confirm size and mount</span></pre></div>
+</div>
+
+<div class="bug">
+  <h4>Bug · extent rounding on lvextend</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>lvextend -L +1G</code> failed — “256 extents needed, but only 255 available.” VG metadata
+      takes a few MiB, so the pool had slightly less than a clean 1 GiB free.</dd>
+    <dt class="fix">FIX</dt><dd>Use <code>-l +100%FREE</code> to take all remaining space instead of an exact size.</dd>
+  </dl>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Live-extend the LV</h3>
+  <div class="block remote"><pre>sudo lvextend -l +100%FREE /dev/vg-data/lv-data    <span class="cmt"># -l: grow by all free space in the pool</span>
+sudo resize2fs /dev/vg-data/lv-data                <span class="cmt"># grow the filesystem to match</span>
+df -h /mnt/lvm-data                                <span class="cmt"># confirm ~3.9G, still mounted throughout</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Tear down the LVM stack</h3>
+  <div class="block remote"><pre>sudo umount /mnt/lvm-data             <span class="cmt"># unmount first</span>
+sudo lvremove /dev/vg-data/lv-data    <span class="cmt"># remove the LV (confirm with y)</span>
+sudo vgremove vg-data                 <span class="cmt"># remove the volume group</span>
+sudo pvremove /dev/nvme2n1            <span class="cmt"># release the disk from LVM</span>
+sudo rmdir /mnt/lvm-data              <span class="cmt"># remove the empty mountpoint</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag console">AWS Console</span>Remove the test volume</h3>
+  <div class="callout console"><b>Cleanup ·</b> Detach the <b>4 GiB</b> LVM test volume once it shows <code>Available</code>, then delete it.
+    The <b>6 GiB</b> <code>/mnt/data</code> volume stays — it's real, mounted infrastructure, not a test.</div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>Permanent mount config</td><td><code>/etc/fstab</code></td></tr>
+    <tr><td>Direct-disk mountpoint</td><td><code>/mnt/data</code></td></tr>
+    <tr><td>LVM logical volume path</td><td><code>/dev/&lt;vg-name&gt;/&lt;lv-name&gt;</code></td></tr>
+    <tr><td>LVM device-mapper path</td><td><code>/dev/mapper/&lt;vg&gt;-&lt;lv&gt;</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="best">Best practices</h2>
+  <div class="cards">
+    <div><b>Match the AZ</b>The EBS volume's AZ must match the instance's AZ before attaching.</div>
+    <div><b>UUID in fstab</b>Not device names — those can shift.</div>
+    <div><b>Test before rebooting</b>Check a new fstab entry with <code>umount</code> + <code>mount -a</code> before trusting a real reboot.</div>
+    <div><b>Grow in two steps</b>An EBS volume grows live in AWS, but the filesystem must be resized separately to see it.</div>
+    <div><b>LVM resizes live</b>Resize storage without unmounting — a real advantage over a raw disk.</div>
+    <div><b>Use +100%FREE</b>Prefer <code>-l +100%FREE</code> over an exact <code>-L</code> size to avoid extent-rounding failures.</div>
+    <div><b>Tear down in order</b>LV → VG → PV, before removing the underlying disk.</div>
+    <div><b>Name LVM parts clearly</b>Prefixes like <code>vg-</code> and <code>lv-</code> make the stack readable at a glance.</div>
+  </div>
+</div>
+
+<p class="part-of">Part of Project Tinker Town · see
+  <a href="../index.html#tinker-town-05-naming-conventions" target="_top">05 Naming Conventions</a> for the naming reference</p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

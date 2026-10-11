@@ -1,0 +1,13 @@
+/* Chalk Book site theme — the dark surroundings around the notes, in the warm greys of Claude's dark mode.
+   Notes never use these; they take their colours from chalk-pastel.css only. */
+:root {
+  color-scheme: dark;
+  --shell-bg:          #262624;   /* main background, behind the note */
+  --shell-side:        #1f1e1d;   /* menu and top bar */
+  --shell-raise:       #30302e;   /* file buttons, raised surfaces */
+  --shell-raise-hover: #3a3a37;   /* raised surface under the pointer */
+  --shell-line:        #3d3d3a;   /* dividers, dashed outlines */
+  --shell-text:        #faf9f5;   /* main text */
+  --shell-text-soft:   #c2c0b6;   /* secondary text */
+  --shell-text-muted:  #8d8b84;   /* counts, hints, planned items */
+}

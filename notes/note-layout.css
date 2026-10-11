@@ -1,0 +1,151 @@
+/* Note layout — structure and components for every chalk-book note.
+   Colours come only from ../chalk-pastel.css; never hard-code hex values here. */
+
+/* Inter is bundled in fonts/ so notes render offline and identically everywhere */
+@font-face { font-family: Inter; font-weight: 400; src: url(fonts/inter-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 600; src: url(fonts/inter-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 700; src: url(fonts/inter-latin-700-normal.woff2) format("woff2"); }
+
+@page {
+  size: A4; margin: 16mm 0 18mm;
+  background: var(--paper);
+  /* each note overrides `content` with its own title — see template.html */
+  @bottom-center { content: counter(page) " / " counter(pages);
+    font: 8pt Inter, sans-serif; color: var(--footer); }
+}
+@page :first { margin-top: 0; }
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; padding: 0 16mm; background: var(--paper); color: var(--ink);
+  font: 9.5pt/1.55 Inter, sans-serif; }
+code, pre { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; }
+code { background: var(--code-bg); border-radius: 3px; padding: 1px 4px; }
+.old { color: var(--faded); text-decoration: line-through; }            /* legacy names */
+
+/* ── Header band ─────────────────────────────────────────── */
+.hero { background: var(--asphalt); margin: 0 -16mm 22px; padding: 30px 16mm 26px; }
+.eyebrow { display: inline-block; background: var(--butter); color: var(--butter-chip); font-size: 7pt;
+  font-weight: 600; letter-spacing: .14em; padding: 3px 9px; border-radius: 4px; text-transform: uppercase; }
+h1 { color: var(--chalk-white); font-size: 24pt; margin: 10px 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--pink); }
+/* Title words, coloured in turn by note.js: blue, pink, green, yellow */
+h1 .tc-sky { color: var(--sky); }
+h1 .tc-pink { color: var(--pink); }
+h1 .tc-mint { color: var(--mint); }
+h1 .tc-butter { color: var(--butter); }
+h1 .tc-lav { color: var(--lav); }                                         /* every "&": purple chalk */
+h1 span:not([class]) { color: inherit; }                                  /* other symbols stay white */
+h1 .wm-chalk { color: var(--sky); }                                   /* the Chalk Book name: same colours as the site */
+h1 .wm-book  { color: var(--butter); }
+.sub { color: var(--mint); margin: 0 0 10px; }
+.hero p { color: var(--band-soft); margin: 4px 0; max-width: 135mm; }
+.hero .sub { color: var(--mint); }
+.hero code { background: var(--asphalt-chip); color: var(--butter); }
+
+/* ── Legend chips ────────────────────────────────────────── */
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.chip { font-size: 7pt; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.local   { --c: var(--sky);    --c-bg: var(--sky-bg);    --c-ink: var(--sky-ink);    --c-chip: var(--sky-chip); }
+.remote  { --c: var(--lav);    --c-bg: var(--lav-bg);    --c-ink: var(--lav-ink);    --c-chip: var(--lav-chip); }
+.config  { --c: var(--butter); --c-bg: var(--butter-bg); --c-ink: var(--butter-ink); --c-chip: var(--butter-chip); }
+.concept { --c: var(--peri);   --c-bg: var(--peri-bg);   --c-ink: var(--peri-ink);   --c-chip: var(--peri-chip); }
+.gotcha  { --c: var(--peach);  --c-bg: var(--peach-bg);  --c-ink: var(--peach-ink);  --c-chip: var(--peach-chip); }
+.best    { --c: var(--mint);   --c-bg: var(--mint-bg);   --c-ink: var(--mint-ink);   --c-chip: var(--mint-chip); }
+.paths   { --c: var(--pink);   --c-bg: var(--pink-bg);   --c-ink: var(--pink-ink);   --c-chip: var(--pink-chip); }
+.console { --c: var(--coral);  --c-bg: var(--coral-bg);  --c-ink: var(--coral-ink);  --c-chip: var(--coral-chip); }
+.chip, .tag { background: var(--c); color: var(--c-chip); }
+
+/* ── Headings ────────────────────────────────────────────── */
+h2 { font-size: 12.5pt; margin: 22px 0 10px; display: flex; align-items: center; gap: 9px; break-after: avoid; }
+h2::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--mint)); }
+h3 { font-size: 9.5pt; margin: 14px 0 6px; break-after: avoid; display: flex; align-items: center; gap: 8px; }
+.tag { font-size: 7pt; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+.keep { break-inside: avoid; }                                          /* wrap a heading + its block */
+
+/* ── Checklist ───────────────────────────────────────────── */
+ul.check { list-style: none; padding: 0; margin: 0; }
+ul.check li { padding: 5px 0 5px 20px; border-bottom: 1px dashed var(--line); position: relative; }
+ul.check li::before { content: "✓"; position: absolute; left: 2px; color: var(--mint-ink); font-weight: 700; }
+
+/* ── Code blocks: <div class="block remote"><pre>…</pre></div> ─ */
+.block { border-left: 3px solid var(--c); background: var(--c-bg); border-radius: 0 6px 6px 0;
+  padding: 9px 12px; margin: 8px 0; break-inside: avoid; }
+.block pre { margin: 0; white-space: pre-wrap; }
+.block .file { font-family: "DejaVu Sans Mono", monospace; font-size: 7.5pt; color: var(--c-ink); margin-bottom: 5px; }
+.cmt { color: var(--c-ink); opacity: .75; }                             /* # comments after commands */
+.block.output { --c: var(--output-line); --c-bg: var(--paper); }
+.block.output .cmt { color: var(--output-ink); opacity: 1; }
+
+/* Config file with notes beside it: each .row is "line | note" */
+.annotated .row { display: grid; grid-template-columns: 1fr 42%; gap: 12px; }
+.annotated .row pre { margin: 0; }
+.annotated .row span { font-size: 8pt; color: var(--c-ink); }
+.annotated .gap { height: 6px; }
+.annotated.wide .row { grid-template-columns: 1fr 22%; }                   /* long code lines, short notes */
+
+/* ── Callouts: <div class="callout gotcha"><b>Gotcha ·</b> …</div> ─ */
+.callout { background: var(--c-bg); border: 1px solid var(--c); border-radius: 7px;
+  padding: 9px 12px; margin: 10px 0; break-inside: avoid; }
+.callout > b:first-child { color: var(--c-ink); }
+
+/* ── Bug cards ───────────────────────────────────────────── */
+.bug { background: var(--peach-bg); border: 1px solid var(--peach); border-radius: 8px;
+  padding: 10px 12px; margin: 10px 0; break-inside: avoid; }
+.bug h4 { margin: 0 0 6px; font-size: 9pt; color: var(--peach-ink); }
+.bug dl { display: grid; grid-template-columns: 38px 1fr; gap: 3px 8px; margin: 0; }
+.bug dt { font-size: 7pt; font-weight: 700; letter-spacing: .06em; padding-top: 2px; }
+.bug dt.cause { color: var(--bug-cause); }
+.bug dt.fix { color: var(--mint-ink); }
+.bug dd { margin: 0; }
+
+/* ── Tables ──────────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 8.5pt; break-inside: avoid; }
+th { text-align: left; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+  background: var(--pink-bg); color: var(--pink-head); padding: 5px 8px; border-bottom: 1.5px solid var(--pink); }
+td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td:first-child { font-weight: 600; }
+.sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px;
+  vertical-align: -1px; background: var(--c); }
+
+/* ── Concept chain: Disk → PV → VG → LV ──────────────────── */
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; }
+.chain span { background: var(--peri-bg); border: 1px solid var(--peri); color: var(--peri-chip);
+  border-radius: 6px; padding: 4px 10px; font-size: 8.5pt; font-weight: 600; }
+.chain i { color: var(--peri-arrow); font-style: normal; }
+
+/* ── Cards & numbered steps ──────────────────────────────── */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; break-inside: avoid; }
+.card { background: var(--c-bg, var(--chalk-white)); border: 1px solid var(--c, var(--line));
+  border-radius: 8px; padding: 10px 12px; }
+.card h4 { margin: 0 0 4px; font-size: 9.5pt; }
+.card p { margin: 0 0 4px; font-size: 8.5pt; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 4px 0; }
+.steps li { counter-increment: s; padding: 4px 0 4px 28px; position: relative; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 4px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--lav); color: var(--lav-chip); font-size: 7.5pt; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; }
+.muted { color: var(--ink-soft); font-size: 8.5pt; }
+
+/* Best-practice cards: a short bold title, then one line. .four = four narrow columns */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.cards.four { grid-template-columns: repeat(4, 1fr); }
+.cards > div { background: var(--c-bg, var(--mint-bg)); border: 1px solid var(--c, var(--mint)); border-radius: 7px;
+  padding: 8px 11px; font-size: 8.5pt; break-inside: avoid; }
+.cards b { display: block; color: var(--c-ink, var(--mint-ink)); font-size: 8.5pt; margin-bottom: 2px; }
+
+/* Closing line: which project the note belongs to, and related notes */
+.part-of { margin: 18px 0 0; padding-top: 8px; border-top: 1px solid var(--line); text-align: center;
+  color: var(--ink-soft); font-size: 8pt; }
+.part-of a { color: var(--pink-ink); }
+
+/* Search hits marked by note.js; on screen only, never printed */
+mark.chalk-hit { background: var(--peach); color: var(--ink); border-radius: 2px; box-shadow: 0 0 0 1px var(--peach); }
+@media print { mark.chalk-hit { background: none; box-shadow: none; color: inherit; } }
+
+/* ── On screen (the chalk-book site): an A4 sheet on the dark site background. PDFs are unaffected ── */
+@media screen {
+  :root { color-scheme: dark; }          /* matches the site, so the frame around the note stays see-through */
+  html { background: linear-gradient(transparent, transparent); }   /* see-through, and stops body's paper spreading to the edges */
+  body { max-width: 210mm; min-height: calc(100vh - 48px); margin: 24px auto; }
+}

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinker Town 05 — Naming Conventions</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Tinker Town 05 — Naming Conventions · " counter(page) " / " counter(pages); } }
+  .steps li { padding-bottom: 9px; }
+  .steps li b { display: block; }
+  .steps li code { display: inline-block; margin: 3px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Project Tinker Town · 05 · Module 1 · 2026-08-30</span>
+  <h1>Naming <span>Conventions</span></h1>
+  <p class="sub">Cross-cutting reference</p>
+  <p>Every naming pattern established across the lab so far — AWS resources, admin vs. service accounts, systemd units,
+    and log/config files.</p>
+  <p>This file is a reference, not a walkthrough — check back here whenever you name something new in later days.</p>
+</header>
+
+<div class="legend">
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">Core philosophy</h2>
+<p style="margin:0 0 4px">Every name should tell you, at a glance, <b>what it's for</b> and <b>what category it belongs to</b>:</p>
+<ul class="check">
+  <li><code>type</code> / <code>workload</code> / <code>env</code> / <code>region</code> fields for cloud resources</li>
+  <li><code>adm-</code> / <code>svc-</code> prefixes instantly separate a human's admin account from a service's unattended account</li>
+  <li>Consistent 1:1 naming between a service and its supporting files (unit file, log folder, logrotate config) so nothing
+    requires memory to trace</li>
+</ul>
+
+<div class="callout paths"><b>Updated rule ·</b> Cloud naming moved to the professional pattern
+  <code>&lt;type&gt;-&lt;workload&gt;-&lt;env&gt;-&lt;region&gt;-&lt;instance&gt;</code>, the widely used Microsoft Cloud Adoption
+  Framework style. Patterns 1 and 2 show the old form crossed out. Day 1 resources still carry the old names, e.g.
+  <span class="old">aws-lab-ubuntu-01</span>.</div>
+
+<h2 class="paths">The patterns</h2>
+<ul class="steps">
+  <li class="keep"><b>AWS resources (key pairs, VPCs, subnets, security groups…)</b>
+    <code>&lt;type&gt;-&lt;workload&gt;-&lt;env&gt;-&lt;region&gt;-&lt;instance&gt;</code><br>
+    <span class="muted">Type first so resources group in lists; short region codes. Example: <code>kp-ubuntu-lab-eun1-001</code><br>
+    Replaces <span class="old">aws-&lt;env&gt;-&lt;purpose&gt;-&lt;id&gt;</span></span></li>
+  <li class="keep"><b>EC2 instances</b>
+    <code>vm-&lt;workload&gt;-&lt;env&gt;-&lt;region&gt;-&lt;instance&gt;</code><br>
+    <span class="muted">Same rule with type <code>vm</code>. Example: <code>vm-ubuntu-lab-eun1-001</code><br>
+    Replaces <span class="old">&lt;env&gt;-&lt;purpose&gt;-&lt;id&gt;</span></span></li>
+  <li class="keep"><b>Personal sudo/admin username</b>
+    <code>adm-&lt;name&gt;</code><br>
+    <span class="muted">Dots are invalid in Linux usernames — only letters, digits, <code>_</code> and <code>-</code>. Example: <code>adm-fkar</code></span></li>
+  <li class="keep"><b>Service accounts</b>
+    <code>svc-&lt;purpose&gt;</code><br>
+    <span class="muted">No login shell, no sudo. Example: <code>svc-disk-report</code></span></li>
+  <li class="keep"><b>Systemd unit files</b>
+    <code>&lt;purpose&gt;.service</code><br>
+    <span class="muted">No extra prefix — location + extension already say what it is. Example: <code>hello-loop.service</code></span></li>
+  <li class="keep"><b>Log directories</b>
+    <code>/var/log/&lt;service-name&gt;/&lt;service-name&gt;.log</code><br>
+    <span class="muted">One dedicated folder per service. Example: <code>/var/log/disk-report/disk-report.log</code></span></li>
+  <li class="keep"><b>Logrotate config files</b>
+    <code>/etc/logrotate.d/&lt;service-name&gt;</code><br>
+    <span class="muted">No extension — matches the <code>.d</code> folder convention. Example: <code>/etc/logrotate.d/disk-report</code></span></li>
+</ul>
+
+<div class="keep">
+  <h2 class="paths">Quick reference</h2>
+  <table>
+    <tr><th>What</th><th>Pattern</th><th>Example</th></tr>
+    <tr><td>AWS resource</td><td><code>&lt;type&gt;-&lt;workload&gt;-&lt;env&gt;-&lt;region&gt;-&lt;instance&gt;</code></td><td><code>kp-ubuntu-lab-eun1-001</code></td></tr>
+    <tr><td>EC2 instance</td><td><code>vm-&lt;workload&gt;-&lt;env&gt;-&lt;region&gt;-&lt;instance&gt;</code></td><td><code>vm-ubuntu-lab-eun1-001</code></td></tr>
+    <tr><td>Personal admin user</td><td><code>adm-&lt;name&gt;</code></td><td><code>adm-fkar</code></td></tr>
+    <tr><td>Service account</td><td><code>svc-&lt;purpose&gt;</code></td><td><code>svc-disk-report</code></td></tr>
+    <tr><td>Systemd unit</td><td><code>&lt;purpose&gt;.service</code></td><td><code>hello-loop.service</code></td></tr>
+    <tr><td>Log directory</td><td><code>/var/log/&lt;service-name&gt;/</code></td><td><code>/var/log/disk-report/</code></td></tr>
+    <tr><td>Logrotate config</td><td><code>/etc/logrotate.d/&lt;service-name&gt;</code></td><td><code>/etc/logrotate.d/disk-report</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Common type prefixes</h2>
+  <table>
+    <tr><th>Type</th><th>Prefix</th><th>Type</th><th>Prefix</th></tr>
+    <tr><td>EC2 instance</td><td><code>vm</code></td><td>Security group</td><td><code>sg</code></td></tr>
+    <tr><td>Key pair</td><td><code>kp</code></td><td>Subnet</td><td><code>snet</code></td></tr>
+    <tr><td>VPC</td><td><code>vpc</code></td><td>Route table</td><td><code>rt</code></td></tr>
+    <tr><td>Internet gateway</td><td><code>igw</code></td><td>NAT gateway</td><td><code>nat</code></td></tr>
+  </table>
+</div>
+
+<p class="part-of">Part of Project Tinker Town · indexes
+  <a href="../index.html#tinker-town-01-aws-ssh-firewall" target="_top">01 AWS, SSH &amp; Firewall</a>,
+  <a href="../index.html#tinker-town-02-linux-users-accounts" target="_top">02 Linux Users &amp; Accounts</a>,
+  <a href="../index.html#tinker-town-03-systemd-service" target="_top">03 Systemd Service</a> and
+  <a href="../index.html#tinker-town-04-cron-logrotate" target="_top">04 Cron &amp; Logrotate</a></p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

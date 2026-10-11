@@ -1,0 +1,198 @@
+/* Chalk Book site — the browser around the notes.
+   Surroundings use site-theme.css (dark); accents come from ../chalk-pastel.css. No hex values here. */
+
+@font-face { font-family: Inter; font-weight: 400; src: url(../notes/fonts/inter-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 600; src: url(../notes/fonts/inter-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 700; src: url(../notes/fonts/inter-latin-700-normal.woff2) format("woff2"); }
+
+:root {
+  --panel: 280px;   /* a side panel when expanded */
+  --rail: 52px;     /* a side panel when collapsed: numbers and colour bars only */
+  --top-h: 56px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--shell-bg); color: var(--shell-text);
+  font: 14px/1.5 Inter, system-ui, sans-serif;
+  display: grid; --left-w: var(--panel); --right-w: var(--rail);
+  grid-template: "top top top" var(--top-h) "left view right" 1fr / var(--left-w) 1fr var(--right-w);
+  transition: grid-template-columns .3s ease;
+}
+body.left-collapsed { --left-w: var(--rail); }
+button { font: inherit; }
+kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
+:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.topbar { grid-area: top; position: relative; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 0;
+  background: var(--shell-side); border-bottom: 1px solid var(--shell-line); }
+.topbar-rail { width: var(--rail); flex: none; display: grid; place-items: center; }   /* ☰ sits centred over the rail */
+.icon-btn { width: 36px; height: 36px; display: grid; place-items: center; flex: none;
+  border: 0; border-radius: 8px; background: none; color: var(--shell-text); cursor: pointer; }
+.icon-btn:hover { background: var(--shell-raise); }
+.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+/* Menu button: three chalk sticks lying down */
+.icon-btn .chalk-sticks { width: 24px; height: 24px; }
+.chalk-sticks rect { stroke: none; }
+.chalk-sticks .pink { fill: var(--pink); }
+.chalk-sticks .butter { fill: var(--butter); }
+.chalk-sticks .sky { fill: var(--sky); }
+/* The name sits in the middle of the top bar */
+.brand { position: absolute; left: 50%; transform: translateX(-50%);
+  font-weight: 700; font-size: 17px; color: var(--shell-text); text-decoration: none; white-space: nowrap; }
+/* <chalk-wordmark>: the one name used everywhere — Chalk in blue, Book in yellow. Size comes from where it sits */
+chalk-wordmark { white-space: nowrap; }
+chalk-wordmark .chalk { color: var(--sky); }
+chalk-wordmark .book  { color: var(--butter); }
+.current { flex: 1; min-width: 0; max-width: calc(50% - 280px); margin-left: auto; text-align: right; color: var(--shell-text-soft);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn { width: 180px; aspect-ratio: 20 / 3; flex: none; border-radius: 8px; cursor: pointer;
+  border: 0; background: var(--mint); color: var(--mint-chip); font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.btn:hover:not(:disabled) { background: var(--mint-bg); }
+.btn:disabled { background: var(--shell-raise); color: var(--shell-text-muted); cursor: default; }
+
+/* Export menu: dark grey, each option in its own pastel chalk colour */
+.export { position: relative; flex: none; }
+.export-menu { position: absolute; z-index: 5; top: calc(100% + 8px); right: 0; min-width: 200px; padding: 6px;
+  background: var(--shell-raise); border: 1px solid var(--shell-line); border-radius: 10px;
+  box-shadow: 0 10px 28px var(--shell-side); }
+.export-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 7px;
+  background: none; color: var(--c, var(--shell-text)); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.export-item:hover, .export-item:focus-visible { background: var(--shell-raise-hover); }
+.export-item svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round; }
+.export-item.mint { --c: var(--mint); }
+
+/* ── Side panels: left = search + notes menu, right = recently viewed, styled as the menu's mirror image ── */
+.panel { display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--shell-side); }
+.panel.left  { grid-area: left;  border-right: 1px solid var(--shell-line);
+  position: relative; width: var(--panel); transition: width .3s ease, box-shadow .3s ease; }
+/* Collapsed: a rail. The menu button opens and closes it */
+.left-collapsed .panel.left { width: var(--rail); }
+body:not(.rail) .panel.left .panel-body { min-width: var(--panel); }     /* no reflow while sliding: text just clips */
+.panel.right { grid-area: right; border-left: 1px solid var(--shell-line);
+  justify-self: end; position: relative; width: var(--rail); transition: width .3s ease, box-shadow .3s ease; }
+/* Recently viewed: a rail that slides open over the note (leftwards) while hovered, and straight back when left */
+.recent-peek .panel.right { width: var(--panel); z-index: 3; box-shadow: -12px 0 28px var(--shell-side); }
+body:not(.recent-rail) .panel.right .panel-body { min-width: var(--panel); }
+.panel-body { flex: 1; overflow: hidden auto; overscroll-behavior: contain; padding: 14px;
+  scrollbar-color: var(--shell-line) transparent; }
+
+.group + .group { margin-top: 20px; }
+.group h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--shell-text-soft);
+  font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.group h2::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--pink)); flex: none; }
+.group h2 .count { margin-left: auto; letter-spacing: 0; color: var(--shell-text-muted); }
+.panel.right .group h2::before { background: var(--peri); }
+
+/* Roadmap progress under a project heading */
+.progress { margin: -2px 0 10px 16px; font-size: 11px; color: var(--shell-text-muted); white-space: nowrap; }
+.progress .bar { height: 3px; margin-top: 4px; border-radius: 2px; background: var(--shell-raise); overflow: hidden; }
+.progress .bar i { display: block; height: 100%; background: var(--c); }
+
+/* A file button: 20 wide by 3 tall, a dark tile with its project's chalk colour */
+.file { display: flex; align-items: center; gap: 8px; width: 100%; aspect-ratio: 20 / 3;
+  margin-bottom: 6px; padding: 0 10px 0 8px; cursor: pointer; text-align: left;
+  border: 0; border-left: 4px solid var(--c); border-radius: 8px;
+  background: var(--shell-raise); color: var(--shell-text); font-size: 13px; }
+.file:hover { background: var(--shell-raise-hover); }
+.file[aria-current] { background: var(--c); color: var(--c-chip); font-weight: 600; }
+.file .num { flex: none; font-size: 11px; font-weight: 600; padding: 1px 5px; border-radius: 4px;
+  background: var(--c); color: var(--c-chip); }
+.file[aria-current] .num { background: var(--paper); }
+.file .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file .state { flex: none; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+
+/* Planned roadmap modules: same shape, outlined instead of filled, not clickable */
+.file.planned { cursor: default; background: none; color: var(--shell-text-muted);
+  border: 1px dashed var(--shell-line); border-left: 4px dashed var(--shell-line); }
+.file.planned .num { background: var(--shell-raise); color: var(--shell-text-muted); }
+.file.planned.active { color: var(--shell-text-soft); border-left-color: var(--pink); }
+.file.planned.active .state { color: var(--pink); }
+
+.panel-foot { margin: 14px 2px 0; font-size: 12px; color: var(--shell-text-muted); white-space: nowrap; }
+
+/* The right panel mirrors the left: colour bar and number on the right edge */
+.panel.right .file { flex-direction: row-reverse; text-align: right; padding: 0 8px 0 10px;
+  border-left: 0; border-right: 4px solid var(--c); }
+.panel.right .file.planned { border-left: 1px dashed var(--shell-line); border-right: 4px dashed var(--shell-line); }
+.panel.right .file.planned.active { border-right-color: var(--pink); }
+.panel.right .group h2 { flex-direction: row-reverse; }
+.panel.right .group h2 .count { margin: 0 auto 0 0; }
+.panel.right .panel-foot { text-align: right; }
+
+/* The search field is a file button turned inside out: light paper fill, dark text, same 20:3 shape */
+.search { display: flex; align-items: center; gap: 8px; width: 100%; aspect-ratio: 20 / 3; margin-bottom: 16px;
+  padding: 0 8px 0 10px; border-radius: 8px; border-left: 4px solid var(--pink);
+  background: var(--paper); color: var(--ink-soft); cursor: text; }
+.search:focus-within { outline: 2px solid var(--pink); outline-offset: 2px; }
+.search svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.search input { flex: 1; min-width: 0; width: 0; border: 0; outline: 0; background: none;
+  color: var(--ink); font: inherit; color-scheme: light; }
+.search input::placeholder { color: var(--ink-soft); }
+.search input::-webkit-search-cancel-button { display: none; }
+.search kbd { background: var(--code-bg); color: var(--ink-soft); }
+
+
+/* Search tile for the rail: a diagonal chalk stick, the same size as a note tile; hidden while expanded */
+.search-rail { display: none; --c: var(--pink); }
+.chalk-stick { width: 22px; height: 22px; }
+.chalk-stick rect { fill: var(--pink); }
+.chalk-stick .tip { fill: var(--pink-bg); }      /* the worn, lighter end */
+
+/* Hit count on a search result */
+.file .hits { flex: none; font-size: 10px; font-weight: 600; color: var(--shell-text-muted); }
+.file[aria-current] .hits { color: var(--c-chip); }
+
+/* ── Collapsed menu: a rail showing only each number and its colour bar ── */
+.rail .panel.left .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
+.rail .panel.left .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
+.rail .panel.left :is(.file .t, .file .state, .file .hits, .progress, .panel-foot, .group h2 .count, .search) { display: none; }
+.rail .panel.left .search-rail { display: flex; margin-bottom: 14px; }
+.rail .panel.left .group h2 { justify-content: center; font-size: 0; margin-bottom: 6px; }
+.rail .panel.left .group + .group { margin-top: 12px; }
+
+/* ── Recently viewed as a rail: the same, mirrored ── */
+.recent-rail .panel.right .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
+.recent-rail .panel.right .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
+.recent-rail .panel.right :is(.file .t, .file .hits, .panel-foot, .group h2 .count) { display: none; }
+.recent-rail .panel.right .group h2 { justify-content: center; font-size: 0; margin-bottom: 6px; }
+.scrim { display: none; }
+
+/* ── View ────────────────────────────────────────────────── */
+.view { grid-area: view; position: relative; min-width: 0; background: var(--shell-bg); }
+.view iframe { display: block; width: 100%; height: 100%; border: 0; }
+/* Centred on the window, like the name in the top bar, not just on the space between the panels */
+.home { position: relative; left: calc((var(--right-w) - var(--left-w)) / 2);
+  max-width: 560px; margin: 12vh auto 0; padding: 0 24px; text-align: center; }
+.home h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -.01em; }
+.home p { color: var(--shell-text-soft); margin: 6px 0; }
+.home .hint { color: var(--shell-text-muted); }
+.home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
+
+/* ── Top bar on smaller windows: the centred name goes first, then the note title;
+      the menu button and Export stay to the end ── */
+@media (max-width: 1100px) {
+  .brand { display: none; }
+  .current { max-width: none; }
+}
+@media (max-width: 600px) { .current { display: none; } }
+
+/* ── Narrow screens: panels stay rails in the layout; expanding one slides it over the note ── */
+@media (max-width: 760px) {
+  body, body.left-collapsed { grid-template-columns: var(--rail) 1fr 0; }
+  .panel { z-index: 2; }
+  body:not(.left-collapsed) .panel.left { position: fixed; top: var(--top-h); bottom: 0; left: 0; width: var(--panel); }
+  .panel.right { display: none; }
+  .scrim { display: block; position: fixed; z-index: 1; inset: var(--top-h) 0 0; background: var(--shell-side); opacity: .7; }
+  body.left-collapsed .scrim { display: none; }
+  .topbar { gap: 8px; padding: 0 8px 0 0; }
+  .home { left: 0; }
+  .topbar .btn { width: auto; aspect-ratio: auto; height: 38px; padding: 0 14px; }
+  .export { margin-left: auto; }
+}

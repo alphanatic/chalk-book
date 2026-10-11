@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinker Town 02 — Linux Users &amp; Accounts</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Tinker Town 02 — Linux Users & Accounts · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Project Tinker Town · 02 · Module 1 · 2026-08-30</span>
+  <h1>Linux Users &amp; <span>Accounts</span></h1>
+  <p class="sub">Admin users &amp; service accounts</p>
+  <p>Created a dedicated sudo admin account (<code>adm-fkar</code>) instead of using the default <code>ubuntu</code> user,
+    then built a proper no-login service account (<code>svc-disk-report</code>) to run background scripts under least privilege.</p>
+  <p>This establishes the identity model the rest of the lab's services build on.</p>
+</header>
+
+<div class="legend">
+  <span class="chip remote">Remote — the server</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Created <code>adm-fkar</code> as a personal sudo admin account</li>
+  <li>Username rules — dots (<code>.</code>) are invalid; landed on hyphenated naming</li>
+  <li>Copied the SSH key to the new user so it could authenticate directly</li>
+  <li>Explored <code>/etc/passwd</code> and <code>/etc/group</code> — how Linux actually stores user and group data</li>
+  <li>Learned the “default private group” mechanism behind <code>adduser</code></li>
+  <li>Personal admin accounts vs. dedicated <b>service accounts</b> — least privilege, blast radius, auditability</li>
+  <li>Created <code>svc-disk-report</code> as a no-login service account</li>
+</ul>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Create the personal admin account</h3>
+  <div class="block remote"><pre>sudo adduser adm-fkar             <span class="cmt"># create user + home directory</span>
+sudo usermod -aG sudo adm-fkar    <span class="cmt"># -aG: append to the sudo group (keeps others)</span>
+groups adm-fkar                   <span class="cmt"># verify group membership</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Copy the SSH key to the new user</h3>
+  <div class="block remote"><pre>sudo mkdir -p /home/adm-fkar/.ssh                                     <span class="cmt"># -p: no error if it exists</span>
+sudo cp ~/.ssh/authorized_keys /home/adm-fkar/.ssh/authorized_keys    <span class="cmt"># copy the allowed public key</span>
+sudo chown -R adm-fkar:adm-fkar /home/adm-fkar/.ssh                   <span class="cmt"># -R: hand folder to the user</span>
+sudo chmod 700 /home/adm-fkar/.ssh                                    <span class="cmt"># 700: only owner can enter</span>
+sudo chmod 600 /home/adm-fkar/.ssh/authorized_keys                    <span class="cmt"># 600: owner read/write only</span></pre></div>
+</div>
+<div class="callout gotcha"><b>Gotcha ·</b> SSH silently refuses keys if the <code>.ssh</code> folder or <code>authorized_keys</code> is owned by
+  root or too open — the <code>chown</code> and <code>chmod</code> steps are what make the login work.</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Delete a user (if starting over)</h3>
+  <div class="block remote"><pre>sudo deluser --remove-home fkar    <span class="cmt"># --remove-home: delete user + home dir</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Inspect users &amp; groups</h3>
+  <div class="block remote"><pre>grep adm-fkar /etc/passwd    <span class="cmt"># user's UID / primary GID / shell</span>
+grep adm-fkar /etc/group     <span class="cmt"># group memberships</span>
+id adm-fkar                  <span class="cmt"># numeric UID/GID + all groups, human-readable</span></pre></div>
+</div>
+<div class="callout best"><b>Tidier form ·</b> The original used <code>cat /etc/passwd | grep adm-fkar</code>. <code>grep</code> can read the
+  file itself, so the <code>cat</code> and pipe aren't needed — same result.</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Create a service account</h3>
+  <div class="block remote"><pre>sudo useradd -r -s /usr/sbin/nologin svc-disk-report    <span class="cmt"># -r: system acct, -s: no-login shell</span></pre></div>
+</div>
+
+<h2 class="concept">How Linux stores accounts</h2>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>/etc/passwd format</h3>
+  <div class="block concept"><pre>username:x:UID:GID:comment:homedir:shell</pre></div>
+  <p>The 4th field (GID) points to the user's <b>primary</b> group — the one auto-created by <code>adduser</code> with the
+    same name as the user.</p>
+</div>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>/etc/group format</h3>
+  <div class="block concept"><pre>groupname:x:GID:member1,member2,...</pre></div>
+  <p>The member list only holds <b>additional</b> members (added via <code>usermod -aG</code>) — not the user whose primary
+    group this is.</p>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>User accounts</td><td><code>/etc/passwd</code></td></tr>
+    <tr><td>Group definitions</td><td><code>/etc/group</code></td></tr>
+    <tr><td>New user's authorized keys</td><td><code>/home/&lt;user&gt;/.ssh/authorized_keys</code></td></tr>
+    <tr><td>Service account shell (blocks login)</td><td><code>/usr/sbin/nologin</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="best">Best practices</h2>
+  <div class="cards">
+    <div><b>Leave the default user behind</b>Don't work as the provider's default user (<code>ubuntu</code>) long-term — create your own admin account.</div>
+    <div><b>Humans and services apart</b>Personal sudo accounts are for you; background services get their own dedicated accounts.</div>
+    <div><b>Service accounts are locked down</b>No login shell, no sudo, no password — least privilege by design.</div>
+    <div><b>One account per service</b>Contains the blast radius and gives a clearer audit trail.</div>
+    <div><b>Follow the naming rule</b><code>adm-&lt;name&gt;</code> for personal admin, <code>svc-&lt;purpose&gt;</code> for services.</div>
+    <div><b>Build, then hand over</b>Build and test as your own account first, then give ownership to the service account once it works.</div>
+  </div>
+</div>
+
+<p class="part-of">Part of Project Tinker Town · see
+  <a href="../index.html#tinker-town-05-naming-conventions" target="_top">05 Naming Conventions</a> for the full naming reference</p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

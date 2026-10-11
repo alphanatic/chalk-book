@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinker Town 01 — AWS, SSH &amp; Firewall</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Tinker Town 01 — AWS, SSH & Firewall · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Project Tinker Town · 01 · Module 1 · 2026-08-30</span>
+  <h1>AWS, SSH &amp; <span>Firewall</span></h1>
+  <p class="sub">Foundations &amp; hardening</p>
+  <p>Spun up a free-tier Ubuntu EC2 instance in eu-north-1, locked SSH down to key-only access from a single IP,
+    and enabled UFW as a basic firewall.</p>
+  <p>This is the foundation the rest of the lab connects to — every later day assumes this instance, this key,
+    and this hardened SSH setup are already in place.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip remote">Remote — the EC2 box</span>
+  <span class="chip config">Config file</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Launched Ubuntu Server 24.04 LTS, x86_64, <code>t2.micro</code> / <code>t3.micro</code> (free tier)</li>
+  <li>Security group restricting SSH (port 22) to <b>My IP</b> only — not <code>0.0.0.0/0</code></li>
+  <li>Generated an <b>ED25519</b> key pair — faster, smaller and more modern than RSA</li>
+  <li>Moved the key to <code>~/.ssh/</code> and renamed it to match the naming convention</li>
+  <li>Set up a local <code>~/.ssh/config</code> so <code>ssh lab-ubuntu-01</code> connects with zero extra flags</li>
+  <li>Hardened <code>sshd_config</code>: disabled root login and password auth</li>
+  <li>Installed and enabled UFW, allowing only OpenSSH</li>
+</ul>
+
+<div class="callout paths"><b>Naming note ·</b> Day 1 resources use the old scheme (<span class="old">aws-lab-ubuntu-01</span>).
+  Under the current rule <code>&lt;type&gt;-&lt;workload&gt;-&lt;env&gt;-&lt;region&gt;-&lt;instance&gt;</code> the key would be
+  <code>kp-ubuntu-lab-eun1-001</code> and the instance <code>vm-ubuntu-lab-eun1-001</code>.</div>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>Key file setup — move into ~/.ssh and rename</h3>
+  <div class="block local"><pre>mkdir -p ~/Projects/aws-lab                                <span class="cmt"># -p: no error if it exists</span>
+mv ~/Documents/aws/ubuntu-lab-key.pem ~/.ssh/              <span class="cmt"># move key into ~/.ssh</span>
+chmod 400 ~/.ssh/ubuntu-lab-key.pem                        <span class="cmt"># 400: owner read-only (required by SSH)</span>
+mv ~/.ssh/ubuntu-lab-key.pem ~/.ssh/aws-lab-ubuntu-01.pem  <span class="cmt"># rename to naming convention</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>First connection — before the alias existed</h3>
+  <div class="block local"><pre>ssh -i ~/.ssh/aws-lab-ubuntu-01.pem ubuntu@&lt;instance-ip&gt;    <span class="cmt"># -i: which private key to use</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>~/.ssh/config — connect without flags</h3>
+  <div class="block local"><pre>nano ~/.ssh/config    <span class="cmt"># open (or create) the client config</span></pre></div>
+  <div class="block config annotated">
+    <div class="file">~/.ssh/config</div>
+    <div class="row"><pre>Host lab-ubuntu-01</pre><span>alias you type after ssh</span></div>
+    <div class="row"><pre>    HostName &lt;instance-ip&gt;</pre><span>real address (changes on stop/start)</span></div>
+    <div class="row"><pre>    User adm-fkar</pre><span>login user, adm-&lt;name&gt; rule</span></div>
+    <div class="row"><pre>    IdentityFile ~/.ssh/aws-lab-ubuntu-01.pem</pre><span>key used automatically</span></div>
+  </div>
+</div>
+<div class="callout gotcha"><b>Gotcha ·</b> SSH config files don't support comments at the end of a line — a <code>#</code> only works at the
+  start of its own line. That's why the notes sit beside the config here instead of inside it.</div>
+<div class="block local"><pre>chmod 600 ~/.ssh/config    <span class="cmt"># 600: owner read/write only</span>
+ssh lab-ubuntu-01          <span class="cmt"># connect using the alias</span></pre></div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Fix terminal rendering (Kitty terminfo)</h3>
+  <div class="block remote"><pre>export TERM=xterm-256color    <span class="cmt"># fixes "Error opening terminal: xterm-kitty"</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Harden sshd_config</h3>
+  <div class="block remote"><pre>sudo nano /etc/ssh/sshd_config    <span class="cmt"># edit the SSH server config as root</span></pre></div>
+  <div class="block config annotated">
+    <div class="file">/etc/ssh/sshd_config</div>
+    <div class="row"><pre>PermitRootLogin no</pre><span>nobody logs in directly as root</span></div>
+    <div class="row"><pre>PasswordAuthentication no</pre><span>keys only, no password guessing</span></div>
+    <div class="row"><pre>PubkeyAuthentication yes</pre><span>allow key-based login</span></div>
+  </div>
+  <div class="block remote"><pre>sudo sshd -t                  <span class="cmt"># -t: test config syntax BEFORE restarting</span>
+sudo systemctl restart ssh    <span class="cmt"># apply the changes</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>UFW firewall</h3>
+  <div class="block remote"><pre>sudo ufw allow OpenSSH    <span class="cmt"># allow SSH before enabling, avoids lockout</span>
+sudo ufw enable           <span class="cmt"># turn the firewall on</span>
+sudo ufw status           <span class="cmt"># confirm the active rules</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag remote">Remote</span>Close the session</h3>
+  <div class="block remote"><pre>exit    <span class="cmt"># or Ctrl+D</span></pre></div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>Private key (local)</td><td><code>~/.ssh/aws-lab-ubuntu-01.pem</code></td></tr>
+    <tr><td>Local SSH config</td><td><code>~/.ssh/config</code></td></tr>
+    <tr><td>SSH daemon config (remote)</td><td><code>/etc/ssh/sshd_config</code></td></tr>
+    <tr><td>SSH config overrides (remote)</td><td><code>/etc/ssh/sshd_config.d/</code></td></tr>
+    <tr><td>Original key download (moved out of)</td><td><code>~/Documents/aws/</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="best">Best practices</h2>
+  <div class="cards">
+    <div><b>Scope SSH to a known IP</b>Never leave port 22 open to <code>0.0.0.0/0</code>.</div>
+    <div><b>ED25519 over RSA</b>Smaller, faster, and no known weaknesses for new keys.</div>
+    <div><b>Uncommenting ≠ changing</b>Removing <code>#</code> keeps the old value — edit the value itself.</div>
+    <div><b>Test before restart</b>Run <code>sshd -t</code> before restarting anything that could lock you out.</div>
+    <div><b>Keep a fallback session</b>Leave one SSH session open while testing a config change.</div>
+    <div><b>Public IPs move</b>A stopped/started instance gets a new IP unless an Elastic IP is attached.</div>
+    <div><b>Keys live in ~/.ssh/</b>Not in a project folder — that's where SSH tooling expects them.</div>
+    <div><b>Lock down permissions</b><code>400</code> on keys, <code>600</code> on config — SSH rejects looser ones.</div>
+  </div>
+</div>
+
+<p class="part-of">Part of Project Tinker Town · see
+  <a href="../index.html#tinker-town-05-naming-conventions" target="_top">05 Naming Conventions</a> for the naming reference</p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

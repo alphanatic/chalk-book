@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chalk Book — Project Guide</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Chalk Book — Project Guide · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">00 · Meta</span>
+  <h1><span class="wm-chalk">Chalk</span> <span class="wm-book">Book</span> <span class="tc-pink">Guide</span></h1>
+  <p class="sub">Purpose, structure &amp; conventions</p>
+  <p>A personal technical chalk book. After a session of problem-solving, building or learning with an AI,
+    the work is distilled into one calm, skimmable note that can be revisited later for a fast refresher,
+    on a small local site or as a PDF.</p>
+  <p>This is the read-only copy of <code>CLAUDE.md</code>, which is the source of truth.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip remote">Remote — the server</span>
+  <span class="chip config">Config file</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip console">AWS Console</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">Purpose</h2>
+<ul class="check">
+  <li><b>Capture</b> recent work while it is fresh: commands, configs, decisions, mistakes.</li>
+  <li><b>Revisit</b> it later and get the gist in under a minute.</li>
+  <li><b>Repeat</b> it cold, months later, without re-researching anything.</li>
+  <li><b>Trace</b> what was done, per project and date, so a future AI can recall which scenarios have been worked through.</li>
+</ul>
+
+<div class="keep">
+  <h3>Two kinds of knowledge</h3>
+  <div class="two">
+    <div class="card local">
+      <h4>Recurring</h4>
+      <p>Used again and again: <code>systemctl</code>, ssh config, naming rules.</p>
+      <p><b>The note is a fast reference.</b> Patterns, quick tables, the one flag you always forget.</p>
+    </div>
+    <div class="card gotcha">
+      <h4>One-off</h4>
+      <p>Set up once, or a rare fix: growing an EBS volume, a logrotate permission error.</p>
+      <p><b>The note is a complete recipe.</b> Every step in order, every flag explained, so it can be redone from zero.</p>
+    </div>
+  </div>
+</div>
+<div class="callout best"><b>Best practice ·</b> When in doubt, write for the forgetful future self. Assume nothing is remembered.</div>
+
+<h2 class="paths">The collection</h2>
+<div class="block paths"><pre>chalk-book/
+├── CLAUDE.md                     <span class="cmt"># this guide (source of truth)</span>
+├── 00-chalk-book-guide.pdf       <span class="cmt"># read-only copy of this guide</span>
+├── chalk-pastel.css              <span class="cmt"># the note colour palette (user-owned)</span>
+├── index.html                    <span class="cmt"># the site: open it in a browser</span>
+├── site/                         <span class="cmt"># catalogue (notes.js), menu, search, dark theme</span>
+├── notes/                        <span class="cmt"># one HTML file per note</span>
+│   ├── tinker-town-01-aws-ssh-firewall.html …
+│   ├── note-layout.css           <span class="cmt"># shared layout and components</span>
+│   └── fonts/                    <span class="cmt"># bundled Inter, renders offline</span>
+├── archive/                      <span class="cmt"># original PDFs from before the HTML rebuild</span>
+└── .claude/skills/memory-dump/   <span class="cmt"># the note-making workflow</span></pre></div>
+
+<div class="keep">
+  <h3>File naming</h3>
+  <div class="block config"><pre>&lt;project&gt;-&lt;NN&gt;-&lt;topic&gt;.html</pre></div>
+  <table>
+    <tr><th>Part</th><th>Rule</th><th>Example</th></tr>
+    <tr><td>project</td><td>Slug from the project list, so the name says where the work happened.</td><td><code>tinker-town</code></td></tr>
+    <tr><td>NN</td><td>Two digits, counting up within each project.</td><td><code>03</code></td></tr>
+    <tr><td>topic</td><td>2–4 words naming the subject, not the outcome.</td><td><code>cron-logrotate</code></td></tr>
+    <tr><td>scope</td><td>One topic per file. A long session becomes several notes.</td><td>—</td></tr>
+    <tr><td>date</td><td>Inside the note and in <code>site/notes.js</code>, not in the file name.</td><td><code>2026-08-30</code></td></tr>
+    <tr><td>00-</td><td>Reserved for meta files about the chalk book itself.</td><td><code>00-chalk-book-guide</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h3>Projects</h3>
+  <table>
+    <tr><th>Slug</th><th>Display name</th><th>What it is</th></tr>
+    <tr><td><code>tinker-town</code></td><td>Project Tinker Town</td><td>Self-paced AWS Linux sysadmin lab, a one-week crash course in 7 modules</td></tr>
+    <tr><td><code>pokedex</code></td><td>Pokédex</td><td>The Pokédex web project</td></tr>
+    <tr><td><code>meta</code></td><td>Chalk Book</td><td>Notes about the chalk book itself</td></tr>
+  </table>
+  <p class="muted">A new project gets a row here and in <code>CHALK_PROJECTS</code> in <code>site/notes.js</code>, which can also hold its roadmap of modules.</p>
+</div>
+
+<div class="keep">
+  <h3>Note types</h3>
+  <div class="two">
+    <div class="card"><h4>Walkthrough</h4><p>What was done in a session, start to finish. Most notes are this type.</p></div>
+    <div class="card"><h4>Reference</h4><p>A cross-cutting rulebook other notes depend on, such as naming conventions. It says so in its summary.</p></div>
+  </div>
+</div>
+
+<h2 class="concept">Anatomy of a note</h2>
+<p style="margin:0 0 6px">Every note follows the same top-to-bottom shape, so the eye always knows where to look.</p>
+<ul class="steps">
+  <li><b>Header band</b>: eyebrow chip <code>PROJECT TINKER TOWN · 03 · MODULE 1 · 2026-08-30</code>, title words coloured blue, pink, green, yellow in turn, a short subtitle, and a 1–2 sentence past-tense summary.</li>
+  <li><b>Legend</b>: colour chips for every block type used in the note.</li>
+  <li><b>What we covered</b>: a ✓ checklist of outcomes, skimmable on its own.</li>
+  <li><b>Full command sequence</b>: steps under short headings, each tagged <span class="tag local">Local</span> or <span class="tag remote">Remote</span></li>
+  <li><b>Supporting sections</b>: concepts, diagrams, field tables, quick-reference tables.</li>
+  <li><b>Bugs hit &amp; fixed</b>: one card per real error, <b>Cause</b> → <b>Fix</b>.</li>
+  <li><b>Where things live</b> and <b>Best practices</b> (short cards) as needed.</li>
+  <li><b>Part of</b> line: the project, with links to related notes through the site.</li>
+  <li><b>Footer</b> on printed pages: <code>Tinker Town 03 — Systemd Service · 1 / 3</code></li>
+</ul>
+
+<div class="keep">
+  <h3>Block types</h3>
+  <table>
+    <tr><th>Block</th><th>Palette colour</th><th>Used for</th></tr>
+    <tr class="local"><td><span class="sw"></span>Local</td><td><code>--sky</code></td><td>Commands run on your own machine</td></tr>
+    <tr class="remote"><td><span class="sw"></span>Remote</td><td><code>--lav</code></td><td>Commands run on the server</td></tr>
+    <tr class="config"><td><span class="sw"></span>Config file</td><td><code>--butter</code></td><td>File contents, with the path as the block title</td></tr>
+    <tr class="concept"><td><span class="sw"></span>Concept</td><td><code>--peri</code></td><td>The <i>why</i> behind something; command output</td></tr>
+    <tr class="gotcha"><td><span class="sw"></span>Gotcha</td><td><code>--peach</code></td><td>Traps that bit, or nearly did; bug cards</td></tr>
+    <tr class="best"><td><span class="sw"></span>Best practice</td><td><code>--mint</code></td><td>The recommended way, and why</td></tr>
+    <tr class="paths"><td><span class="sw"></span>Paths</td><td><code>--pink</code></td><td>File and folder locations; tables; title accent</td></tr>
+    <tr class="console"><td><span class="sw"></span>AWS Console</td><td><code>--coral</code></td><td>Steps done in a web console, not a shell</td></tr>
+  </table>
+  <p class="muted">Inline callouts use a bold label and a dot: <b>Gotcha ·</b> <b>Concept ·</b> <b>Key rule ·</b> <b>Naming note ·</b> <b>Updated rule ·</b></p>
+</div>
+
+<h2 class="local">Writing style</h2>
+<ul class="check">
+  <li><b>Skim first.</b> Headings, checklists and tables carry the story; prose only fills gaps.</li>
+  <li><b>Short.</b> Sentences under ~20 words. No intro paragraphs, no filler.</li>
+  <li><b>Every command gets a comment</b> explaining what it does and what each flag means.</li>
+  <li><b>Config files stay clean.</b> Annotations sit beside the file or in a field table, never inside it.</li>
+  <li><b>Real names, real output.</b> Actual usernames, paths, IDs and error messages from the session.</li>
+  <li><b>Keep the mistakes.</b> Errors and their fixes are often the most valuable part.</li>
+  <li><b>Respect history.</b> When a convention changes, mark old names as legacy instead of rewriting earlier notes.</li>
+  <li><b>Calm tone.</b> Plain, friendly and factual. No hype, no emoji.</li>
+</ul>
+<div class="block remote"><pre>sudo mkdir -p /mnt/data    <span class="cmt"># -p: create parents, no error if it exists</span></pre></div>
+<div class="callout gotcha"><b>Gotcha ·</b> Many config formats break on inline comments. That is why config blocks are never annotated inside the block itself.</div>
+
+<h2 class="config">Visual style</h2>
+<div class="callout paths"><b>Key rule ·</b> <code>chalk-pastel.css</code> is the palette for every note, until the user says otherwise.
+  Colours are used only through its variables, never as hex values. The file belongs to the user.</div>
+<div class="keep">
+  <h3>How the palette is built</h3>
+  <table>
+    <tr><th>Part</th><th>Example</th><th>Used for</th></tr>
+    <tr><td>chalk</td><td><code>--lav</code></td><td>Chips, borders, left bars</td></tr>
+    <tr><td>-bg</td><td><code>--lav-bg</code></td><td>Box tints</td></tr>
+    <tr><td>-ink</td><td><code>--lav-ink</code></td><td>Coloured text, comments</td></tr>
+    <tr><td>-chip</td><td><code>--lav-chip</code></td><td>Text on a chalk chip</td></tr>
+  </table>
+</div>
+<div class="callout concept"><b>Concept ·</b> Notes link the palette instead of copying it. Changing <code>chalk-pastel.css</code> restyles every note at its next render; PDFs keep their look until re-rendered.</div>
+<p class="muted">Layout lives in <code>notes/note-layout.css</code>: A4 on <code>--paper</code>, an <code>--asphalt</code> header band, Inter for text, DejaVu Sans Mono for code, soft tinted blocks with a coloured left bar.</p>
+
+<div class="keep">
+  <h3>The site</h3>
+  <ul class="check">
+    <li><code>index.html</code> opens straight from disk, no build step. Each note shows as a pastel A4 sheet in a dark frame
+      in the warm greys of Claude's dark mode (<code>site/site-theme.css</code>, kept apart from the note palette).</li>
+    <li>Left menu: search on top, then notes per project with roadmap progress and planned modules. The ☰ button
+      (three chalk sticks) collapses it to a rail of note numbers and colour bars, with a chalk-stick tile for search.</li>
+    <li>Search reads the full text of every note; results replace the list while typing, each note once with its hit count,
+      and opening one highlights every hit. Rebuild the index with <code>node site/build-index.mjs</code>.</li>
+    <li>Right panel: recently viewed notes, newest first. The name is one shared element, <code>&lt;chalk-wordmark&gt;</code>.</li>
+    <li><b>Export</b> opens a small menu; for now it holds <b>Save as PDF</b>, which opens the browser's print dialog for the open note.</li>
+    <li>The menu starts as a rail; the menu button opens and closes it. Recently viewed is a rail too, sliding open over the note in 0.3 s while hovered and closing as soon as the cursor leaves.</li>
+  </ul>
+</div>
+
+<h2 class="gotcha">How notes are made &amp; changed</h2>
+<div class="callout concept"><b>Concept ·</b> The notes are <b>read-only by design</b>. Nobody edits a note in a viewer; every change goes through an AI session.</div>
+
+<div class="keep">
+  <h3>Adding a note: the memory-dump skill</h3>
+  <ul class="steps">
+    <li>Work on something, in any project folder.</li>
+    <li>While it is fresh, say <b>“memory-dump”</b> or <b>“chalk that up”</b>. A personal pointer skill makes this work in every folder.
+      An AI may also offer a dump when the topic changes or about an hour of content has built up.</li>
+    <li>The skill plans the notes, fills the template in <code>notes/</code>, adds them to <code>site/notes.js</code>, rebuilds the search index,
+      checks every page, then commits and pushes if the repo is set up.</li>
+    <li>Check the note on the site and ask for any changes in the same session.</li>
+  </ul>
+</div>
+
+<div class="keep">
+  <h3>Changing a note or this guide</h3>
+  <ul class="check">
+    <li>Ask for the change in a session. The AI edits the HTML source or <code>CLAUDE.md</code>.</li>
+    <li>After <code>CLAUDE.md</code> changes, this guide's HTML and PDF are updated so all three stay in sync.</li>
+    <li>Note PDFs are made on demand from the site; the originals from before the HTML rebuild are kept in <code>archive/</code>.</li>
+  </ul>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>Rendering</h3>
+  <div class="block local"><pre>.claude/skills/memory-dump/render.sh notes/&lt;name&gt;.html [out-dir]   <span class="cmt"># → &lt;name&gt;.pdf</span></pre></div>
+</div>
+
+<h2 class="concept">Rules for AI assistants</h2>
+<ul class="check">
+  <li>Read <code>CLAUDE.md</code> before creating or changing anything in the chalk book.</li>
+  <li>Use the <code>memory-dump</code> skill to make notes, and <code>chalk-pastel.css</code> for every colour.</li>
+  <li>Match the existing notes' structure and look exactly; open one as a reference if unsure.</li>
+  <li>Never edit, rename or delete an existing note or archived PDF unless the user asks.</li>
+  <li>Keep <code>CLAUDE.md</code>, this guide's HTML and its PDF in sync, and change them only when the user asks.</li>
+</ul>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

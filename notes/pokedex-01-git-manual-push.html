@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pokédex 01 — Git: Manual Commit &amp; Push</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Pokédex 01 — Git: Manual Commit & Push · " counter(page) " / " counter(pages); } }
+  .two .block { margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Pokédex · 01 · Git · 2026-10-11</span>
+  <h1>Git: Manual Commit &amp; <span>Push</span></h1>
+  <p class="sub">From working folder to GitHub, by hand</p>
+  <p>Committed today's work in the <code>pokedex</code> repo by hand as <code>44e0d5c</code>, ready to push to GitHub
+    <code>alphanatic/pokeggdex</code> over HTTPS.</p>
+  <p>Along the way, learned how <code>git status</code> reads the three places a file can be, how to shape commit messages
+    and trailers, and what <code>.git/index</code> actually contains.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>The three places a file can be — working folder, index, HEAD — plus <code>origin</code> on GitHub</li>
+  <li>A push routine: look first, then stage, commit and push</li>
+  <li>Reading every section of <code>git status</code>, and the Starship prompt symbols</li>
+  <li>Commit message shape, extra <code>-m</code> paragraphs, and trailers</li>
+  <li>Inspected <code>.git/index</code> byte by byte with <code>xxd</code></li>
+  <li>Fixed tooling errors: missing <code>xxd</code>, unsynced pacman file lists, mirror 404s</li>
+</ul>
+
+<h2 class="concept">The big picture</h2>
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>Three places a file can be</h3>
+  <div class="cards four">
+    <div class="local"><b>Working folder</b>your files on disk</div>
+    <div class="best"><b>Index (staging)</b><code>.git/index</code> — the next commit</div>
+    <div class="remote"><b>HEAD</b>your last commit</div>
+    <div class="paths"><b>origin</b>GitHub's copy</div>
+  </div>
+  <div class="callout concept"><b>Concept ·</b> <code>git add</code> moves folder → index · <code>git commit</code> seals index → HEAD ·
+    <code>git push</code> sends HEAD → origin. <code>git status</code> compares them: folder ≠ index = red “not staged”,
+    index ≠ HEAD = green “to be committed”.</div>
+</div>
+
+<h2 class="local">The push routine</h2>
+
+<div class="keep">
+  <h3><span class="tag best">Every push</span>Look before you touch</h3>
+  <div class="block local"><pre>cd ~/Projects/pokedex    <span class="cmt"># go to the repo</span>
+git status               <span class="cmt"># what changed, what's staged</span>
+git remote -v            <span class="cmt"># which GitHub repo this folder talks to</span>
+git log --oneline -5     <span class="cmt"># last 5 commits, one line each</span></pre></div>
+</div>
+
+<div class="two">
+  <div>
+    <h3><span class="tag local">New repo only</span>Brand-new repo</h3>
+    <div class="block local"><pre>git init -b main               <span class="cmt"># start</span>
+git remote add origin &lt;url&gt;    <span class="cmt"># link GitHub</span>
+git push -u origin main        <span class="cmt"># 1st push</span></pre></div>
+    <p class="muted">Check <code>.gitignore</code> first: <code>node_modules/</code>, <code>dist/</code>.</p>
+  </div>
+  <div>
+    <h3><span class="tag paths">Existing repo</span>Your case today</h3>
+    <div class="block local"><pre>git pull --rebase    <span class="cmt"># sync first</span>
+git push             <span class="cmt"># then push</span></pre></div>
+    <p class="muted"><code>git remote -v</code> already showed <code>origin</code> → skip the new-repo steps.</p>
+  </div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag best">Every push</span>Stage, commit, push</h3>
+  <div class="block local"><pre>git add -A                                 <span class="cmt"># stage everything: modified, deleted, new</span>
+git status                                 <span class="cmt"># check: all green</span>
+git commit -m "Title" -m "Description."    <span class="cmt"># 1st -m = title, 2nd = body</span>
+git push                                   <span class="cmt"># HTTPS remote: username + access token</span>
+git status                                 <span class="cmt"># expect "up to date with 'origin/main'"</span></pre></div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Reading git status</h2>
+  <table>
+    <tr><th>Section</th><th>Colour</th><th>Meaning</th><th>Move it with</th></tr>
+    <tr><td>On branch / up to date</td><td>—</td><td>Where you stand vs GitHub</td><td><code>git pull</code> / <code>push</code></td></tr>
+    <tr><td>Changes to be committed</td><td>green</td><td>Staged, goes in next commit</td><td><code>git restore --staged</code></td></tr>
+    <tr><td>Changes not staged</td><td>red</td><td>Tracked, edited, left out</td><td><code>git add</code></td></tr>
+    <tr><td>Untracked files</td><td>red</td><td>Git has never seen them</td><td><code>git add</code> / <code>.gitignore</code></td></tr>
+  </table>
+  <p class="muted">Starship prompt shorthand: <code>»</code> renamed · <code>!</code> modified · <code>?</code> untracked ·
+    <code>✘</code> deleted · <code>+</code> staged · <code>↑</code> ahead of GitHub (push me).</p>
+</div>
+
+<h2 class="best">Commit messages</h2>
+<div class="callout best"><b>Shape of a good message ·</b>
+  <ul style="margin:4px 0 0; padding-left:18px">
+    <li><b>Title:</b> one short line, sentence case, what changed, no full stop. Shown by <code>git log --oneline</code>.</li>
+    <li><b>Body:</b> after a blank line — the what and why. Each extra <code>-m</code> = one more paragraph (no limit).</li>
+    <li>One change per commit is best practice; <code>git add -A</code> for “everything at once” is fine when it all belongs together.</li>
+  </ul>
+</div>
+<div class="block local"><pre>git commit -m "Lore page board, cabin and Pokédex updates" -m "Lore content now sits on a padded board, …"  <span class="cmt"># today's commit</span></pre></div>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>Trailers: <code>Key: value</code> lines in the last paragraph</h3>
+  <table>
+    <tr><th>Trailer</th><th>Meaning</th></tr>
+    <tr><td><code>Co-Authored-By:</code></td><td>Someone helped — GitHub shows both avatars</td></tr>
+    <tr><td><code>Signed-off-by:</code></td><td>“I wrote it and may submit it” (Linux kernel style)</td></tr>
+    <tr><td><code>Reviewed-by</code> / <code>Tested-by</code></td><td>Credit checkers and testers</td></tr>
+    <tr><td><code>Closes: #12</code></td><td>Auto-closes GitHub issue 12</td></tr>
+  </table>
+  <div class="block local"><pre>git commit -s -m "Title"                         <span class="cmt"># -s adds Signed-off-by</span>
+git commit -m "Title" --trailer "Closes: #12"    <span class="cmt"># any trailer, no extra -m</span>
+git log -1 --format='%(trailers)'                <span class="cmt"># show only trailers</span></pre></div>
+</div>
+
+<h2 class="concept">Inside .git/index (with xxd)</h2>
+<div class="callout concept"><b>Concept ·</b> The staging area is a real binary file: a list of path → content hash, plus each file's
+  stat info (size, timestamps, inode) so <code>git status</code> can skip re-reading unchanged files. File contents live in
+  <code>.git/objects</code>, not here.</div>
+<div class="block local"><pre>xxd .git/index | head -8             <span class="cmt"># first 128 bytes as hex</span>
+git ls-files --stage .gitignore      <span class="cmt"># Git's decoded view of one entry</span>
+git show :src/pokedex/pokedex.css    <span class="cmt"># ":" = the staged version of a file</span></pre></div>
+
+<div class="keep">
+  <table>
+    <tr><th>Offset</th><th>Bytes (your repo)</th><th>Meaning</th></tr>
+    <tr><td><code>0x00</code></td><td><code>4449 5243</code></td><td>“DIRC” — I'm a Git index</td></tr>
+    <tr><td><code>0x04</code></td><td><code>0000 0002</code></td><td>Format version 2</td></tr>
+    <tr><td><code>0x08</code></td><td><code>0000 0059</code></td><td>89 tracked files</td></tr>
+    <tr><td><code>0x0c</code></td><td><code>6ac8 e401 …</code></td><td>Entry 1 stat data: times, inode, mode 100644, uid 1000, size 18</td></tr>
+    <tr><td><code>0x34</code></td><td><code>f062 35c4 … 1b08</code></td><td>Content hash (SHA-1) — the actual snapshot</td></tr>
+    <tr><td><code>0x48</code></td><td><code>000a</code></td><td>Path is 10 characters</td></tr>
+    <tr><td><code>0x4a</code></td><td><code>2e67 6974 …</code></td><td>“.gitignore” (first: entries sorted, “.” before letters)</td></tr>
+    <tr><td><code>0x54</code></td><td><code>0000 … 0000</code></td><td>1–8 NUL bytes, pads entry to a multiple of 8</td></tr>
+  </table>
+  <p class="muted">Reading an xxd row: <b>left</b> = byte position · <b>middle</b> = bytes in hex · <b>right</b> = same bytes as text (dots = unprintable).</p>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+
+<div class="bug">
+  <h4>Bug · git rmove -v</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>A typo. Git suggests the closest real command (<code>remote</code>).</dd>
+    <dt class="fix">FIX</dt><dd>Run the suggested <code>git remote -v</code>.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · xxd: command not found</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>xxd</code> wasn't installed. zsh's helper searched pacman's file database: three packages provide it.</dd>
+    <dt class="fix">FIX</dt><dd>Picked <b>tinyxxd</b> (smallest). The default choice (1) was <b>gvim</b> — don't just hit Enter.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · database file for 'chaotic-aur' does not exist</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>pacman's file lists had never been synced.</dd>
+    <dt class="fix">FIX</dt><dd>Sync them:</dd>
+  </dl>
+  <div class="block local"><pre>sudo pacman -Fy    <span class="cmt"># -F: file database, -y: refresh it</span></pre></div>
+</div>
+
+<div class="bug">
+  <h4>Bug · red 404s while installing</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>The mirrors had moved to a newer version than the local package list.</dd>
+    <dt class="fix">FIX</dt><dd>Do a full upgrade — never <code>-Sy</code> alone (partial upgrade):</dd>
+  </dl>
+  <div class="block local"><pre>sudo pacman -Syu    <span class="cmt"># -S: sync, -y: refresh lists, -u: upgrade everything</span></pre></div>
+</div>
+
+<div class="callout gotcha"><b>Gotcha ·</b>
+  <ul style="margin:4px 0 0; padding-left:18px">
+    <li><code>git commit -am</code> skips untracked files — it would have missed the new <code>pokedex.css</code>. Use <code>git add -A</code>.</li>
+    <li>Unstaging a rename splits it into <code>deleted</code> + <code>untracked</code>; re-adding both rejoins it as <code>renamed (98%)</code>.</li>
+    <li>HTTPS remote: GitHub wants a <b>personal access token</b>, not your password.</li>
+  </ul>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Open items</h2>
+  <div class="block local"><pre>git push                              <span class="cmt"># send 44e0d5c (prompt shows ↑ until done)</span>
+pass insert github/token-pokeggdex    <span class="cmt"># keep the token in pass</span></pre></div>
+  <div class="block local"><pre>git remote set-url origin git@github.com:alphanatic/pokeggdex.git    <span class="cmt"># later: switch to SSH</span></pre></div>
+</div>
+
+<p class="part-of">Part of the Pokédex project</p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+/* Chalk Pastel — sidewalk-chalk palette for lab recaps (pinned 2026-10-10) */
+/* Each color: chalk = chips/borders, -bg = box tint, -ink = colored text, -chip = text on a chalk chip */
+:root{
+  --sky:#A9D3EE;    --sky-bg:#E8F3FB;    --sky-ink:#2F6A92;    --sky-chip:#1F4F70;    /* local commands */
+  --lav:#D3B8E6;    --lav-bg:#F4ECF9;    --lav-ink:#6B4687;    --lav-chip:#4D2F66;    /* remote commands */
+  --butter:#F6E3A1; --butter-bg:#FCF6DF; --butter-ink:#7D6614; --butter-chip:#5E4C0A; /* config & script files */
+  --peri:#B9B7E8;   --peri-bg:#EEEDFA;   --peri-ink:#4E4B94;   --peri-chip:#3B3880;   /* concepts, output */
+  --peri-arrow:#8C88C9;                                                                /* arrows in concept chains */
+  --peach:#F7C8A0;  --peach-bg:#FDF0E4;  --peach-ink:#9A5A24;  --peach-chip:#74400F;  /* gotchas, bug cards */
+  --bug-cause:#B0563F;                                                                 /* "Cause" label on bug cards */
+  --mint:#B8E2C8;   --mint-bg:#EAF6EE;   --mint-ink:#2F7550;   --mint-chip:#1F5A3C;   /* best practices, done */
+  --pink:#F4B6C2;   --pink-bg:#FCEAEE;   --pink-ink:#9C4458;   --pink-chip:#7A2E40;   /* paths, tables, title accent */
+  --pink-head:#6A2537;                                                                 /* text on pink table headers */
+  --coral:#F2A99B;  --coral-bg:#FCEDEA;  --coral-ink:#9A3A28;  --coral-chip:#7A2C1E;  /* AWS Console steps */
+
+  --asphalt:#34373D;      /* header band */
+  --asphalt-chip:#4A4E56; /* code chips inside the header */
+  --chalk-white:#FFFFFF;  /* header title */
+  --band-text:#F1EDE6;    /* header subtitle */
+  --band-soft:#D9D4CC;    /* header paragraphs */
+  --ink:#2E2A33;          /* body text */
+  --ink-soft:#5E5866;     /* secondary text */
+  --paper:#FBF8F3;        /* page background */
+  --line:#E7E1D8;         /* dividers, table borders */
+  --code-bg:#F1ECE4;      /* inline code background */
+  --output-line:#D8D0C4;  /* command-output block border */
+  --output-ink:#7A7280;   /* comments in output blocks */
+  --faded:#A39CA8;        /* crossed-out old names */
+  --footer:#9A939F;       /* page footer */
+}
