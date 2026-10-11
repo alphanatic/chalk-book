@@ -1,0 +1,40 @@
+/* Site sub-pages (backlog, contact): shown inside the site's viewer, in the dark site theme.
+   Colours come from ../../chalk-pastel.css and ../site-theme.css only. */
+
+@font-face { font-family: Inter; font-weight: 400; src: url(../../notes/fonts/inter-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 600; src: url(../../notes/fonts/inter-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 700; src: url(../../notes/fonts/inter-latin-700-normal.woff2) format("woff2"); }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--shell-bg); color: var(--shell-text-soft); font: 14px/1.6 Inter, system-ui, sans-serif; }
+main { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
+h1 { margin: 0 0 6px; font-size: 30px; color: var(--shell-text); letter-spacing: -.01em; }
+.lead { margin: 0 0 32px; color: var(--shell-text-muted); }
+h2 { display: flex; align-items: center; gap: 8px; margin: 28px 0 10px; color: var(--shell-text-soft);
+  font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+h2::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--pink)); }
+a { color: var(--sky); }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 12px; background: var(--shell-raise); color: var(--butter);
+  padding: 1px 5px; border-radius: 4px; }
+
+/* A backlog item: a dark tile with a chalk bar and a number chip, like the site's menu tiles.
+   Numbers (C01, C02…) are permanent IDs: they stay with an item when it moves to Complete Tasks */
+.item { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 5px; padding: 7px 10px 7px 8px;
+  background: var(--shell-raise); border-left: 4px solid var(--c, var(--shell-line)); border-radius: 8px; }
+.item b { color: var(--shell-text); font-weight: 600; }
+.item p { margin: 2px 0 0; color: var(--shell-text-muted); font-size: 13px; }
+.item .num { flex: none; margin-top: 2px; padding: 1px 5px; border-radius: 4px; font-size: 11px; font-weight: 600;
+  background: var(--c); color: var(--c-chip); }
+.item > div { flex: 1; min-width: 0; }
+.item .tag { flex: none; margin-top: 3px; margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--c, var(--shell-text-muted)); }
+.planned  { --c: var(--sky);    --c-chip: var(--sky-chip); }
+.progress { --c: var(--pink);   --c-chip: var(--pink-chip); }
+.decision { --c: var(--butter); --c-chip: var(--butter-chip); }
+.idea     { --c: var(--lav);    --c-chip: var(--lav-chip); }
+.done     { --c: var(--mint);   --c-chip: var(--mint-chip); }
+.done b   { text-decoration: line-through 7px color-mix(in srgb, var(--coral) 80%, transparent); }   /* crossed off: pastel red, 20% transparent */
+
+
+
+.sky { --c: var(--sky); } .pink { --c: var(--pink); } .butter { --c: var(--butter); } .mint { --c: var(--mint); }

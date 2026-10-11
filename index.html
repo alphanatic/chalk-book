@@ -14,7 +14,7 @@
   <div class="topbar-rail">
     <!-- Menu button: three chalk sticks lying down -->
     <button class="icon-btn" id="menu-btn" type="button" aria-label="Collapse or expand the notes menu"
-      aria-controls="menu" aria-expanded="true">
+      aria-controls="nav-menu" aria-expanded="true">
       <svg class="chalk-sticks" viewBox="0 0 24 24" aria-hidden="true">
         <rect class="pink" x="3" y="5" width="18" height="3.4" rx="1.7"/>
         <rect class="butter" x="4.5" y="10.3" width="16" height="3.4" rx="1.7"/>
@@ -22,7 +22,7 @@
       </svg>
     </button>
   </div>
-  <a class="brand" href="#"><chalk-wordmark></chalk-wordmark></a>
+  <span class="brand"><chalk-wordmark></chalk-wordmark></span>
   <span class="current" id="current"></span>
   <!-- Export: a small menu of ways to take the open note elsewhere. Mail options can join later -->
   <div class="export">
@@ -41,7 +41,7 @@
 </header>
 
 <!-- Left: search on top, then every note grouped by project. Collapses to a rail of numbers -->
-<nav class="panel left" id="menu" aria-label="Notes">
+<nav class="panel left" id="nav-menu" aria-label="Notes">
   <div class="panel-body">
     <label class="search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
@@ -78,6 +78,17 @@
     <p class="panel-foot" id="recent-foot"></p>
   </div>
 </aside>
+<!-- Main footer: persistent on every page, links to the site's own pages; it grows with its contents -->
+<footer class="main-footer" aria-label="Main footer">
+  <nav aria-label="Main">
+    <ul>
+      <li><a class="main-footer-btn" href="#" data-page="">Home</a></li>
+      <li><a class="main-footer-btn" href="#backlog" data-page="backlog">Backlog</a></li>
+      <li><a class="main-footer-btn" href="#complete" data-page="complete">Complete Tasks</a></li>
+      <li><a class="main-footer-btn" href="#contact" data-page="contact">Contact</a></li>
+    </ul>
+  </nav>
+</footer>
 <div class="scrim" id="scrim"></div>
 
 <script src="site/notes.js"></script>

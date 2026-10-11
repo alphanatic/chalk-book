@@ -18,7 +18,7 @@ body {
   margin: 0; background: var(--shell-bg); color: var(--shell-text);
   font: 14px/1.5 Inter, system-ui, sans-serif;
   display: grid; --left-w: var(--panel); --right-w: var(--rail);
-  grid-template: "top top top" var(--top-h) "left view right" 1fr / var(--left-w) 1fr var(--right-w);
+  grid-template: "top top top" var(--top-h) "left view right" 1fr "foot foot foot" auto / var(--left-w) 1fr var(--right-w);
   transition: grid-template-columns .3s ease;
 }
 body.left-collapsed { --left-w: var(--rail); }
@@ -40,14 +40,13 @@ kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
 .chalk-sticks .pink { fill: var(--pink); }
 .chalk-sticks .butter { fill: var(--butter); }
 .chalk-sticks .sky { fill: var(--sky); }
-/* The name sits in the middle of the top bar */
-.brand { position: absolute; left: 50%; transform: translateX(-50%);
-  font-weight: 700; font-size: 17px; color: var(--shell-text); text-decoration: none; white-space: nowrap; }
+/* The name hugs the left, next to the menu button. Plain text, not a link */
+.brand { font-weight: 700; font-size: 17px; color: var(--shell-text); white-space: nowrap; cursor: default; }
 /* <chalk-wordmark>: the one name used everywhere — Chalk in blue, Book in yellow. Size comes from where it sits */
 chalk-wordmark { white-space: nowrap; }
 chalk-wordmark .chalk { color: var(--sky); }
 chalk-wordmark .book  { color: var(--butter); }
-.current { flex: 1; min-width: 0; max-width: calc(50% - 280px); margin-left: auto; text-align: right; color: var(--shell-text-soft);
+.current { flex: 1; min-width: 0; margin-left: auto; text-align: right; color: var(--shell-text-soft);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .btn { width: 180px; aspect-ratio: 20 / 3; flex: none; border-radius: 8px; cursor: pointer;
   border: 0; background: var(--mint); color: var(--mint-chip); font-weight: 600;
@@ -77,6 +76,9 @@ chalk-wordmark .book  { color: var(--butter); }
 body:not(.rail) .panel.left .panel-body { min-width: var(--panel); }     /* no reflow while sliding: text just clips */
 .panel.right { grid-area: right; border-left: 1px solid var(--shell-line);
   justify-self: end; position: relative; width: var(--rail); transition: width .3s ease, box-shadow .3s ease; }
+/* Hidden on pages that don't need it (the backlog): its column closes */
+body.no-recent { --right-w: 0px; }
+body.no-recent .panel.right { display: none; }
 /* Recently viewed: a rail that slides open over the note (leftwards) while hovered, and straight back when left */
 .recent-peek .panel.right { width: var(--panel); z-index: 3; box-shadow: -12px 0 28px var(--shell-side); }
 body:not(.recent-rail) .panel.right .panel-body { min-width: var(--panel); }
@@ -175,12 +177,23 @@ body:not(.recent-rail) .panel.right .panel-body { min-width: var(--panel); }
 .home .hint { color: var(--shell-text-muted); }
 .home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
 
-/* ── Top bar on smaller windows: the centred name goes first, then the note title;
+/* ── Main footer: the persistent footer on every page. Subtle, centred links that wrap and grow with their contents ── */
+.main-footer { grid-area: foot; display: flex; justify-content: center; padding: 4px 16px;
+  background: var(--shell-side); border-top: 1px solid var(--shell-line); }
+.main-footer ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 6px; margin: 0; padding: 0; list-style: none; }
+/* Links are bold and coloured like note titles, in turn: blue, pink, green, yellow (new links continue it) */
+.main-footer-btn { display: inline-block; padding: 3px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;
+  color: var(--c); text-decoration: none; }
+.main-footer li:nth-child(4n+1) { --c: var(--sky); }
+.main-footer li:nth-child(4n+2) { --c: var(--pink); }
+.main-footer li:nth-child(4n+3) { --c: var(--mint); }
+.main-footer li:nth-child(4n+4) { --c: var(--butter); }
+.main-footer-btn:hover { background: var(--shell-raise); }
+.main-footer-btn[aria-current] { background: var(--shell-raise); box-shadow: inset 0 -2px 0 var(--c); }   /* the page you're on */
+
+/* ── Top bar on smaller windows: the name goes first, then the note title;
       the menu button and Export stay to the end ── */
-@media (max-width: 1100px) {
-  .brand { display: none; }
-  .current { max-width: none; }
-}
+@media (max-width: 820px) { .brand { display: none; } }
 @media (max-width: 600px) { .current { display: none; } }
 
 /* ── Narrow screens: panels stay rails in the layout; expanding one slides it over the note ── */

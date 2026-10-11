@@ -20,6 +20,13 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const narrow = matchMedia("(max-width: 760px)");
   const text = window.CHALK_TEXT || {};     // plain text of each note, from site/build-index.mjs
   const MIN_QUERY = 2;
+  // The site's own pages, opened from the footer; anything else in the address is a note id
+  const PAGES = {
+    // The private progress pages (.prog/ is gitignored), shown in the viewer
+    backlog: { title: "Backlog", file: ".prog/index.html", hideRecent: true },
+    complete: { title: "Complete Tasks", file: ".prog/complete.html" },
+    contact: { title: "Contact", file: "site/pages/contact.html" },
+  };
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
 
   // ?filler=40 adds placeholder notes, to test how the panels behave when full
@@ -153,7 +160,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
 
   // ── Menu. Starts as a rail; the menu button opens it beside the note and closes it again.
   //    body classes: left-collapsed = closed · rail = showing the rail layout ──
-  const menuEl = $("menu"), recentEl = $("recent");
+  const menuEl = $("nav-menu"), recentEl = $("recent");
   const body = document.body;
   const menuOpen = () => !body.classList.contains("left-collapsed");
   function syncMenu() {
@@ -184,10 +191,22 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
 
   // ── Viewer ───────────────────────────────────────────────
   function show(id) {
-    const n = notes.find(x => x.id === id && x.file);
+    const page = PAGES[id];
+    const n = page ? null : notes.find(x => x.id === id && x.file);
+    body.classList.toggle("no-recent", !!page?.hideRecent);
     currentId = n ? n.id : null;
+    for (const a of document.querySelectorAll(".main-footer-btn"))
+      a.toggleAttribute("aria-current", a.dataset.page === (page ? id : n ? "-" : ""));
 
-    if (n) {
+    if (page) {
+      if (frame.dataset.src !== page.file) { frame.src = page.file; frame.dataset.src = page.file; }
+      frame.hidden = false;
+      home.hidden = true;
+      current.textContent = page.title;
+      exportBtn.disabled = true;
+      setExport(false);
+      document.title = `${page.title} · Chalk Book`;
+    } else if (n) {
       if (frame.dataset.src !== n.file) { frame.src = n.file; frame.dataset.src = n.file; }
       frame.hidden = false;
       home.hidden = true;
