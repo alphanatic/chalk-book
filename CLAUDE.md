@@ -135,7 +135,15 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
   `sudo mkdir -p /mnt/data   # -p: create parents, no error if it exists`
 - **Config files stay clean.** Never put comments inside a config block (many formats
   break on inline comments). Annotations sit in a column beside the file, or in a field table below it.
-- **Real names, real output.** Use the actual usernames, paths, IDs and error messages from the session.
+- **Real by default, except access, location and private life.** Use the actual commands, paths and error messages
+  from the session, with three exceptions:
+  - **Access:** never write anything that grants access (keys, passwords, tokens, recovery codes), not even partly masked.
+  - **Location:** anything that locates or identifies a host or account (public IPs, AWS account IDs, resource IDs,
+    emails, internet hostnames) becomes a placeholder, `<what-it-is>` in lowercase kebab-case. Reuse an existing name
+    where one fits: `<instance-ip>`, `<my-ip>`, `<vpc-id>`. Private ranges (`10.0.0.0/16`) and `0.0.0.0/0` are fine.
+  - **Private life:** nothing about the user's life outside the work: real name or initials, home address, job search,
+    health, other people. A username built from the user's name becomes `adm-<fruit>`; the lab's admin is `adm-kiwi`.
+    When in doubt, leave it out and ask.
 - **Keep the mistakes.** Errors and their fixes are often the most valuable part. Record them as Bug cards.
 - **Respect history.** When a convention changes, update the reference note and mark old
   names as legacy (struck through, with a *Naming note*), rather than rewriting earlier notes.
@@ -233,7 +241,7 @@ goes through an AI session.
    `~/.claude/skills/memory-dump/` makes this work in every folder and leads back to this project.
    An AI may also offer a dump when the topic changes or about an hour of content has built up.
 3. The skill plans the note(s), copies `template.html` into `notes/`, fills it in following this
-   guide, adds it to `site/notes.js`, rebuilds the search index, checks every page, then commits and pushes if the repo is set up.
+   guide, adds it to `site/notes.js`, rebuilds the search index, checks every page, then commits and offers to push.
 4. Check the note on the site; ask for any changes in the same session.
 
 **Changing a note or this guide**
@@ -261,3 +269,6 @@ in the root. The original PDFs from before the HTML rebuild are kept in `archive
 - Never edit, rename or delete an existing note or archived PDF unless the user asks.
 - Keep `CLAUDE.md`, the guide's HTML and `00-chalk-book-guide.pdf` in sync.
 - Change this guide only when the user asks. It is meant to stay stable.
+- Keep private data out *before* it is committed. A pushed commit can't be fully taken back: GitHub may still serve it
+  by its hash after a force-push. If something slips through, tell the user; don't rewrite history without asking.
+- Commit locally as needed, but push only when the user asks for it.

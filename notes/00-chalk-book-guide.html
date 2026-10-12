@@ -140,7 +140,9 @@
   <li><b>Short.</b> Sentences under ~20 words. No intro paragraphs, no filler.</li>
   <li><b>Every command gets a comment</b> explaining what it does and what each flag means.</li>
   <li><b>Config files stay clean.</b> Annotations sit beside the file or in a field table, never inside it.</li>
-  <li><b>Real names, real output.</b> Actual usernames, paths, IDs and error messages from the session.</li>
+  <li><b>Real by default, except access, location and private life.</b> Actual commands, paths and error messages, but:
+    no keys, passwords or tokens; placeholders such as <code>&lt;instance-ip&gt;</code> for public IPs, account IDs and emails;
+    nothing about the user's private life. A username built from the user's name becomes <code>adm-&lt;fruit&gt;</code> (the lab's is <code>adm-kiwi</code>).</li>
   <li><b>Keep the mistakes.</b> Errors and their fixes are often the most valuable part.</li>
   <li><b>Respect history.</b> When a convention changes, mark old names as legacy instead of rewriting earlier notes.</li>
   <li><b>Calm tone.</b> Plain, friendly and factual. No hype, no emoji.</li>
@@ -190,7 +192,7 @@
     <li>While it is fresh, say <b>“memory-dump”</b> or <b>“chalk that up”</b>. A personal pointer skill makes this work in every folder.
       An AI may also offer a dump when the topic changes or about an hour of content has built up.</li>
     <li>The skill plans the notes, fills the template in <code>notes/</code>, adds them to <code>site/notes.js</code>, rebuilds the search index,
-      checks every page, then commits and pushes if the repo is set up.</li>
+      checks every page, then commits and offers to push.</li>
     <li>Check the note on the site and ask for any changes in the same session.</li>
   </ul>
 </div>
@@ -216,6 +218,9 @@
   <li>Match the existing notes' structure and look exactly; open one as a reference if unsure.</li>
   <li>Never edit, rename or delete an existing note or archived PDF unless the user asks.</li>
   <li>Keep <code>CLAUDE.md</code>, this guide's HTML and its PDF in sync, and change them only when the user asks.</li>
+  <li>Keep private data out <i>before</i> it is committed: GitHub may still serve a pushed commit after a force-push.
+    If something slips through, tell the user; don't rewrite history without asking.</li>
+  <li>Commit locally as needed, but push only when the user asks.</li>
 </ul>
 
 <!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->

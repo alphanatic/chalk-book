@@ -15,7 +15,7 @@
   <span class="eyebrow">Project Tinker Town · 02 · Module 1 · 2026-08-30</span>
   <h1>Linux Users &amp; <span>Accounts</span></h1>
   <p class="sub">Admin users &amp; service accounts</p>
-  <p>Created a dedicated sudo admin account (<code>adm-fkar</code>) instead of using the default <code>ubuntu</code> user,
+  <p>Created a dedicated sudo admin account (<code>adm-kiwi</code>) instead of using the default <code>ubuntu</code> user,
     then built a proper no-login service account (<code>svc-disk-report</code>) to run background scripts under least privilege.</p>
   <p>This establishes the identity model the rest of the lab's services build on.</p>
 </header>
@@ -30,7 +30,7 @@
 
 <h2 class="best">What we covered</h2>
 <ul class="check">
-  <li>Created <code>adm-fkar</code> as a personal sudo admin account</li>
+  <li>Created <code>adm-kiwi</code> as a personal sudo admin account</li>
   <li>Username rules — dots (<code>.</code>) are invalid; landed on hyphenated naming</li>
   <li>Copied the SSH key to the new user so it could authenticate directly</li>
   <li>Explored <code>/etc/passwd</code> and <code>/etc/group</code> — how Linux actually stores user and group data</li>
@@ -43,34 +43,34 @@
 
 <div class="keep">
   <h3><span class="tag remote">Remote</span>Create the personal admin account</h3>
-  <div class="block remote"><pre>sudo adduser adm-fkar             <span class="cmt"># create user + home directory</span>
-sudo usermod -aG sudo adm-fkar    <span class="cmt"># -aG: append to the sudo group (keeps others)</span>
-groups adm-fkar                   <span class="cmt"># verify group membership</span></pre></div>
+  <div class="block remote"><pre>sudo adduser adm-kiwi             <span class="cmt"># create user + home directory</span>
+sudo usermod -aG sudo adm-kiwi    <span class="cmt"># -aG: append to the sudo group (keeps others)</span>
+groups adm-kiwi                   <span class="cmt"># verify group membership</span></pre></div>
 </div>
 
 <div class="keep">
   <h3><span class="tag remote">Remote</span>Copy the SSH key to the new user</h3>
-  <div class="block remote"><pre>sudo mkdir -p /home/adm-fkar/.ssh                                     <span class="cmt"># -p: no error if it exists</span>
-sudo cp ~/.ssh/authorized_keys /home/adm-fkar/.ssh/authorized_keys    <span class="cmt"># copy the allowed public key</span>
-sudo chown -R adm-fkar:adm-fkar /home/adm-fkar/.ssh                   <span class="cmt"># -R: hand folder to the user</span>
-sudo chmod 700 /home/adm-fkar/.ssh                                    <span class="cmt"># 700: only owner can enter</span>
-sudo chmod 600 /home/adm-fkar/.ssh/authorized_keys                    <span class="cmt"># 600: owner read/write only</span></pre></div>
+  <div class="block remote"><pre>sudo mkdir -p /home/adm-kiwi/.ssh                                     <span class="cmt"># -p: no error if it exists</span>
+sudo cp ~/.ssh/authorized_keys /home/adm-kiwi/.ssh/authorized_keys    <span class="cmt"># copy the allowed public key</span>
+sudo chown -R adm-kiwi:adm-kiwi /home/adm-kiwi/.ssh                   <span class="cmt"># -R: hand folder to the user</span>
+sudo chmod 700 /home/adm-kiwi/.ssh                                    <span class="cmt"># 700: only owner can enter</span>
+sudo chmod 600 /home/adm-kiwi/.ssh/authorized_keys                    <span class="cmt"># 600: owner read/write only</span></pre></div>
 </div>
 <div class="callout gotcha"><b>Gotcha ·</b> SSH silently refuses keys if the <code>.ssh</code> folder or <code>authorized_keys</code> is owned by
   root or too open — the <code>chown</code> and <code>chmod</code> steps are what make the login work.</div>
 
 <div class="keep">
   <h3><span class="tag remote">Remote</span>Delete a user (if starting over)</h3>
-  <div class="block remote"><pre>sudo deluser --remove-home fkar    <span class="cmt"># --remove-home: delete user + home dir</span></pre></div>
+  <div class="block remote"><pre>sudo deluser --remove-home kiwi    <span class="cmt"># --remove-home: delete user + home dir</span></pre></div>
 </div>
 
 <div class="keep">
   <h3><span class="tag remote">Remote</span>Inspect users &amp; groups</h3>
-  <div class="block remote"><pre>grep adm-fkar /etc/passwd    <span class="cmt"># user's UID / primary GID / shell</span>
-grep adm-fkar /etc/group     <span class="cmt"># group memberships</span>
-id adm-fkar                  <span class="cmt"># numeric UID/GID + all groups, human-readable</span></pre></div>
+  <div class="block remote"><pre>grep adm-kiwi /etc/passwd    <span class="cmt"># user's UID / primary GID / shell</span>
+grep adm-kiwi /etc/group     <span class="cmt"># group memberships</span>
+id adm-kiwi                  <span class="cmt"># numeric UID/GID + all groups, human-readable</span></pre></div>
 </div>
-<div class="callout best"><b>Tidier form ·</b> The original used <code>cat /etc/passwd | grep adm-fkar</code>. <code>grep</code> can read the
+<div class="callout best"><b>Tidier form ·</b> The original used <code>cat /etc/passwd | grep adm-kiwi</code>. <code>grep</code> can read the
   file itself, so the <code>cat</code> and pipe aren't needed — same result.</div>
 
 <div class="keep">

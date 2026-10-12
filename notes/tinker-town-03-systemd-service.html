@@ -67,7 +67,7 @@
     <div class="row"><pre>[Service]</pre><span>how to run it</span></div>
     <div class="row"><pre>ExecStart=/usr/local/bin/hello-loop.sh</pre><span>the command to run</span></div>
     <div class="row"><pre>Restart=always</pre><span>restart it whenever it stops</span></div>
-    <div class="row"><pre>User=adm-fkar</pre><span>run as this user, not root</span></div>
+    <div class="row"><pre>User=adm-kiwi</pre><span>run as this user, not root</span></div>
     <div class="gap"></div>
     <div class="row"><pre>[Install]</pre><span>how it hooks into boot</span></div>
     <div class="row"><pre>WantedBy=multi-user.target</pre><span>start in the normal boot state</span></div>
@@ -99,12 +99,12 @@ cat /var/log/hello-loop.log                 <span class="cmt"># confirm it's wri
 <div class="bug">
   <h4>Bug · log permission denied</h4>
   <dl>
-    <dt class="cause">CAUSE</dt><dd>The service ran as <code>adm-fkar</code>, but <code>/var/log/</code> is root-owned — the user
+    <dt class="cause">CAUSE</dt><dd>The service ran as <code>adm-kiwi</code>, but <code>/var/log/</code> is root-owned — the user
       couldn't create files there.</dd>
     <dt class="fix">FIX</dt><dd>Create the log file as root, then hand that one file to the service user:</dd>
   </dl>
   <div class="block remote"><pre>sudo touch /var/log/hello-loop.log                      <span class="cmt"># create the empty log file</span>
-sudo chown adm-fkar:adm-fkar /var/log/hello-loop.log    <span class="cmt"># give it to the service user</span></pre></div>
+sudo chown adm-kiwi:adm-kiwi /var/log/hello-loop.log    <span class="cmt"># give it to the service user</span></pre></div>
 </div>
 
 <div class="bug">

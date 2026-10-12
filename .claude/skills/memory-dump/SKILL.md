@@ -69,9 +69,8 @@ For each note:
    - short sentences, calm tone, no emoji
 5. **Colour only through palette classes** (`local`, `remote`, `config`, `concept`, `gotcha`,
    `best`, `paths`, `console`) or `var(--…)` from `chalk-pastel.css`. No hex values.
-6. **Keep secrets out.** Never include private keys, passwords, tokens or access keys.
-   Replace public IPs and AWS account IDs with placeholders such as `<instance-ip>` or `<my-ip>`,
-   since the repo may be published.
+6. **Follow the privacy rule** in `CLAUDE.md` §4: no access secrets, placeholders for anything that
+   locates a host or account, nothing from the user's private life.
 7. Wrap each small heading and the block that belongs to it in `<div class="keep">` so they
    don't split across pages.
 8. Link related notes through the site: `<a href="../index.html#<note-id>" target="_top">`.
@@ -95,13 +94,18 @@ Then rebuild the search index so the new text is searchable: `node site/build-in
   Fix awkward breaks, overflowing or wrapping code lines (about 100 characters fit), near-empty pages.
 - `grep -n '{{' notes/<name>.html` must find nothing.
 - `grep -nE '(style="[^"]*|:\s*)#[0-9a-fA-F]{3,6}\b' notes/<name>.html` must find nothing.
+- Privacy scan. Each hit must be a placeholder, `0.0.0.0` or a private range, or be fixed:
+  ```
+  grep -nE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b|@[a-z0-9-]+\.[a-z]{2,}|\b[0-9]{12}\b|AKIA|gh[pousr]_|BEGIN .*PRIVATE' notes/<name>.html
+  ```
 - Open `index.html#<name>` and confirm the note appears in the menu and displays.
 - Re-render after every fix. PDFs are not kept; the site's Export → Save as PDF makes them on demand.
 
-## 7. Commit and push
+## 7. Commit, then offer to push
 
-If the chalk-book folder is a git repository with a remote, commit the new and changed files
-with the message `note: <name>` (one commit per dump) and push. If it isn't, say so and skip.
+If the chalk-book folder is a git repository, commit the new and changed files with the message
+`note: <name>` (one commit per dump), then offer to push in one line. Push only when the user says so.
+If it isn't a repository, say so and skip.
 
 ## 8. Follow-ups
 

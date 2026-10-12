@@ -34,7 +34,7 @@ window.CHALK_NOTES = [
   {
     id: "tinker-town-02-linux-users-accounts", project: "tinker-town", n: 2, module: 1, date: "2026-08-30",
     title: "Linux Users & Accounts",
-    summary: "Sudo admin account adm-fkar and no-login service account svc-disk-report, least privilege.",
+    summary: "Sudo admin account adm-kiwi and no-login service account svc-disk-report, least privilege.",
     skills: ["linux", "users", "groups", "sudo", "service accounts", "least privilege", "/etc/passwd"],
   },
   {
