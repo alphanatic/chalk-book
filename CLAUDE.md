@@ -35,6 +35,7 @@ When in doubt, write for the forgetful future self: assume nothing is remembered
 
 ```
 chalk-book/
+├── README.md                     ← what this is; points here
 ├── CLAUDE.md                     ← this guide (source of truth)
 ├── 00-chalk-book-guide.pdf       ← read-only copy of this guide
 ├── chalk-pastel.css              ← the note colour palette (user-owned)
