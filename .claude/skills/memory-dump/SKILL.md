@@ -19,6 +19,7 @@ Files this skill uses:
 | `site/notes.js` | The catalogue the site lists: projects and notes |
 | `template.html` (this folder) | The skeleton every note starts from |
 | `render.sh` (this folder) | HTML → PDF, for checking pages |
+| `check.sh` (this folder) | The checks every commit must pass: privacy, admin names, colours, catalogue |
 
 ## 1. Read the rules
 
@@ -92,18 +93,18 @@ Then rebuild the search index so the new text is searchable: `node site/build-in
   pdftoppm -r 70 -png <scratchpad>/<name>.pdf <scratchpad>/p
   ```
   Fix awkward breaks, overflowing or wrapping code lines (about 100 characters fit), near-empty pages.
-- `grep -n '{{' notes/<name>.html` must find nothing.
-- `grep -nE '(style="[^"]*|:\s*)#[0-9a-fA-F]{3,6}\b' notes/<name>.html` must find nothing.
-- Privacy scan. Each hit must be a placeholder, `0.0.0.0` or a private range, or be fixed:
+- Run the checks; every problem must be fixed before committing:
   ```
-  grep -nE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b|@[a-z0-9-]+\.[a-z]{2,}|\b[0-9]{12}\b|AKIA|gh[pousr]_|BEGIN .*PRIVATE' notes/<name>.html
+  .claude/skills/memory-dump/check.sh
   ```
+  It rebuilds the search index and checks placeholders, hex colours, secrets, public IPs, account IDs,
+  emails, admin accounts (only `adm-kiwi`), the private block list and the catalogue, in notes and PDFs.
 - Open `index.html#<name>` and confirm the note appears in the menu and displays.
 - Re-render after every fix. PDFs are not kept; the site's Export → Save as PDF makes them on demand.
 
 ## 7. Commit, then offer to push
 
-If the chalk-book folder is a git repository, commit the new and changed files with the message
+If the chalk-book folder is a git repository and `check.sh` passed, commit the new and changed files with the message
 `note: <name>` (one commit per dump), then offer to push in one line. Push only when the user says so.
 If it isn't a repository, say so and skip.
 

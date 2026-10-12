@@ -142,7 +142,7 @@
   <li><b>Config files stay clean.</b> Annotations sit beside the file or in a field table, never inside it.</li>
   <li><b>Real by default, except access, location and private life.</b> Actual commands, paths and error messages, but:
     no keys, passwords or tokens; placeholders such as <code>&lt;instance-ip&gt;</code> for public IPs, account IDs and emails;
-    nothing about the user's private life. Every personal admin account, live or test, is written as <code>adm-kiwi</code>; the steps stay the same.</li>
+    nothing about the user's private life. Anything that looks like an admin account is always <code>adm-kiwi</code>: never a name, never a placeholder, live or test.</li>
   <li><b>Keep the mistakes.</b> Errors and their fixes are often the most valuable part.</li>
   <li><b>Respect history.</b> When a convention changes, mark old names as legacy instead of rewriting earlier notes.</li>
   <li><b>Calm tone.</b> Plain, friendly and factual. No hype, no emoji.</li>
@@ -192,7 +192,7 @@
     <li>While it is fresh, say <b>“memory-dump”</b> or <b>“chalk that up”</b>. A personal pointer skill makes this work in every folder.
       An AI may also offer a dump when the topic changes or about an hour of content has built up.</li>
     <li>The skill plans the notes, fills the template in <code>notes/</code>, adds them to <code>site/notes.js</code>, rebuilds the search index,
-      checks every page, then commits and offers to push.</li>
+      runs <code>check.sh</code> and checks every page, then commits and offers to push.</li>
     <li>Check the note on the site and ask for any changes in the same session.</li>
   </ul>
 </div>
@@ -207,8 +207,9 @@
 </div>
 
 <div class="keep">
-  <h3><span class="tag local">Local</span>Rendering</h3>
-  <div class="block local"><pre>.claude/skills/memory-dump/render.sh notes/&lt;name&gt;.html [out-dir]   <span class="cmt"># → &lt;name&gt;.pdf</span></pre></div>
+  <h3><span class="tag local">Local</span>Rendering and checks</h3>
+  <div class="block local"><pre>.claude/skills/memory-dump/render.sh notes/&lt;name&gt;.html [out-dir]   <span class="cmt"># → &lt;name&gt;.pdf</span>
+.claude/skills/memory-dump/check.sh [--render]                      <span class="cmt"># must pass before every commit</span></pre></div>
 </div>
 
 <h2 class="concept">Rules for AI assistants</h2>

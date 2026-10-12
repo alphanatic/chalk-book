@@ -55,7 +55,8 @@ chalk-book/
 └── .claude/skills/memory-dump/   ← the note-making workflow
     ├── SKILL.md
     ├── template.html
-    └── render.sh
+    ├── render.sh
+    └── check.sh                  ← the checks every commit must pass
 ```
 
 ### File naming
@@ -143,8 +144,10 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
     where one fits: `<instance-ip>`, `<my-ip>`, `<vpc-id>`. Private ranges (`10.0.0.0/16`) and `0.0.0.0/0` are fine.
   - **Private life:** nothing about the user's life outside the work: real name or initials, home address, job search,
     health, other people. When in doubt, leave it out and ask.
-  - **Admin users:** every personal admin account is written as `adm-kiwi`, in live and test environments alike,
-    whatever its real name. The steps (creating it, logging in, sudo) stay exactly as they were done.
+  - **Admin accounts:** anything that looks like an admin account (`adm-…`, `admin-…`, `…-admin`) is always written as
+    `adm-kiwi`, never a real name and never a placeholder. This applies to live and test environments,
+    patterns and examples alike. Commands stay exactly as run, with `adm-kiwi` in place of the name. Notes don't explain the
+    substitution. The "Respect history" rule doesn't apply here: old admin names are never shown, not even struck through.
 - **Keep the mistakes.** Errors and their fixes are often the most valuable part. Record them as Bug cards.
 - **Respect history.** When a convention changes, update the reference note and mark old
   names as legacy (struck through, with a *Naming note*), rather than rewriting earlier notes.
