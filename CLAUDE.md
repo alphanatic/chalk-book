@@ -142,8 +142,9 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
     emails, internet hostnames) becomes a placeholder, `<what-it-is>` in lowercase kebab-case. Reuse an existing name
     where one fits: `<instance-ip>`, `<my-ip>`, `<vpc-id>`. Private ranges (`10.0.0.0/16`) and `0.0.0.0/0` are fine.
   - **Private life:** nothing about the user's life outside the work: real name or initials, home address, job search,
-    health, other people. A username built from the user's name becomes `adm-<fruit>`; the lab's admin is `adm-kiwi`.
-    When in doubt, leave it out and ask.
+    health, other people. When in doubt, leave it out and ask.
+  - **Admin users:** every personal admin account is written as `adm-kiwi`, in live and test environments alike,
+    whatever its real name. The steps (creating it, logging in, sudo) stay exactly as they were done.
 - **Keep the mistakes.** Errors and their fixes are often the most valuable part. Record them as Bug cards.
 - **Respect history.** When a convention changes, update the reference note and mark old
   names as legacy (struck through, with a *Naming note*), rather than rewriting earlier notes.
