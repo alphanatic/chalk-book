@@ -246,7 +246,8 @@ goes through an AI session.
    `~/.claude/skills/memory-dump/` makes this work in every folder and leads back to this project.
    An AI may also offer a dump when the topic changes or about an hour of content has built up.
 3. The skill plans the note(s), copies `template.html` into `notes/`, fills it in following this
-   guide, adds it to `site/notes.js`, rebuilds the search index, checks every page, then commits and offers to push.
+   guide, adds it to `site/notes.js`, rebuilds the search index, checks every page, then hands over
+   following the user's own git preferences (§7).
 4. Check the note on the site; ask for any changes in the same session.
 
 **Changing a note or this guide**
@@ -276,4 +277,11 @@ in the root. The original PDFs from before the HTML rebuild are kept in `archive
 - Change this guide only when the user asks. It is meant to stay stable.
 - Keep private data out *before* it is committed. A pushed commit can't be fully taken back: GitHub may still serve it
   by its hash after a force-push. If something slips through, tell the user; don't rewrite history without asking.
-- Commit locally as needed, but push only when the user asks for it.
+- **Git follows the person.** Whether to commit or push, and the commit-message style, come from the current user's
+  own instructions (their global `CLAUDE.md` or memory), never from this file. If none are given, ask before any git action.
+  Personal habits stay out of this file, so the repo serves whoever works on it next.
+- **Git wording.** Use git's own terms exactly: *stage* (`git add`), *commit* (save a snapshot locally), *push* (send
+  commits to GitHub), *pull*, *revert*, *reset*. If a request doesn't map clearly to one git action, don't guess: ask,
+  offering 1–3 options, each with its command and one line on what it does.
+- **Commit messages document the work:** a title, then a body saying what changed and why. The user's own style
+  comes before any default.

@@ -193,7 +193,7 @@
     <li>While it is fresh, say <b>“memory-dump”</b> or <b>“chalk that up”</b>. A personal pointer skill makes this work in every folder.
       An AI may also offer a dump when the topic changes or about an hour of content has built up.</li>
     <li>The skill plans the notes, fills the template in <code>notes/</code>, adds them to <code>site/notes.js</code>, rebuilds the search index,
-      runs <code>check.sh</code> and checks every page, then commits and offers to push.</li>
+      runs <code>check.sh</code> and checks every page, then hands over following the user's own git preferences.</li>
     <li>Check the note on the site and ask for any changes in the same session.</li>
   </ul>
 </div>
@@ -222,7 +222,11 @@
   <li>Keep <code>CLAUDE.md</code>, this guide's HTML and its PDF in sync, and change them only when the user asks.</li>
   <li>Keep private data out <i>before</i> it is committed: GitHub may still serve a pushed commit after a force-push.
     If something slips through, tell the user; don't rewrite history without asking.</li>
-  <li>Commit locally as needed, but push only when the user asks.</li>
+  <li><b>Git follows the person.</b> Committing, pushing and commit-message style come from the current user's own
+    instructions, never from this guide. If none are given, ask before any git action.</li>
+  <li><b>Git wording.</b> Use git's own terms exactly: <i>stage</i>, <i>commit</i>, <i>push</i>, <i>pull</i>, <i>revert</i>, <i>reset</i>.
+    If a request doesn't map clearly to one git action, ask, offering 1–3 options with a short description each.</li>
+  <li><b>Commit messages document the work:</b> a title, then a body saying what changed and why.</li>
 </ul>
 
 <!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->

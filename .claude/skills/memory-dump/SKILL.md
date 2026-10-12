@@ -102,11 +102,10 @@ Then rebuild the search index so the new text is searchable: `node site/build-in
 - Open `index.html#<name>` and confirm the note appears in the menu and displays.
 - Re-render after every fix. PDFs are not kept; the site's Export → Save as PDF makes them on demand.
 
-## 7. Commit, then offer to push
+## 7. Hand over
 
-If the chalk-book folder is a git repository and `check.sh` passed, commit the new and changed files with the message
-`note: <name>` (one commit per dump), then offer to push in one line. Push only when the user says so.
-If it isn't a repository, say so and skip.
+List the new and changed files and confirm `check.sh` passed. Any git step (commit, push) follows the user's own
+git preferences (their global `CLAUDE.md` or memory), as `CLAUDE.md` §7 says. If they have none, ask before any git action.
 
 ## 8. Follow-ups
 
