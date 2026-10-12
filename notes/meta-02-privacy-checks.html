@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chalk Book 02 — Privacy Rule &amp; Check Script</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Chalk Book 02 — Privacy Rule & Check Script · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Chalk Book · 02 · 2026-10-12</span>
+  <h1>Privacy Rule &amp; Check Script</h1>
+  <p class="sub">Rules that a script enforces, not memory</p>
+  <p>Wrote a privacy rule into <code>CLAUDE.md</code> and masked every admin account as <code>adm-kiwi</code>,
+    in notes and archived PDFs alike. Built <code>check.sh</code>, which every commit must pass.</p>
+  <p>Backlog items 1 and 2 are done. Every later note is checked by the same script before it is committed.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip config">Config file</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>A privacy rule in <code>CLAUDE.md</code> §4: real by default, except access, location and private life</li>
+  <li>Every admin account written as <code>adm-kiwi</code>, live or test, with no placeholder and no explanation</li>
+  <li>Swapped text inside archived PDFs with PyMuPDF, in each PDF's own font</li>
+  <li><code>check.sh</code>: one command for placeholders, colours, secrets, IPs, emails, admin names and the catalogue</li>
+  <li>An optional private block list outside the repo, for words no general check can recognise</li>
+  <li>Workflow rules: commit locally, push only when asked, ask before marking a backlog item done</li>
+  <li>Backlog: item 25 added (legends that match the page), items 1 and 2 marked done</li>
+</ul>
+
+<h2 class="concept">The privacy rule</h2>
+<div class="keep">
+  <table>
+    <tr><th>Kind</th><th>Rule</th><th>Example</th></tr>
+    <tr><td><b>Access</b></td><td>Never written, not even partly masked</td><td>keys, passwords, tokens, recovery codes</td></tr>
+    <tr><td><b>Location</b></td><td>Becomes a <code>&lt;what-it-is&gt;</code> placeholder</td><td><code>&lt;instance-ip&gt;</code>, <code>&lt;my-ip&gt;</code>, <code>&lt;vpc-id&gt;</code></td></tr>
+    <tr><td><b>Private life</b></td><td>Left out; when in doubt, ask</td><td>real name, home address, job search, health</td></tr>
+    <tr><td><b>Admin accounts</b></td><td>Always <code>adm-kiwi</code>, never a name or a pattern</td><td><code>ssh adm-kiwi@&lt;instance-ip&gt;</code></td></tr>
+  </table>
+  <div class="callout concept"><b>Concept ·</b> Private ranges (<code>10.0.0.0/16</code>), <code>0.0.0.0/0</code> and role accounts
+    such as <code>svc-disk-report</code> are fine. They don't identify a person or a host on the internet.</div>
+</div>
+<div class="callout gotcha"><b>Gotcha ·</b> A pushed commit can't be fully taken back. GitHub may still serve it by its hash after a
+  force-push. Keep private data out <i>before</i> the first commit.</div>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>Run the checks</h3>
+  <div class="block local"><pre>.claude/skills/memory-dump/check.sh             <span class="cmt"># every check; exit 1 if any problem</span>
+.claude/skills/memory-dump/check.sh --render    <span class="cmt"># also renders changed notes, prints page counts</span></pre></div>
+  <div class="block output"><pre>2. Placeholders
+  notes/tinker-town-03-systemd-service.html:16:  …&#123;&#123;x&#125;&#125;…  leftover &#123;&#123;…&#125;&#125; placeholder
+8. Catalogue
+  site/notes.js: tinker-town-04-cron-logrotate has n: 7, file says 04  catalogue
+...
+✗ 55 problem(s)</pre></div>
+  <p class="muted">Output from the test copy with planted problems. The real repo prints <code>✓ all checks passed</code>.</p>
+</div>
+
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>What check.sh checks</h3>
+  <table>
+    <tr><th>#</th><th>Check</th><th>Scans</th></tr>
+    <tr><td>1</td><td>Rebuilds the search index</td><td>—</td></tr>
+    <tr><td>2</td><td>No <code>&#123;&#123;…&#125;&#125;</code> placeholders</td><td>notes</td></tr>
+    <tr><td>3</td><td>No hard-coded hex colours</td><td>notes</td></tr>
+    <tr><td>4</td><td>No private keys, <code>AKIA…</code> keys, <code>ghp_…</code> tokens</td><td>all committed text and PDFs</td></tr>
+    <tr><td>5</td><td>No public IPs, 12-digit account IDs or emails (allowed: <code>git@github.com</code>)</td><td>all committed text and PDFs</td></tr>
+    <tr><td>6</td><td>Admin accounts are only <code>adm-kiwi</code>: catches <code>adm-…</code>, <code>admin-…</code>, <code>…_admin</code></td><td>all committed text and PDFs</td></tr>
+    <tr><td>7</td><td>No word from the private block list</td><td>everything, incl. the search index</td></tr>
+    <tr><td>8</td><td>Every note has a catalogue entry and the reverse; ids unique; <code>n</code> matches the file</td><td><code>notes/</code>, <code>site/notes.js</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h3><span class="tag config">Config</span>Private block list (outside the repo)</h3>
+  <div class="block config annotated">
+    <div class="file">~/.config/chalk-book/blocklist</div>
+    <div class="row"><pre># one word per line</pre><span>lines starting with # are skipped</span></div>
+    <div class="row"><pre>&lt;real-username&gt;</pre><span>matched as a whole word, any case</span></div>
+    <div class="row"><pre>&lt;surname&gt;</pre><span>fill in yourself; never in a transcript</span></div>
+  </div>
+  <p class="muted">Missing file: check 7 is skipped. It lives outside the repo, so it can never be committed.</p>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>Swap text inside a PDF (one-off recipe)</h3>
+  <div class="block local"><pre>python3 -m venv ~/venv-pdf &amp;&amp; ~/venv-pdf/bin/pip install pymupdf fonttools brotli
+~/venv-pdf/bin/python -c "from fontTools.ttLib import TTFont  <span class="cmt"># woff2 → ttf for PyMuPDF</span>
+f = TTFont('inter.woff2'); f.flavor = None; f.save('Inter.ttf')"</pre></div>
+  <div class="block local"><pre>for page in doc:                                         <span class="cmt"># doc = pymupdf.open(path)</span>
+    for r in page.search_for(old):                       <span class="cmt"># every spot the text appears</span>
+        page.add_redact_annot(r, fill=bg)                <span class="cmt"># bg: colour sampled beside the text</span>
+    page.apply_redactions(images=0, graphics=0)          <span class="cmt"># remove the text, keep chips and lines</span>
+    page.insert_text((r.x0, span_baseline), new, fontsize=span_size,
+                     fontfile="DejaVuSansMono.ttf", color=span_colour)   <span class="cmt"># same font, size, colour</span>
+doc.save(tmp, garbage=4, deflate=True)                   <span class="cmt"># garbage=4: drop the old text objects</span></pre></div>
+  <div class="block local"><pre>diff &lt;(pdftotext -layout before.pdf -) &lt;(pdftotext -layout after.pdf -)    <span class="cmt"># only the swap differs</span></pre></div>
+</div>
+
+<h2 class="best">Workflow rules</h2>
+<div class="cards">
+  <div><b>Commit, don't push</b>The AI commits once <code>check.sh</code> passes. Pushing waits for an explicit "push it".</div>
+  <div><b>Ask before done</b>The AI says when a backlog item is finished and waits for a yes before marking it.</div>
+  <div><b>Suggest, then do</b>Backlog items start as a written suggestion. Work starts on "do it".</div>
+  <div><b>Rule once, check always</b>A rule lives in <code>CLAUDE.md</code> once; the skill points to it and <code>check.sh</code> enforces it.</div>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+
+<div class="bug">
+  <h4>Bug · check.sh printed problems but said "all checks passed"</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>grep … | report</code> runs <code>report</code> in a subshell. Its <code>problems=$((problems+1))</code>
+      was lost when the pipe ended.</dd>
+    <dt class="fix">FIX</dt><dd>Count failures in a file instead, and read the count at the end.</dd>
+  </dl>
+  <div class="block local"><pre>fail() { echo "  $1"; echo x &gt;&gt; "$tmp/problems"; }                    <span class="cmt"># survives the subshell</span>
+problems=0; [ -f "$tmp/problems" ] &amp;&amp; problems=$(wc -l &lt; "$tmp/problems")</pre></div>
+</div>
+
+<div class="bug">
+  <h4>Bug · clean run exited 1 with no summary</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>cat missing-file | wc -l</code> fails, and <code>set -euo pipefail</code> stops the script there.</dd>
+    <dt class="fix">FIX</dt><dd>Test that the file exists before counting (the line above).</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · swapped PDF text came out tiny, on grey boxes</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>The redaction's replacement text used a built-in PDF font at a fitted size, and the default fill was grey.</dd>
+    <dt class="fix">FIX</dt><dd>Restore the backups, redact with the sampled background colour, then draw the new text with
+      <code>insert_text</code> in the original font file, size and colour.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · check.sh flagged CLAUDE.md itself</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>The rule's own wording showed the forbidden pattern as an example.</dd>
+    <dt class="fix">FIX</dt><dd>Reworded it to "never a placeholder", so the repo never shows the pattern at all.</dd>
+  </dl>
+</div>
+
+<div class="bug">
+  <h4>Bug · zsh: ==REAL not found</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>In zsh, a word starting with <code>=</code> expands to a command's path, so <code>echo ===REAL</code> fails.</dd>
+    <dt class="fix">FIX</dt><dd>Quote it, <code>echo "===REAL"</code>, or use another marker.</dd>
+  </dl>
+</div>
+
+<div class="callout gotcha"><b>Gotcha ·</b> Claude Code blocks an AI from editing session transcripts. To scrub a word from
+  <code>~/.claude/projects/</code>, close every session and run the replacement yourself in a terminal.</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>The rules (privacy in §4, AI rules in §7)</td><td><code>CLAUDE.md</code></td></tr>
+    <tr><td>The check script</td><td><code>.claude/skills/memory-dump/check.sh</code></td></tr>
+    <tr><td>Private block list</td><td><code>~/.config/chalk-book/blocklist</code></td></tr>
+    <tr><td>Claude Code transcripts (deleted after 30 days by default)</td><td><code>~/.claude/projects/&lt;project-path&gt;/*.jsonl</code></td></tr>
+    <tr><td>Keep transcripts longer</td><td><code>"cleanupPeriodDays": 365</code> in <code>~/.claude/settings.json</code></td></tr>
+    <tr><td>Backlog and Complete Tasks (private)</td><td><code>.prog/index.html</code>, <code>.prog/complete.html</code></td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Open decisions</h2>
+  <table>
+    <tr><th>Item</th><th>Question</th><th>Suggested</th></tr>
+    <tr><td>3 · Going online</td><td>GitHub Pages (public), stay local, or a private host?</td><td>Cloudflare Pages + Access: private, free, works on a phone</td></tr>
+    <tr><td>Private pages</td><td>Footer links appear only when a <code>.prog/</code> page exists?</td><td>A generated <code>.prog/pages.js</code>, from a tag in each page</td></tr>
+    <tr><td>25 · Legends</td><td>Drop or relabel the legend in a note without blocks?</td><td>Waiting</td></tr>
+    <tr><td>Guide PDF</td><td>Keep <code>00-chalk-book-guide.pdf</code>, now mostly redundant?</td><td>Waiting</td></tr>
+  </table>
+</div>
+
+<p class="part-of">Part of Chalk Book · follows
+  <a href="../index.html#meta-01-site-build" target="_top">01 Site &amp; Workflow Build</a> · rules in
+  <a href="../index.html#00-chalk-book-guide" target="_top">00 Chalk Book Guide</a></p>
+
+<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
+<script src="note.js"></script>
+</body>
+</html>

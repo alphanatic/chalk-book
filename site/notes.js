@@ -74,6 +74,12 @@ window.CHALK_NOTES = [
     skills: ["html", "css", "javascript", "static site", "postMessage", "file://", "search", "claude code skills", "git", "gitignore", "pymupdf"],
   },
   {
+    id: "meta-02-privacy-checks", project: "meta", n: 2, date: "2026-10-12",
+    title: "Privacy Rule & Check Script",
+    summary: "Privacy rule in CLAUDE.md, every admin account masked as adm-kiwi, check.sh enforces it before each commit.",
+    skills: ["privacy", "check.sh", "bash", "grep", "pymupdf", "pdf", "git", "secrets", "claude code"],
+  },
+  {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",
     title: "Chalk Book Guide",
     summary: "Purpose, structure and conventions of the chalk book. Read-only copy of CLAUDE.md.",
