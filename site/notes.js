@@ -80,6 +80,18 @@ window.CHALK_NOTES = [
     skills: ["privacy", "check.sh", "bash", "grep", "pymupdf", "pdf", "git", "secrets", "claude code"],
   },
   {
+    id: "meta-03-readme-git-rules", project: "meta", n: 3, date: "2026-10-13",
+    title: "README & Git Rules",
+    summary: "README.md that points to CLAUDE.md; git rules follow each user's own preferences; amend, then push.",
+    skills: ["git", "readme", "commit messages", "git commit --amend", "git stash", "claude code", "claude.md"],
+  },
+  {
+    id: "meta-04-claude-md-cleanup", project: "meta", n: 4, date: "2026-10-13",
+    title: "CLAUDE.md Cleanup",
+    summary: "Read-only audit, then CLAUDE.md cut 17% to rules only; stale facts fixed and the guide synced.",
+    skills: ["claude.md", "documentation", "wc", "grep", "ugrep", "audit", "claude code"],
+  },
+  {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",
     title: "Chalk Book Guide",
     summary: "Purpose, structure and conventions of the chalk book. Read-only copy of CLAUDE.md.",

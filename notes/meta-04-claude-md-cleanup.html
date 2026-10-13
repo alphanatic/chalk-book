@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chalk Book 04 — CLAUDE.md Cleanup</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Chalk Book 04 — CLAUDE.md Cleanup · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Chalk Book · 04 · 2026-10-13</span>
+  <h1>CLAUDE.md Cleanup</h1>
+  <p class="sub">Rules stay, description goes, and the file shrinks</p>
+  <p>Audited <code>CLAUDE.md</code> read-only first, then cut it from 16,933 to 14,028 bytes (−17%) without losing a rule.
+    Fixed three stale facts and synced the guide HTML.</p>
+  <p>How the site looks now lives in the code and in note 01; <code>CLAUDE.md</code> keeps only what an AI must do.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>A two-phase brief: Phase 1 investigates and proposes, Phase 2 edits only after "do it"</li>
+  <li>Five suspected contradictions checked against the repo: three true, one partly, one false</li>
+  <li>§5 "The site" split into rules (kept) and description (cut, −2,410 bytes)</li>
+  <li>Block colours, layout and the sync rule merged into shorter forms</li>
+  <li>The §2 tree gained <code>build-index.mjs</code>, <code>.prog/</code>, <code>.research/</code> and <code>backlog-workflow/</code></li>
+  <li>Guide HTML synced; the guide PDF moved to <code>archive/</code> and no longer updated</li>
+  <li>Seven site details found that no note records</li>
+</ul>
+
+<h2 class="concept">Rule or description?</h2>
+<div class="keep">
+  <table>
+    <tr><th>Kind</th><th>Test</th><th>Example</th><th>Goes in</th></tr>
+    <tr><td><b>Rule</b></td><td>An AI must do it, or never do it</td><td>Rebuild the search index after a note changes</td><td><code>CLAUDE.md</code></td></tr>
+    <tr><td><b>Description</b></td><td>How something looks or behaves</td><td>Recently viewed slides open in 0.3 s</td><td>The code and the meta notes</td></tr>
+  </table>
+  <div class="callout concept"><b>Concept ·</b> A description in <code>CLAUDE.md</code> goes stale the moment the code changes.
+    A rule only goes stale when the intent does.</div>
+</div>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>Phase 1: baseline and evidence (read-only)</h3>
+  <div class="block local"><pre>wc -c CLAUDE.md                      <span class="cmt"># -c: bytes. 16,933; the result must be below this</span>
+wc -w CLAUDE.md                      <span class="cmt"># -w: words. 2,737, for the report</span>
+ls site/pages/ .prog/                <span class="cmt"># where Complete Tasks really lives</span>
+ls README.md site/build-index.mjs    <span class="cmt"># do the files the tree should list exist?</span>
+ls notes/fonts/                      <span class="cmt"># which fonts are bundled: only Inter</span>
+grep -n -i font notes/note-layout.css   <span class="cmt"># -n: line no., -i: any case; DejaVu → monospace</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3>Contradictions checked</h3>
+  <table>
+    <tr><th></th><th>Claim</th><th>Verdict</th><th>Fix</th></tr>
+    <tr><td>a</td><td>Complete Tasks in <code>site/pages/</code> and in <code>.prog/</code></td><td>True</td><td>Only <code>.prog/complete.html</code> exists; stale line cut</td></tr>
+    <tr><td>b</td><td>Tree lists README, still on the backlog</td><td>False</td><td>README exists; the backlog was stale instead</td></tr>
+    <tr><td>c</td><td><code>build-index.mjs</code> missing from the tree</td><td>True</td><td>Added</td></tr>
+    <tr><td>d</td><td>Private folders missing from the tree</td><td>True</td><td>One line for <code>.prog/</code> and <code>.research/</code>, one for <code>backlog-workflow/</code></td></tr>
+    <tr><td>e</td><td>All fonts seem bundled</td><td>Partly</td><td>Says DejaVu comes from the system</td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h3>Changes and their size</h3>
+  <table>
+    <tr><th>#</th><th>Change</th><th>Section</th><th>Bytes</th></tr>
+    <tr><td>1</td><td>"The site" cut to 7 rules; description points to note 01</td><td>§5</td><td>−2,410</td></tr>
+    <tr><td>2</td><td>Block table → one line of block → variable; "used for" lives in the CSS comments</td><td>§3</td><td>−320</td></tr>
+    <tr><td>3</td><td>Layout table → two sentences</td><td>§5</td><td>−250</td></tr>
+    <tr><td>4</td><td>Sync rule kept once, in §7</td><td>§6, §7</td><td>−180</td></tr>
+    <tr><td>5</td><td>Tree additions</td><td>§2</td><td>+210</td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>Phase 2: edit and verify</h3>
+  <div class="block local"><pre>node site/build-index.mjs              <span class="cmt"># the guide HTML changed: rebuild the search index</span>
+wc -c CLAUDE.md                        <span class="cmt"># 14,028: below the 16,933 baseline</span>
+git diff --stat                        <span class="cmt"># summary: 3 files, 37 insertions, 82 deletions</span>
+.claude/skills/memory-dump/check.sh    <span class="cmt"># must pass</span></pre></div>
+</div>
+<div class="callout best"><b>Best practice ·</b> Draft the new wording in a scratch file and measure it with <code>wc -c</code>
+  before proposing. Byte estimates then come from real text, not guesses.</div>
+
+<div class="keep">
+  <h3>Site details no note records yet</h3>
+  <ul class="check">
+    <li>Menu button of three chalk sticks; the search tile's diagonal stick</li>
+    <li>File buttons are 20:3; the search field is an inverted file button</li>
+    <li>Recently viewed is the menu's mirror image, newest first</li>
+    <li>Roadmap progress line, with planned modules outlined</li>
+    <li>Complete Tasks' look, and old items keeping <code>C12</code>, <code>C13</code>, <code>C16</code></li>
+    <li>Export is a small dark menu; Brave or Chrome match <code>render.sh</code>; mail is a possible option</li>
+    <li>The top-bar name is plain text, not a link</li>
+  </ul>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+<div class="bug">
+  <h4>Bug · grep with a context window failed</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>grep -o ".\{0,90\}word.\{0,90\}"</code> runs as ugrep here. On UTF-8 text it stops with
+      <code>ugrep: error: error at position 83 … exceeds complexity limits</code>.</dd>
+    <dt class="fix">FIX</dt><dd>Strip the tags in Python and slice the text around each match instead.</dd>
+  </dl>
+  <div class="block local"><pre>python3 -c '...re.sub(r"&lt;[^&gt;]+&gt;", " ", s)...'   <span class="cmt"># tags out, then slice around each hit</span></pre></div>
+</div>
+<div class="bug">
+  <h4>Bug · The pasted brief arrived cut short</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>The paste ended at step 8, so the constraints never arrived. One of them said: if a fix makes the
+      file grow, propose shorter wording. Change 5 added 210 bytes without that offer.</dd>
+    <dt class="fix">FIX</dt><dd>Spotted from a screenshot of the full brief and reported against each constraint. Nothing
+      else was broken: <code>chalk-pastel.css</code>, other notes and <code>archive/</code> stayed untouched.</dd>
+  </dl>
+</div>
+<div class="bug">
+  <h4>Bug · Stale git step in the backlog</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>The backlog's "how to work this list" still said "One commit per item … Push only when the
+      user says so", after the git rules changed.</dd>
+    <dt class="fix">FIX</dt><dd>It now says never commit <code>.prog/</code>, and any other git step follows the user's own preferences.</dd>
+  </dl>
+</div>
+
+<h2 class="paths">Where things live</h2>
+<table>
+  <tr><th>What</th><th>Path</th></tr>
+  <tr><td>The rules</td><td><code>CLAUDE.md</code></td></tr>
+  <tr><td>The guide, kept in sync</td><td><code>notes/00-chalk-book-guide.html</code> (the last PDF is in <code>archive/</code>)</td></tr>
+  <tr><td>How the site looks and behaves</td><td><code>site/</code> · <code>notes/meta-01-site-build.html</code></td></tr>
+  <tr><td>Drafts for measuring</td><td>the session's scratchpad, never the repo</td></tr>
+</table>
+
+<h2 class="best">Best practices</h2>
+<div class="cards">
+  <div><b>Investigate, then edit</b>A read-only phase with a proposal table lets the user cut changes before any file moves.</div>
+  <div><b>Measure the baseline</b>A hard size limit needs a number recorded before the first edit.</div>
+  <div><b>Verify every claim</b>Check suspected contradictions against the repo; one turned out false.</div>
+  <div><b>Ask before costly steps</b>Re-rendering the guide PDF waited for a decision; it was archived instead.</div>
+</div>
+
+<p class="part-of">Part of Chalk Book · follows
+  <a href="../index.html#meta-03-readme-git-rules" target="_top">03 README &amp; Git Rules</a> · site details in
+  <a href="../index.html#meta-01-site-build" target="_top">01 Site &amp; Workflow Build</a></p>
+
+<script src="note.js"></script>
+</body>
+</html>
