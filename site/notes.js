@@ -105,6 +105,12 @@ window.CHALK_NOTES = [
     skills: ["claude code", "skills", "plugins", "skillspector", "prompt injection", "ai safety", "supply chain", "docker", "uv", "pacman", "reflector"],
   },
   {
+    id: "claude-code-02-untrusted-content-triage", project: "claude-code", n: 2, date: "2026-10-13",
+    title: "Untrusted Content Triage",
+    summary: "Claim versus reach: green proceeds, amber asks, red is refused and logged; a CLAUDE.md layer plus deny/ask rules.",
+    skills: ["claude code", "prompt injection", "ai safety", "claude.md", "settings.json", "permissions", "sandbox", "grep", "unicode"],
+  },
+  {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",
     title: "Chalk Book Guide",
     summary: "Purpose, structure and conventions of the chalk book. Read-only copy of CLAUDE.md.",
