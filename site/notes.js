@@ -69,6 +69,12 @@ window.CHALK_NOTES = [
     skills: ["git", "github", "https", "personal access token", "xxd", "pacman"],
   },
   {
+    id: "pokedex-02-project-story", project: "pokedex", n: 2, date: "2026-10-13",
+    title: "Project Story & Private Notes",
+    summary: "personal-notes/ renamed to .prog/ via .git/info/exclude; story.md tells the original intent and six direction changes.",
+    skills: ["git", ".git/info/exclude", "sed", "grep", "markdown", "project history"],
+  },
+  {
     id: "meta-01-site-build", project: "meta", n: 1, date: "2026-10-12",
     title: "Site & Workflow Build",
     summary: "Rename to Chalk Book, memory-dump pointer skill, HTML notes, dark static site with search, private pages, push.",
