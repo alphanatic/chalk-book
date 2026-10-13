@@ -21,6 +21,7 @@ window.CHALK_PROJECTS = {
     ],
   },
   "pokedex": { name: "Pokédex",    color: "sky" },
+  "claude-code": { name: "Claude Code", color: "coral" },
   "meta":    { name: "Chalk Book", color: "butter" },
 };
 
@@ -90,6 +91,12 @@ window.CHALK_NOTES = [
     title: "CLAUDE.md Cleanup",
     summary: "Read-only audit, then CLAUDE.md cut 17% to rules only; stale facts fixed and the guide synced.",
     skills: ["claude.md", "documentation", "wc", "grep", "ugrep", "audit", "claude code"],
+  },
+  {
+    id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
+    title: "Skill & Plugin Vetting",
+    summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
+    skills: ["claude code", "skills", "plugins", "skillspector", "prompt injection", "ai safety", "supply chain", "docker", "uv", "pacman", "reflector"],
   },
   {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",

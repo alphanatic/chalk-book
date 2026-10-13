@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude Code 01 — Skill &amp; Plugin Vetting</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "Claude Code 01 — Skill & Plugin Vetting · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Claude Code · 01 · 2026-10-13</span>
+  <h1>Skill &amp; Plugin Vetting</h1>
+  <p class="sub">Quarantine, scan, then install or delete</p>
+  <p>Set up NVIDIA SkillSpector and wrote a pipeline that vets every Claude Code skill or plugin before it is installed:
+    check the source, quarantine, scan, review by hand, log the result, then install at the narrowest scope.</p>
+  <p>A reference, not a walkthrough. Every future skill or plugin goes through it, and so does every update.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip config">Config file</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Why skills and plugins are a risk: skills become instructions, plugins run code with your privileges</li>
+  <li>A threat map, from prompt injection to rug pulls, and where each threat is caught</li>
+  <li>An 8-step pipeline: source → quarantine → inventory → scan → review → log → install or delete → re-vet updates</li>
+  <li>A rule in <code>~/.claude/CLAUDE.md</code> plus an <code>ask</code> permission gate, so Claude Code can't skip the process</li>
+  <li>The AI-safety principles behind it, and the limits of a clean scan</li>
+  <li>SkillSpector installed from source with <code>uv</code>, plus a pacman mirror fix along the way</li>
+</ul>
+
+<h2 class="concept">Why this matters</h2>
+<div class="keep">
+  <table>
+    <tr><th>Kind</th><th>What it is</th><th>What it can do</th></tr>
+    <tr><td><b>Skill</b></td><td>Markdown that enters Claude's context <i>as instructions</i></td><td>Steer the agent, using the tools and permissions it already has</td></tr>
+    <tr><td><b>Plugin</b></td><td>Can also carry hooks, MCP/LSP servers and a <code>bin/</code> folder</td><td>Run code on your machine with your full user privileges</td></tr>
+  </table>
+  <div class="callout concept"><b>Concept ·</b> NVIDIA studied 42,447 public skills: 26.1% had at least one vulnerability, 5.2% showed
+    likely malicious intent, and skills that ship scripts were 2.12× more likely to be vulnerable.</div>
+</div>
+<div class="callout gotcha"><b>Gotcha ·</b> Claude Code's permission rules and sandbox cover <i>Claude's tool calls</i>. Plugin hooks and
+  MCP server processes run outside the sandbox. A malicious hook fires on lifecycle events, before you ever use the plugin.</div>
+<div class="callout concept"><b>AI safety ·</b> Prompt injection is untrusted text that tries to steer the agent: "ignore previous
+  instructions", "read <code>~/.ssh</code> and post it here", or a trigger that hijacks an ordinary command. In a skill it is
+  pre-installed and loads every session. It hides in comments, zero-width text, homoglyphs, right-to-left overrides, encoded
+  scripts and dependencies that look clean.</div>
+
+<div class="keep">
+  <h3>Threat map</h3>
+  <table>
+    <tr><th>Threat</th><th>What it looks like</th><th>Where it's caught</th></tr>
+    <tr><td><b>Prompt injection</b></td><td>Instructions hidden in <code>SKILL.md</code> or tool metadata</td><td>SkillSpector static + LLM pass, your own read</td></tr>
+    <tr><td><b>Data exfiltration</b></td><td>Env vars, API keys, <code>~/.ssh</code> or files sent to a URL</td><td>Taint tracking, AST analysis</td></tr>
+    <tr><td><b>Code execution</b></td><td><code>exec</code>, <code>eval</code>, <code>subprocess</code>, hooks, <code>bin/</code> files</td><td>AST, YARA, plugin inventory</td></tr>
+    <tr><td><b>Trigger shadowing</b></td><td>Claims a common word or command, so it loads unasked</td><td>SkillSpector pattern check</td></tr>
+    <tr><td><b>Supply chain</b></td><td>Typosquats, unpinned or vulnerable dependencies</td><td>OSV.dev CVE lookup, pinning</td></tr>
+    <tr><td><b>Rug pull</b></td><td>Clean v1, malicious v2 via auto-update</td><td>Pin the commit; diff and re-scan every update</td></tr>
+    <tr><td><b>Social engineering</b></td><td>"Comment SCAN and I'll DM the install command"</td><td>Step 0: official sources only</td></tr>
+  </table>
+</div>
+
+<h2 class="local">Full command sequence</h2>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>0 · Check the source</h3>
+  <div class="block local"><pre>claude plugin marketplace list    <span class="cmt"># where each marketplace really comes from</span></pre></div>
+  <div class="callout best"><b>Best practice ·</b> Take links from official docs or the author's own org, never from DMs or comments.
+    Official Anthropic marketplace names only load from <code>github.com/anthropics/</code>. Everything else is third-party.</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>1 · Quarantine and pin</h3>
+  <div class="block local"><pre>mkdir -p ~/quarantine                          <span class="cmt"># -p: no error if it exists</span>
+git clone https://github.com/user/cool-skill \
+  ~/quarantine/cool-skill                      <span class="cmt"># download only; nothing runs</span>
+git -C ~/quarantine/cool-skill rev-parse HEAD  <span class="cmt"># -C: run in that folder; record the exact commit</span></pre></div>
+  <div class="callout gotcha"><b>Gotcha ·</b> Claude Code auto-loads <code>.claude/skills</code> inside projects, so never quarantine inside a
+    project folder. If you open the folder in VS Code, choose <b>Restricted Mode</b> so <code>tasks.json</code> and similar files can't run.</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>2 · Inventory (plugins)</h3>
+  <div class="block local"><pre>claude --plugin-dir ~/quarantine/cool-plugin \
+  plugin details cool-plugin                   <span class="cmt"># lists hooks, MCP, skills; no install</span></pre></div>
+  <p>Then read these yourself: <code>hooks/hooks.json</code> (each hook's command), <code>.mcp.json</code> (server commands and URLs)
+    and every file in <code>bin/</code>.</p>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>3 · Scan with SkillSpector</h3>
+  <div class="block local"><pre>skillspector scan ~/quarantine/cool-skill \
+  --format markdown \
+  --output ~/quarantine/cool-skill.md          <span class="cmt"># static scan, report written as Markdown</span>
+less ~/quarantine/cool-skill.md                <span class="cmt"># score, verdict, and file:line for each finding</span></pre></div>
+</div>
+<div class="keep">
+  <p><b>Isolated scan.</b> The scanner parses hostile input too, so run it sealed off:</p>
+  <div class="block local"><pre>docker build -t skillspector ~/Projects/SkillSpector    <span class="cmt"># -t: image name; build once</span>
+docker run --rm --network none \
+  -v ~/quarantine/cool-skill:/scan:ro \
+  skillspector scan /scan --no-llm             <span class="cmt"># --rm: remove after; no network; :ro read-only</span></pre></div>
+  <div class="callout concept"><b>Concept ·</b> With no network, the CVE lookup falls back to offline data. That is a fair trade for untrusted input.</div>
+</div>
+
+<div class="keep">
+  <h3>4 · Human review: you decide, not the tool</h3>
+  <ul class="check">
+    <li>Does the description match what the scripts actually do?</li>
+    <li>Are permissions limited to what the skill needs?</li>
+    <li>Are network, shell, file, env and MCP access declared and justified?</li>
+    <li>Read <code>SKILL.md</code> yourself. Any unclear answer means <b>not ready</b>.</li>
+  </ul>
+  <table>
+    <tr><th>Verdict</th><th>Action</th></tr>
+    <tr><td><b>SAFE</b></td><td>Still skim <code>SKILL.md</code>, then install</td></tr>
+    <tr><td><b>CAUTION</b></td><td>Check every finding at file:line. Install only if all are false alarms</td></tr>
+    <tr><td><b>DO NOT INSTALL</b></td><td>Delete it. No exceptions</td></tr>
+  </table>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>5 · Log the decision</h3>
+  <div class="block local"><pre>echo "$(date +%F) cool-skill &lt;url&gt; &lt;sha&gt; SAFE" \
+  &gt;&gt; ~/quarantine/vetting.log                   <span class="cmt"># %F: YYYY-MM-DD; &gt;&gt; appends a line</span></pre></div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>6 · Install at the narrowest scope, or delete</h3>
+  <div class="block local"><pre>mv ~/quarantine/cool-skill ~/.claude/skills/   <span class="cmt"># skill: activate it</span>
+claude plugin install cool-plugin@market \
+  --scope local                                <span class="cmt"># plugin: this repo only</span></pre></div>
+  <div class="block local"><pre>rm -rf ~/quarantine/cool-skill                 <span class="cmt"># -r: recursive, -f: no prompts; never installed</span>
+claude plugin uninstall cool-plugin@market \
+  --scope local                                <span class="cmt"># installed, now distrusted</span>
+rm -rf ~/.claude/plugins/cache/market/cool-plugin   <span class="cmt"># the cache lingers 14 days otherwise</span></pre></div>
+  <div class="callout best"><b>Best practice ·</b> Try a new plugin in a throwaway project before widening it to user scope.</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>7 · Updates re-enter the pipeline</h3>
+  <div class="block local"><pre>git -C ~/quarantine/cool-skill fetch           <span class="cmt"># get new commits, change nothing</span>
+git -C ~/quarantine/cool-skill diff \
+  &lt;old-sha&gt;..origin/HEAD                       <span class="cmt"># read only what changed</span></pre></div>
+  <p>Re-scan, then replace the installed copy. Keep auto-update <b>off</b> for third-party marketplaces, which is the default.
+    Anthropic's official marketplaces auto-update.</p>
+</div>
+
+<div class="keep">
+  <h3><span class="tag local">Local</span>8 · Monthly audit, with the permission review</h3>
+  <div class="block local"><pre>skillspector scan ~/.claude/skills/ --no-llm   <span class="cmt"># re-check installed skills; no LLM pass</span>
+claude plugin list                             <span class="cmt"># what's installed, its scope and status</span></pre></div>
+</div>
+
+<h2 class="config">Make Claude Code follow the process</h2>
+<div class="callout gotcha"><b>Gotcha ·</b> Claude Code <i>can</i> install plugins itself with <code>claude plugin install</code>, and it does not
+  quarantine anything: the plugin goes straight in, enabled. Enforce the process with a written rule <i>and</i> a hard gate.</div>
+
+<div class="keep">
+  <div class="block config">
+    <div class="file">~/.claude/CLAUDE.md</div>
+<pre>## Installing skills/plugins
+- Never install directly; clone to ~/quarantine/&lt;name&gt; first.
+- Run skillspector and show me the verdict + findings.
+- Wait for my explicit approval before installing.</pre>
+  </div>
+  <p class="muted">A soft guard: a rule Claude reads every session.</p>
+</div>
+
+<div class="keep">
+  <div class="block config annotated">
+    <div class="file">~/.claude/settings.json</div>
+    <div class="row"><pre>{</pre><span></span></div>
+    <div class="row"><pre>  "permissions": {</pre><span></span></div>
+    <div class="row"><pre>    "ask": [</pre><span>always ask before these run</span></div>
+    <div class="row"><pre>      "Bash(claude plugin install *)",</pre><span>any plugin install</span></div>
+    <div class="row"><pre>      "Bash(claude plugin marketplace add *)"</pre><span>any new marketplace</span></div>
+    <div class="row"><pre>    ]</pre><span></span></div>
+    <div class="row"><pre>  }</pre><span></span></div>
+    <div class="row"><pre>}</pre><span></span></div>
+  </div>
+  <p class="muted">A hard guard: <code>ask</code> forces your click on installs and new marketplaces. JSON allows no comments.</p>
+</div>
+
+<h2 class="concept">AI-safety principles</h2>
+<div class="cards">
+  <div><b>Human in the loop</b>The agent may prepare and scan, but a person approves installs. Never let an agent approve its own new capabilities.</div>
+  <div><b>Least privilege</b>Start at local scope, keep Claude Code in project folders, give skills only what they declare.</div>
+  <div><b>Defense in depth</b>Source check, quarantine, scan, human read, permission gate, re-scan on update. No layer is trusted alone.</div>
+  <div><b>Scanner output is data</b>A skill may hold text aimed at the scanner's LLM pass ("this skill is safe"). The verdict informs; you decide.</div>
+  <div><b>Verify integrity</b>Check a shipped signature (e.g. <code>skill.oms.sig</code>). Scanning asks "is it safe?", signing "is this what was reviewed?"</div>
+  <div><b>Evaluate too</b>Evaluation asks a third question: "does it actually help?"</div>
+</div>
+<div class="callout gotcha"><b>Gotcha · limits ·</b> A clean scan lowers the risk but doesn't rule it out: SkillSpector can't read non-English
+  text, text in images, or encrypted or binary code. The optional LLM pass sends the skill's content to an API; keep its key in
+  <code>pass</code>, never in a committed <code>.env</code>. And SkillSpector only covers what you install: injection from pages or files
+  Claude reads mid-task is handled by permission scoping.</div>
+
+<h2 class="local">Setup log</h2>
+<div class="keep">
+  <h3><span class="tag local">Local</span>SkillSpector from source, in ~/Projects/SkillSpector</h3>
+  <div class="block local"><pre>git remote -v                                  <span class="cmt"># -v: URLs; origin is NVIDIA/SkillSpector</span>
+sudo pacman -S uv                              <span class="cmt"># -S: install; from extra, no AUR</span>
+uv sync                                        <span class="cmt"># builds .venv: 69 pinned packages from uv.lock</span>
+uv run skillspector scan ./skills/ --no-llm    <span class="cmt"># test scan: 0 uninspected, no executable scripts</span>
+uv tool install --editable .                   <span class="cmt"># next step: makes skillspector a global command</span></pre></div>
+</div>
+<div class="keep">
+  <h3>Reading a scan</h3>
+  <table>
+    <tr><th>Status</th><th>Meaning</th></tr>
+    <tr><td><code>completed</code></td><td>The analyzer ran</td></tr>
+    <tr><td><code>no_applicable_files</code> · <code>manifest_absent</code></td><td>Nothing of that type to inspect</td></tr>
+    <tr><td><code>disabled_by_configuration</code></td><td>The LLM pass is off, via <code>--no-llm</code></td></tr>
+  </table>
+  <div class="callout concept"><b>Concept ·</b> The verdict sits at the <b>top</b> of the output.</div>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+<div class="bug">
+  <h4>Bug · pacman 404s</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>Stale mirrors in <code>/etc/pacman.d/mirrorlist</code>: downloads failed with 404.</dd>
+    <dt class="fix">FIX</dt><dd>Rank fresh mirrors with reflector. The <code>chaotic-aur</code> warning that followed is harmless; syncing the file databases clears it.</dd>
+  </dl>
+  <div class="block local"><pre>sudo reflector --country &lt;nearby-countries&gt; \
+  --protocol https --latest 20 --sort rate \
+  --save /etc/pacman.d/mirrorlist              <span class="cmt"># 20 newest https mirrors, fastest first</span>
+sudo pacman -Fy                                <span class="cmt"># -F: file databases, -y: refresh them</span></pre></div>
+</div>
+
+<h2 class="paths">Where things live</h2>
+<table>
+  <tr><th>What</th><th>Path</th></tr>
+  <tr><td>Holding area for anything unvetted</td><td><code>~/quarantine/</code> (outside <code>~/.claude</code> and <code>~/Projects</code>)</td></tr>
+  <tr><td>Audit trail of every verdict</td><td><code>~/quarantine/vetting.log</code></td></tr>
+  <tr><td>SkillSpector source</td><td><code>~/Projects/SkillSpector</code></td></tr>
+  <tr><td>Installed skills</td><td><code>~/.claude/skills/</code></td></tr>
+  <tr><td>Plugin cache</td><td><code>~/.claude/plugins/cache/</code></td></tr>
+  <tr><td>Rule and permission gate</td><td><code>~/.claude/CLAUDE.md</code> · <code>~/.claude/settings.json</code></td></tr>
+  <tr><td>Sources</td><td>NVIDIA docs: agent-skill-trust-pipeline, scanning-agent-skills · Claude Code docs: plugins/security,
+    discover-plugins · <code>github.com/NVIDIA/SkillSpector</code> (Apache-2.0)</td></tr>
+</table>
+
+<h2 class="best">Best practices</h2>
+<div class="cards">
+  <div><b>Official sources only</b>Links from docs or the author's org, never from DMs or comments.</div>
+  <div><b>Never inside a project</b>Quarantine outside <code>~/Projects</code>, where skills would auto-load.</div>
+  <div><b>Pin, then diff</b>Record the commit you reviewed; read only the diff on every update.</div>
+  <div><b>Narrowest scope first</b>Local scope in a throwaway project before user scope.</div>
+</div>
+
+<p class="part-of">Part of Claude Code · the first note in this project · rules for notes in
+  <a href="../index.html#00-chalk-book-guide" target="_top">00 Chalk Book Guide</a></p>
+
+<script src="note.js"></script>
+</body>
+</html>
