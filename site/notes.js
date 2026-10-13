@@ -112,6 +112,12 @@ window.CHALK_NOTES = [
     skills: ["claude code", "prompt injection", "ai safety", "claude.md", "settings.json", "permissions", "sandbox", "grep", "unicode"],
   },
   {
+    id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13",
+    title: "Footer Links & Tabs",
+    summary: "Same .map() pattern, different job: tabs set state with onClick, the footer navigates via the URL hash.",
+    skills: ["javascript", "react", "map", "keys", "useeffect", "hashchange", "aria-current", "jsx", "eslint"],
+  },
+  {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",
     title: "Chalk Book Guide",
     summary: "Purpose, structure and conventions of the chalk book. Read-only copy of CLAUDE.md.",

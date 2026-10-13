@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript 01 — Footer Links &amp; Tabs</title>
+<link rel="stylesheet" href="../chalk-pastel.css">
+<link rel="stylesheet" href="note-layout.css">
+<style>
+  @page { @bottom-center { content: "JavaScript 01 — Footer Links & Tabs · " counter(page) " / " counter(pages); } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">JavaScript · 01 · 2026-10-13</span>
+  <h1>Footer Links &amp; Tabs</h1>
+  <p class="sub">Same <code>.map()</code> pattern, a different job</p>
+  <p>Added a footer and a Backlog page to the React todo app, then compared <code>Footer.jsx</code> with <code>Tabs.jsx</code>.
+    Both turn a list into elements with <code>.map()</code>. The tabs change state; the footer navigates through the URL.</p>
+  <p>The Backlog page holds 12 graded JavaScript fixes from the code review, each one to write by hand.</p>
+</header>
+
+<div class="legend">
+  <span class="chip local">Local — your machine</span>
+  <span class="chip config">Code file</span>
+  <span class="chip concept">Concept</span>
+  <span class="chip gotcha">Gotcha</span>
+  <span class="chip best">Best practice</span>
+  <span class="chip paths">Paths</span>
+</div>
+
+<h2 class="best">What we covered</h2>
+<ul class="check">
+  <li>Built <code>Footer.jsx</code>: an array of link objects, mapped to <code>&lt;li&gt;&lt;a&gt;</code> elements</li>
+  <li>Switched pages on <code>#backlog</code> in <code>App.jsx</code> with a <code>hashchange</code> listener</li>
+  <li>Compared the footer with the tabs: one shared pattern, five differences</li>
+  <li>Buttons for actions, links for navigation</li>
+  <li><code>aria-current</code> vs a class name for "you are here"</li>
+  <li>Keys from the data (<code>link.label</code>) vs keys from position (<code>tabIndex</code>)</li>
+</ul>
+
+<h2 class="local">Run it</h2>
+<div class="keep">
+  <h3><span class="tag local">Local</span>Install, start, lint</h3>
+  <div class="block local"><pre>cd ~/Projects/todo-app
+npm install      <span class="cmt"># install react, vite and eslint into node_modules/</span>
+npm run dev      <span class="cmt"># start Vite on http://localhost:5173, reloads on save</span>
+npx eslint .     <span class="cmt"># lint every .js/.jsx file; prop-types errors are backlog item 12</span></pre></div>
+  <p class="muted">Open <code>http://localhost:5173/#backlog</code> for the Backlog page. npm warned that esbuild's install
+    script was blocked; Vite still ran.</p>
+</div>
+
+<h2 class="concept">The shared pattern</h2>
+<div class="keep">
+  <div class="chain"><span>An array</span><i>→</i><span>.map(item =&gt; …)</span><i>→</i><span>One element per item</span><i>→</i><span>React renders the list</span></div>
+  <div class="callout concept"><b>Concept ·</b> Inside the <code>.map()</code> callback, both compute a value for the item first
+    (<code>numOfTasks</code>, <code>isExternal</code>), then <code>return</code> its JSX. Both mark the active item with a ternary
+    (<code>? :</code>).</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag config">Code</span>Tabs.jsx, the key lines</h3>
+  <div class="block config annotated wide">
+    <div class="file">src/components/Tabs.jsx</div>
+    <div class="row"><pre>const tabs = ['All', 'Open', 'Completed']</pre><span>array of strings</span></div>
+    <div class="row"><pre>tabs.map((tab, tabIndex) =&gt; {</pre><span>element + its position</span></div>
+    <div class="row"><pre>  const numOfTasks = …</pre><span>computed per tab</span></div>
+    <div class="row"><pre>  return &lt;button</pre><span>a button: an action</span></div>
+    <div class="row"><pre>    onClick={() =&gt; { setSelectedTab(tab) }}</pre><span>changes App's state</span></div>
+    <div class="row"><pre>    key={tabIndex}</pre><span>key = position</span></div>
+    <div class="row"><pre>    className={… (tab === selectedTab ? ' tab-selected' : ' ')}&gt;</pre><span>active = a class</span></div>
+  </div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag config">Code</span>Footer.jsx, the key lines</h3>
+  <div class="block config annotated wide">
+    <div class="file">src/components/Footer.jsx</div>
+    <div class="row"><pre>const links = [</pre><span>array of objects</span></div>
+    <div class="row"><pre>  { label: 'Home', href: '#' },</pre><span>two values per item</span></div>
+    <div class="row"><pre>  { label: 'Backlog', href: '#backlog' }, …</pre><span>read as link.label, link.href</span></div>
+    <div class="row"><pre>links.map((link) =&gt; {</pre><span>element only, no index needed</span></div>
+    <div class="row"><pre>  const isExternal = link.href.startsWith('http')</pre><span>computed per link</span></div>
+    <div class="row"><pre>  return &lt;li key={link.label}&gt;</pre><span>key = a value from the data</span></div>
+    <div class="row"><pre>    &lt;a href={link.href}</pre><span>a link: the browser changes the URL</span></div>
+    <div class="row"><pre>      aria-current={isCurrent(link.href, page) ? 'page' : undefined}&gt;</pre><span>active = an attribute</span></div>
+  </div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Side by side</h2>
+  <table>
+    <tr><th>Aspect</th><th>Tabs.jsx</th><th>Footer.jsx</th></tr>
+    <tr><td>Data</td><td>array of strings</td><td>array of objects: <code>label</code>, <code>href</code></td></tr>
+    <tr><td>Key</td><td><code>tabIndex</code>, the position</td><td><code>link.label</code>, a value</td></tr>
+    <tr><td>Element</td><td><code>&lt;button&gt;</code></td><td><code>&lt;a&gt;</code> inside <code>&lt;li&gt;</code></td></tr>
+    <tr><td>On click</td><td>calls <code>setSelectedTab(tab)</code></td><td>browser sets the URL hash</td></tr>
+    <tr><td>Who sets state</td><td>the child, through a setter prop</td><td>App, through a <code>hashchange</code> listener</td></tr>
+    <tr><td>Props in</td><td><code>todos</code>, <code>selectedTab</code>, <code>setSelectedTab</code></td><td><code>page</code> only, read-only</td></tr>
+    <tr><td>Active marker</td><td>class <code>tab-selected</code></td><td>attribute <code>aria-current="page"</code></td></tr>
+    <tr><td>Active check</td><td><code>tab === selectedTab</code></td><td><code>isCurrent(href, page)</code> helper</td></tr>
+  </table>
+</div>
+
+<h2 class="concept">Two ways a click changes the page</h2>
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>Tabs change state directly</h3>
+  <div class="chain"><span>Click "Open"</span><i>→</i><span>setSelectedTab('Open')</span><i>→</i><span>App re-renders</span><i>→</i><span>TodoList filters</span></div>
+</div>
+<div class="keep">
+  <h3><span class="tag concept">Concept</span>The footer goes through the URL</h3>
+  <div class="chain"><span>Click "Backlog"</span><i>→</i><span>URL ends in #backlog</span><i>→</i><span>hashchange event</span><i>→</i><span>setPage(hash)</span><i>→</i><span>App renders Backlog</span></div>
+  <div class="callout concept"><b>Concept ·</b> Buttons act, links go. A button runs code on this page. A link goes somewhere:
+    the URL changes, so Back works and the page can be bookmarked.</div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag config">Code</span>App.jsx: listening for the URL</h3>
+  <div class="block config annotated wide">
+    <div class="file">src/App.jsx</div>
+    <div class="row"><pre>const [page, setPage] = useState(window.location.hash)</pre><span>start from the current URL</span></div>
+    <div class="row"><pre>useEffect(() =&gt; {</pre><span>runs after the first render</span></div>
+    <div class="row"><pre>  function handleHashChange() {</pre><span>called on every hash change</span></div>
+    <div class="row"><pre>    setPage(window.location.hash)</pre><span>new state → re-render</span></div>
+    <div class="row"><pre>    window.scrollTo(0, 0)</pre><span>start the new page at the top</span></div>
+    <div class="row"><pre>  }</pre><span></span></div>
+    <div class="row"><pre>  window.addEventListener('hashchange', handleHashChange)</pre><span>start listening</span></div>
+    <div class="row"><pre>  return () =&gt; window.removeEventListener('hashchange', handleHashChange)</pre><span>cleanup when App unmounts</span></div>
+    <div class="row"><pre>}, [])</pre><span>[]: set up once</span></div>
+    <div class="row"><pre>if (page === '#backlog') { return … &lt;Backlog /&gt; … }</pre><span>early return: the other page</span></div>
+  </div>
+</div>
+
+<div class="keep">
+  <h3><span class="tag config">Code</span>Footer.jsx: which link is current</h3>
+  <div class="block config annotated wide">
+    <div class="file">src/components/Footer.jsx</div>
+    <div class="row"><pre>function isCurrent(href, page) {</pre><span>true for the link of the page shown</span></div>
+    <div class="row"><pre>  if (href === '#') { return page !== '#backlog' }</pre><span>Home: any hash that isn't another page</span></div>
+    <div class="row"><pre>  return href === page</pre><span>others: an exact match</span></div>
+    <div class="row"><pre>}</pre><span></span></div>
+  </div>
+  <div class="callout gotcha"><b>Gotcha ·</b> Home has two URLs: no hash at all (<code>''</code>) and <code>'#'</code>. A plain
+    <code>href === page</code> misses the first, so Home needs its own rule.</div>
+  <div class="callout concept"><b>Concept ·</b> <code>aria-current="page"</code> tells screen readers "you are here", and CSS can
+    target it too: <code>.main-footer-btn[aria-current]</code>. A class name only means something to CSS.</div>
+</div>
+
+<div class="keep">
+  <div class="callout gotcha"><b>Gotcha ·</b> On a page switched by the hash, an in-page link like <code>&lt;a href="#todo-ids"&gt;</code>
+    changes the hash and leaves the page. The Backlog overview stops that with <code>e.preventDefault()</code> and scrolls with
+    <code>scrollIntoView()</code> instead.</div>
+</div>
+
+<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+<div class="bug">
+  <h4>Bug · footer links off centre</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd><code>fanta.css</code> gives every <code>ul</code> <code>padding-left: 1rem</code>. The footer's
+      <code>.main-footer ul</code> rule didn't set padding, so that rule still applied. Caught while reading FantaCSS.</dd>
+    <dt class="fix">FIX</dt><dd>Set the padding in the more specific rule; <code>.main-footer ul</code> beats plain <code>ul</code>.</dd>
+  </dl>
+  <div class="block config"><div class="file">src/index.css</div><pre>.main-footer ul {
+  padding: 0;
+}</pre></div>
+</div>
+
+<div class="bug">
+  <h4>Bug · apostrophe in JSX text</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>"you're" written as plain text inside JSX in <code>Backlog.jsx</code>. ESLint:
+      <code>`'` can be escaped with `&amp;apos;`, `&amp;lsquo;`, `&amp;#39;`, `&amp;rsquo;`  react/no-unescaped-entities</code></dd>
+    <dt class="fix">FIX</dt><dd>Reworded to "you are". <code>&amp;apos;</code> would work too. Apostrophes inside JavaScript strings are fine.</dd>
+  </dl>
+  <div class="block local"><pre>npx eslint .    <span class="cmt"># re-run: only the 21 prop-types errors remain</span></pre></div>
+</div>
+
+<div class="keep">
+  <h2 class="paths">Where things live</h2>
+  <table>
+    <tr><th>What</th><th>Path</th></tr>
+    <tr><td>Footer component</td><td><code>src/components/Footer.jsx</code></td></tr>
+    <tr><td>Tabs component</td><td><code>src/components/Tabs.jsx</code></td></tr>
+    <tr><td>Page switch and listener</td><td><code>src/App.jsx</code></td></tr>
+    <tr><td>Backlog page</td><td><code>src/components/Backlog.jsx</code></td></tr>
+    <tr><td>Backlog items: rank, grade, status</td><td><code>src/backlog.js</code></td></tr>
+    <tr><td>Footer styles</td><td><code>src/index.css</code></td></tr>
+    <tr><td>Backlog styles</td><td><code>src/backlog.css</code></td></tr>
+  </table>
+</div>
+
+<h2 class="best">Best practices</h2>
+<div class="cards">
+  <div><b>Keys from the data</b>Use a value that belongs to the item, like a label or an id, not its position.</div>
+  <div><b>Buttons act, links go</b><code>&lt;button&gt;</code> for actions on this page, <code>&lt;a href&gt;</code> to go somewhere.</div>
+  <div><b>Clean up listeners</b>Return a function from <code>useEffect</code> that removes what it added.</div>
+  <div><b>One owner per state</b>App owns <code>page</code>; the footer only reads it.</div>
+</div>
+
+<p class="part-of">Part of JavaScript · the todo app built from the smoljames React tutorial. Backlog item 2, todo ids,
+  builds on the keys rule here.</p>
+
+<script src="note.js"></script>
+</body>
+</html>
