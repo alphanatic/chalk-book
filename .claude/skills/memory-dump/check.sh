@@ -77,8 +77,11 @@ for (const n of window.CHALK_NOTES) {
 }
 EOF
 
+echo "9. Viewport"
+grep -L 'name="viewport"' notes/*.html | sed 's/$/:1/' | report "no viewport tag: phones show it zoomed out" || true
+
 if [ "${1:-}" = "--render" ]; then
-  echo "9. Render"
+  echo "10. Render"
   changed=$( { git diff --name-only HEAD -- 'notes/*.html'; git ls-files --others --exclude-standard -- 'notes/*.html'; } | sort -u)
   [ -n "$changed" ] || echo "  no changed notes"
   for f in $changed; do
