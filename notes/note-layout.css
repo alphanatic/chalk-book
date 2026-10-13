@@ -129,6 +129,7 @@ td:first-child { font-weight: 600; }
 
 /* Best-practice cards: a short bold title, then one line. .four = four narrow columns */
 .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.cards.three { grid-template-columns: repeat(3, 1fr); }
 .cards.four { grid-template-columns: repeat(4, 1fr); }
 .cards > div { background: var(--c-bg, var(--mint-bg)); border: 1px solid var(--c, var(--mint)); border-radius: 7px;
   padding: 8px 11px; font-size: 8.5pt; break-inside: avoid; }
@@ -148,4 +149,17 @@ mark.chalk-hit { background: var(--peach); color: var(--ink); border-radius: 2px
   :root { color-scheme: dark; }          /* matches the site, so the frame around the note stays see-through */
   html { background: linear-gradient(transparent, transparent); }   /* see-through, and stops body's paper spreading to the edges */
   body { max-width: 210mm; min-height: calc(100vh - 48px); margin: 24px auto; }
+}
+
+/* ── On a phone: one column and 16px sides. Screen only, so PDFs stay exactly as they are ── */
+@media screen and (max-width: 600px) {
+  body { padding: 0 16px; margin: 0 auto; min-height: 100vh; }
+  .hero { margin: 0 -16px 20px; padding: 24px 16px 22px; }
+  h1 { font-size: 20pt; }
+  .hero p { max-width: none; }
+  .two, .cards, .cards.three, .cards.four { grid-template-columns: 1fr; }
+  .annotated .row, .annotated.wide .row { grid-template-columns: 1fr; gap: 0; }
+  .annotated .row span:not(:empty) { display: block; padding: 0 0 4px 12px; }    /* the note sits under its line */
+  pre { overflow-wrap: anywhere; }                                      /* long paths and UUIDs break too */
+  table { display: block; overflow-x: auto; }                          /* wide tables scroll in their own box */
 }
