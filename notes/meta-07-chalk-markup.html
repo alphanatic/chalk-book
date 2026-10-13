@@ -1,0 +1,121 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Notes as compact text, built in the browser
+Replaced each note's hand-written HTML with chalk markup, a Markdown-like text that `note.js` turns into the same page. Piloted on one note, then all 18 were converted and checked pixel by pixel.
+
+Notes are 34% smaller to read and a new note is far less to write; the site, PDFs and search work as before.
+
+## What we covered
+- Measured where a note's bytes go: 39% tags, 4% comment padding, about 52% plain text
+- Chose Markdown-in-HTML over lean HTML (estimated 61% versus 81% of today's size)
+- A renderer in `notes/note.js`: header, legend and footer made from `site/notes.js` and the page
+- Pilot on `tinker-town-04`: 9,761 → 5,558 bytes, all 3 pages pixel-identical
+- A converter turned the other 17 notes; anything it couldn't say exactly went through as raw HTML
+- Every note checked: same page count, every page identical, same PDF text, same search words
+- `build-index.mjs` indexes the markup; template, `SKILL.md`, `CLAUDE.md` and the guide updated
+
+## Where the bytes went {concept}
+| Part of a note | Share | Now
+| Tags and attributes | 39% | Mostly gone: headings, lists, blocks and tables are markup
+| Comment padding in code | 4% | Two spaces; `note.js` lines comments up
+| Head, legend, indentation, entities | 11% | Made by `note.js`, or not needed inside the script
+| Plain text | 52% | Unchanged: the floor
+
+## Full command sequence
+
+### Local · Baseline: render every note before touching it
+```local
+.claude/skills/memory-dump/render.sh notes/<n>.html $B  # PDF of the old note
+pdftoppm -r 70 -png $B/<n>.pdf $B/<n>  # one PNG per page
+pdftotext -layout $B/<n>.pdf $B/<n>.txt  # its text, for diffing
+```
+`$B` holds the baselines, `$A` the new renders and `$T` a scratch copy of the project; all three sit in the session's scratchpad.
+
+### Config · The shell every note now has
+```html
+<div class="block config"><div class="file">notes/&lt;note&gt;.html</div><pre>&lt;!doctype html&gt;&lt;meta charset=utf-8&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;script type=text/chalk&gt;
+…the note, in chalk markup…
+&lt;/script&gt;
+&lt;body&gt;&lt;script src=../site/notes.js&gt;&lt;/script&gt;&lt;script src=note.js&gt;&lt;/script&gt;</pre></div>
+```
+> Concept · The text sits in a `<script>` that the browser never runs, so `<` and `&` need no escaping. The explicit `<body>` lets `note.js` build the page as it loads.
+
+### Concept · Chalk markup at a glance
+```concept
+line 1, then paragraphs        subtitle, then the summary
+## Title {class}               section; the five standard ones get their id and colour
+### Remote · Title             step with a tag chip; starts a group that stays on one page
+#### Bug · name                bug card, then "cause:" and "fix:" lines
+{keep}  /  ---                 start a group at the next element  /  end one early
+- item   /   1. item           ✓ checklist (cards under Best practices)  /  numbered steps
+> Gotcha · text                callout, coloured by its label
+| a | b                        table, first row = header
+code » note                    annotated config line (two spaces around »)
+three backticks + type         code block: local, remote, output, concept, config, html (raw)
+[[note-id]]                    link to a note, named from the catalogue
+```
+
+### Local · Convert and compare
+```local
+node convert.mjs . $B/<n>.html $T/notes/<n>.html  # markup; raw HTML where needed
+compare -metric AE $B/<n>-1.png $A/<n>-1.png /dev/null  # differing pixels; 0 = same
+diff $B/<n>.txt $A/<n>.txt  # the PDF text, line by line
+node site/build-index.mjs  # search text, now read from the markup
+.claude/skills/memory-dump/check.sh  # privacy, placeholders, catalogue
+```
+> Best practice · Convert into a scratch copy of the project, compare there, and copy into `notes/` only what passed.
+
+### Results
+| Measure | Before | After
+| All 18 notes | 194,856 bytes | 128,268 bytes (−34%)
+| Template | 5,550 bytes | 1,851 bytes
+| `note.js` | 2,772 bytes | 14,223 bytes, paid once
+| Pages differing from the baseline | — | 0 of 68
+
+> Concept · Kept as written: 7 hand-made legends (backlog item 25 decides), the guide's own title, one eyebrow, 3 notes' own `<style>` rules, and chains or two-column layouts as raw HTML. That is why all notes saved 34%, not the pilot's 43%.
+
+## Bugs hit & fixed
+
+#### Bug · subtitle merged with the summary
+cause: The header parser waited for a blank line, so line 1 and the first summary paragraph became one subtitle.
+fix: Line 1 is always the subtitle on its own.
+
+#### Bug · the converted note vanished from search
+cause: `build-index.mjs` dropped every `<script>`, and the whole note now lives in one.
+fix: It reads the `text/chalk` script and strips the markup symbols instead.
+
+#### Bug · search lost `<user>` and `<group>`
+cause: The indexer stripped anything shaped like a tag, but in markup `<` is literal text.
+fix: Tags are stripped only in raw HTML blocks, and never inside `code`.
+
+#### Bug · most code blocks fell back to raw HTML
+cause: After a comment span, the empty text before the line break counted as a third piece of the line.
+fix: Empty text pieces are skipped. Raw fallbacks dropped to genuinely special components.
+
+#### Bug · three notes differed by a few pixels
+cause: `tinker-town-05`, `tinker-town-06` and `pokedex-01` had their own `<style>` rules, which the converter dropped.
+fix: The rules stay in the shell, and `note.js` inserts the shared CSS before them, so they still win.
+
+#### Bug · check.sh flagged the double-brace example in meta-02
+cause: The note shows the placeholder check's own output, and markup has no entities inside code.
+fix: Those two elements are raw HTML with `&#123;`, so the check stays strict.
+
+## Where things live
+| What | Path
+| The renderer and the markup syntax | `notes/note.js` (comment at the top)
+| Every part of the markup, as an example | `.claude/skills/memory-dump/template.html`
+| Header data: title, date, number, module | `site/notes.js`
+| Search text from the markup | `site/build-index.mjs`
+| The converter and compare loop | the session's scratchpad, not the repo
+
+{keep}
+## Best practices
+- **Baseline first** Render every note before changing anything; a pixel diff then proves nothing moved.
+- **Pilot one** One converted note showed the format's rough edges before 17 more were touched.
+- **Fall back, don't guess** Anything the converter couldn't say exactly went through as raw HTML.
+- **Data in one place** Title and date live in the catalogue only; the note can't disagree with it.
+
+Part of Chalk Book · follows [[meta-06-token-usage]], which measured what a read costs
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

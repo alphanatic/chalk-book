@@ -1,163 +1,115 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chalk Book 05 — Complete Tasks Page</title>
-<link rel="stylesheet" href="../chalk-pastel.css">
-<link rel="stylesheet" href="note-layout.css">
-<style>
-  @page { @bottom-center { content: "Chalk Book 05 — Complete Tasks Page · " counter(page) " / " counter(pages); } }
-</style>
-</head>
-<body>
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+The backlog's look, showing only what is done
 
-<header class="hero">
-  <span class="eyebrow">Chalk Book · 05 · 2026-10-13</span>
-  <h1>Complete Tasks Page</h1>
-  <p class="sub">The backlog's look, showing only what is done</p>
-  <p>Rebuilt the private Complete Tasks page from the backlog's own styles and articles, filtered to items marked done.
-    Then refined it step by step: renamed legacy items, a source-sorted overview, and a watermark tried and removed.</p>
-  <p>Both pages live in <code>.prog/</code>, which is gitignored, so none of this is committed.</p>
-</header>
+Rebuilt the private Complete Tasks page from the backlog's own styles and articles, filtered to items marked done. Then refined it step by step: renamed legacy items, a source-sorted overview, and a watermark tried and removed.
 
-<div class="legend">
-  <span class="chip local">Local — your machine</span>
-  <span class="chip concept">Concept</span>
-  <span class="chip gotcha">Gotcha</span>
-  <span class="chip best">Best practice</span>
-  <span class="chip paths">Paths</span>
-</div>
+Both pages live in `.prog/`, which is gitignored, so none of this is committed.
 
-<h2 class="best">What we covered</h2>
-<ul class="check">
-  <li>Complete Tasks rebuilt with the backlog's <code>&lt;head&gt;</code>, hero, legend, filter and filter script</li>
-  <li>Done items copied unchanged from the backlog, each with a <code>.date</code> chip after its Done chip</li>
-  <li>Sections by tier (Critical, Important), plus <b>Legacy</b> for the three pre-backlog items</li>
-  <li>Legacy items renamed C12, C13, C16 → <code>L1</code>, <code>L2</code>, <code>L3</code>, with invented rank, platform and kind</li>
-  <li>Overview sorted in the source: 1, 2, 4, 6, L1, L2, L3; no sort script</li>
-  <li>Removed on request: the "For AI" callout, the Done date column, and a corner watermark</li>
-  <li>A handoff file written for the next session: <code>.prog/handoff-2026-10-13c.md</code></li>
-</ul>
+## What we covered
 
-<h2 class="concept">How the page is put together</h2>
-<div class="keep">
-  <table>
-    <tr><th>Part</th><th>Taken from</th><th>Change</th></tr>
-    <tr><td>Styles, hero, legend</td><td>Backlog <code>&lt;head&gt;</code> and header</td><td>Status row shows only Done; adds <code>.date</code></td></tr>
-    <tr><td>Platform filter</td><td>Backlog filter and script</td><td>None</td></tr>
-    <tr><td>Overview table</td><td>Backlog rows with <code>data-status="done"</code></td><td>Same columns: # · Item · Rank · Platform · Kind · Status</td></tr>
-    <tr><td>Item cards</td><td>Backlog <code>&lt;article&gt;</code>s, unchanged</td><td>A <code>&lt;span class="date"&gt;</code> after the Done chip</td></tr>
-    <tr><td>Card dates</td><td>The Done chip's <code>title</code> (hover time)</td><td>Never guessed; one came from the handoff file</td></tr>
-  </table>
-  <div class="callout concept"><b>Concept ·</b> Copying the backlog's markup, not rewriting it, keeps both pages in step.
-    A card reads the same on either page, and the shared filter script works unchanged.</div>
-</div>
+- Complete Tasks rebuilt with the backlog's `<head>`, hero, legend, filter and filter script
+- Done items copied unchanged from the backlog, each with a `.date` chip after its Done chip
+- Sections by tier (Critical, Important), plus **Legacy** for the three pre-backlog items
+- Legacy items renamed C12, C13, C16 → `L1`, `L2`, `L3`, with invented rank, platform and kind
+- Overview sorted in the source: 1, 2, 4, 6, L1, L2, L3; no sort script
+- Removed on request: the "For AI" callout, the Done date column, and a corner watermark
+- A handoff file written for the next session: `.prog/handoff-2026-10-13c.md`
 
-<h2 class="local">Full command sequence</h2>
+## How the page is put together
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Look before building</h3>
-  <div class="block local"><pre>cat .prog/complete.html                       <span class="cmt"># the old page: 3 items, struck-through titles</span>
-grep -n 'data-status="done"\|&lt;h2' .prog/index.html  <span class="cmt"># -n: line numbers. Done items, sections</span>
-sed -n '/&lt;script/,/&lt;\/script&gt;/p' .prog/index.html    <span class="cmt"># print only the filter script</span>
-cp .prog/complete.html &lt;scratchpad&gt;/complete.backup.html   <span class="cmt"># backup before overwriting</span></pre></div>
-</div>
+{keep}
+| Part | Taken from | Change
+| Styles, hero, legend | Backlog `<head>` and header | Status row shows only Done; adds `.date`
+| Platform filter | Backlog filter and script | None
+| Overview table | Backlog rows with `data-status="done"` | Same columns: # · Item · Rank · Platform · Kind · Status
+| Item cards | Backlog `<article>`s, unchanged | A `<span class="date">` after the Done chip
+| Card dates | The Done chip's `title` (hover time) | Never guessed; one came from the handoff file
+> Concept · Copying the backlog's markup, not rewriting it, keeps both pages in step. A card reads the same on either page, and the shared filter script works unchanged.
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Build, then check by eye</h3>
-  <div class="block local"><pre>python3 -I &lt;scratchpad&gt;/build.py .prog/index.html .prog/complete.html .prog/complete.html
+## Full command sequence
+
+### Local · Look before building
+```local
+cat .prog/complete.html                       # the old page: 3 items, struck-through titles
+grep -n 'data-status="done"\|<h2' .prog/index.html  # -n: line numbers. Done items, sections
+sed -n '/<script/,/<\/script>/p' .prog/index.html    # print only the filter script
+cp .prog/complete.html <scratchpad>/complete.backup.html   # backup before overwriting
+```
+
+### Local · Build, then check by eye
+```html
+<div class="block local"><pre>python3 -I &lt;scratchpad&gt;/build.py .prog/index.html .prog/complete.html .prog/complete.html
                                               <span class="cmt"># -I: isolated mode. Copies the done articles</span>
 brave --headless=new --window-size=1100,2400 \
   --screenshot=&lt;scratchpad&gt;/c.png "file://$PWD/.prog/complete.html"
                                               <span class="cmt"># render the page to a PNG, no window</span></pre></div>
-</div>
+```
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Rename the legacy items</h3>
-  <div class="block local"><pre>sed -i 's/\bC12\b/L01/g; s/id="c12"/id="l01"/g; s/"#c12"/"#l01"/g' .prog/complete.html
+### Local · Rename the legacy items
+```html
+<div class="block local"><pre>sed -i 's/\bC12\b/L01/g; s/id="c12"/id="l01"/g; s/"#c12"/"#l01"/g' .prog/complete.html
                                               <span class="cmt"># -i: in place. \b: whole word. Label, id, link</span>
 grep -ci 'c1[236]' .prog/complete.html        <span class="cmt"># -c: count, -i: any case. 0 = no old names left</span></pre></div>
-</div>
+```
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Before any commit</h3>
-  <div class="block local"><pre>git check-ignore -v .prog/complete.html       <span class="cmt"># -v: show the rule. .gitignore:5 .prog/</span>
-.claude/skills/memory-dump/check.sh           <span class="cmt"># all checks passed</span></pre></div>
-</div>
+### Local · Before any commit
+```local
+git check-ignore -v .prog/complete.html       # -v: show the rule. .gitignore:5 .prog/
+.claude/skills/memory-dump/check.sh           # all checks passed
+```
 
-<h2 class="concept">Sorting a list 0–9, a–z</h2>
-<div class="keep">
-  <p>HTML has no built-in sort. Two ways:</p>
-  <table>
-    <tr><th>Way</th><th>When</th></tr>
-    <tr><td><b>Write it sorted in the source</b></td><td>The list only changes by editing the file. No script; works from disk and in print</td></tr>
-    <tr><td><b>Sort on load with a script</b></td><td>Rows may arrive in any order and must always end up sorted</td></tr>
-  </table>
-  <div class="block local"><pre>const byNatural = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }).compare;
+## Sorting a list 0–9, a–z
+
+{keep}
+HTML has no built-in sort. Two ways:
+| Way | When
+| **Write it sorted in the source** | The list only changes by editing the file. No script; works from disk and in print
+| **Sort on load with a script** | Rows may arrive in any order and must always end up sorted
+```html
+<div class="block local"><pre>const byNatural = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }).compare;
 const rows = [...table.querySelectorAll("tr")].slice(1);  <span class="cmt">// skip the header row</span>
 rows.sort((a, b) =&gt; byNatural(a.cells[0].textContent, b.cells[0].textContent))
     .forEach(r =&gt; r.parentNode.appendChild(r));  <span class="cmt">// moves each row to the end, in order</span></pre></div>
-  <table>
-    <tr><th>Plain text sort</th><th>Natural sort (<code>numeric: true</code>)</th></tr>
-    <tr><td>1, 10, 2, L01</td><td>1, 2, 10, L01</td></tr>
-  </table>
-  <div class="callout gotcha"><b>Gotcha ·</b> Sorting the table alone leaves the cards below in the old order.
-    Sort both, or sort neither and fix the source.</div>
-</div>
+```
+| Plain text sort | Natural sort (`numeric: true`)
+| 1, 10, 2, L01 | 1, 2, 10, L01
+> Gotcha · Sorting the table alone leaves the cards below in the old order. Sort both, or sort neither and fix the source.
 
-<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+## Bugs hit & fixed
 
-<div class="bug">
-  <h4>Bug · zsh ate a separator line</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd><code>echo =====</code> failed with <code>(eval):1: ==== not found</code>. In zsh a word
-      starting with <code>=</code> expands to a command's path, like <code>=ls</code> → <code>/usr/bin/ls</code>.</dd>
-    <dt class="fix">FIX</dt><dd>Quote it, or use a separator that doesn't start with <code>=</code>.</dd>
-  </dl>
-  <div class="block local"><pre>echo '====='    <span class="cmt"># quoted: printed as-is</span></pre></div>
-</div>
+#### Bug · zsh ate a separator line
+cause: `echo =====` failed with `(eval):1: ==== not found`. In zsh a word starting with `=` expands to a command's path, like `=ls` → `/usr/bin/ls`.
+fix: Quote it, or use a separator that doesn't start with `=`.
+```local
+echo '====='  # quoted: printed as-is
+```
 
-<div class="bug">
-  <h4>Bug · legacy items ignored by the filter</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>The filter hides elements by <code>data-platform</code>. The old items had none, so they
-      showed under every filter.</dd>
-    <dt class="fix">FIX</dt><dd>Gave each legacy card and overview row a <code>data-platform</code>, plus rank and kind chips.</dd>
-  </dl>
-</div>
+#### Bug · legacy items ignored by the filter
+cause: The filter hides elements by `data-platform`. The old items had none, so they showed under every filter.
+fix: Gave each legacy card and overview row a `data-platform`, plus rank and kind chips.
 
-<div class="bug">
-  <h4>Bug · two items, one new name</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>The rename list mapped both C13 and C16 to <code>L03</code>. Duplicate ids break the overview links.</dd>
-    <dt class="fix">FIX</dt><dd>Asked instead of guessing: C13 → L02, C16 → L03. Later shortened to L1–L3.</dd>
-  </dl>
-</div>
+#### Bug · two items, one new name
+cause: The rename list mapped both C13 and C16 to `L03`. Duplicate ids break the overview links.
+fix: Asked instead of guessing: C13 → L02, C16 → L03. Later shortened to L1–L3.
 
-<h2 class="paths">Where things live</h2>
-<table>
-  <tr><th>What</th><th>Path</th></tr>
-  <tr><td>Backlog (open items, private)</td><td><code>.prog/index.html</code> · site <code>#backlog</code></td></tr>
-  <tr><td>Complete Tasks (done items, private)</td><td><code>.prog/complete.html</code> · site <code>#complete</code></td></tr>
-  <tr><td>Session handoff</td><td><code>.prog/handoff-2026-10-13c.md</code></td></tr>
-  <tr><td>The rule that no longer matches</td><td><code>CLAUDE.md</code> §5 "Moving a finished item"</td></tr>
-</table>
-<div class="callout gotcha"><b>Gotcha ·</b> Done items now sit on both pages, and <code>CLAUDE.md</code> still says to <i>move</i>
-  them. Both are open, waiting for the user's call.</div>
+## Where things live
 
-<h2 class="best">Best practices</h2>
-<div class="cards">
-  <div><b>Copy, don't restyle</b>Reuse the sister page's markup so both stay in step.</div>
-  <div><b>Ask on a clash</b>A list that maps two things to one name gets a question, not a guess.</div>
-  <div><b>Screenshot to check</b>A headless render shows what a grep can't.</div>
-  <div><b>Remove fully</b>"All traces" means the CSS, the classes and the comments; grep to confirm.</div>
-</div>
+| What | Path
+| Backlog (open items, private) | `.prog/index.html` · site `#backlog`
+| Complete Tasks (done items, private) | `.prog/complete.html` · site `#complete`
+| Session handoff | `.prog/handoff-2026-10-13c.md`
+| The rule that no longer matches | `CLAUDE.md` §5 "Moving a finished item"
 
-<p class="part-of">Part of Chalk Book · follows
-  <a href="../index.html#meta-04-claude-md-cleanup" target="_top">04 CLAUDE.md Cleanup</a> · site details in
-  <a href="../index.html#meta-01-site-build" target="_top">01 Site &amp; Workflow Build</a></p>
+> Gotcha · Done items now sit on both pages, and `CLAUDE.md` still says to *move* them. Both are open, waiting for the user's call.
 
-<script src="note.js"></script>
-</body>
-</html>
+## Best practices
+
+- **Copy, don't restyle** Reuse the sister page's markup so both stay in step.
+- **Ask on a clash** A list that maps two things to one name gets a question, not a guess.
+- **Screenshot to check** A headless render shows what a grep can't.
+- **Remove fully** "All traces" means the CSS, the classes and the comments; grep to confirm.
+
+Part of Chalk Book · follows [[meta-04-claude-md-cleanup]] · site details in [[meta-01-site-build]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

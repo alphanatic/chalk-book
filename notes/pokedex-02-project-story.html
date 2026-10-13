@@ -1,115 +1,85 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pokédex 02 — Project Story &amp; Private Notes</title>
-<link rel="stylesheet" href="../chalk-pastel.css">
-<link rel="stylesheet" href="note-layout.css">
-<style>
-  @page { @bottom-center { content: "Pokédex 02 — Project Story & Private Notes · " counter(page) " / " counter(pages); } }
-</style>
-</head>
-<body>
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+<div class="legend"><span class="chip local">Local — your machine</span><span class="chip concept">Concept</span><span class="chip gotcha">Gotcha</span><span class="chip best">Best practice</span><span class="chip paths">Paths</span></div>
+Why the project exists, and where the session notes live
 
-<header class="hero">
-  <span class="eyebrow">Pokédex · 02 · 2026-10-13</span>
-  <h1>Project Story &amp; Private Notes</h1>
-  <p class="sub">Why the project exists, and where the session notes live</p>
-  <p>Renamed the private notes folder <code>personal-notes/</code> to <code>.prog/</code>, still kept out of git.
-    Wrote <code>story.md</code>: the project's original question and its six big turns, committed as <code>30d4bf9</code>.</p>
-  <p>The story is the place to start when someone asks "why is the Pokédex on a ship?"</p>
-</header>
+Renamed the private notes folder `personal-notes/` to `.prog/`, still kept out of git. Wrote `story.md`: the project's original question and its six big turns, committed as `30d4bf9`.
 
-<div class="legend">
-  <span class="chip local">Local — your machine</span>
-  <span class="chip concept">Concept</span>
-  <span class="chip gotcha">Gotcha</span>
-  <span class="chip best">Best practice</span>
-  <span class="chip paths">Paths</span>
-</div>
+The story is the place to start when someone asks "why is the Pokédex on a ship?"
 
-<h2 class="best">What we covered</h2>
-<ul class="check">
-  <li>Backed up, then renamed <code>personal-notes/</code> → <code>.prog/</code></li>
-  <li>Updated the ignore rule in <code>.git/info/exclude</code>, so the folder stays private</li>
-  <li>Pointed Claude's memory files and the progress notes at the new folder name</li>
-  <li>Gathered the history from the design doc, backups and memory, not just git log</li>
-  <li>Wrote <code>story.md</code>: the original question, six direction changes, what stayed true</li>
-  <li>Committed it as <code>30d4bf9</code> "Project story: original intent and direction changes", not pushed</li>
-</ul>
+## What we covered
 
-<h2 class="local">Full command sequence</h2>
+- Backed up, then renamed `personal-notes/` → `.prog/`
+- Updated the ignore rule in `.git/info/exclude`, so the folder stays private
+- Pointed Claude's memory files and the progress notes at the new folder name
+- Gathered the history from the design doc, backups and memory, not just git log
+- Wrote `story.md`: the original question, six direction changes, what stayed true
+- Committed it as `30d4bf9` "Project story: original intent and direction changes", not pushed
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Back up, then rename the folder</h3>
-  <div class="block local"><pre>B=../pokedex-backups/2026-10-13-personal-notes   <span class="cmt"># backup folder, outside the repo</span>
-mkdir -p $B                                      <span class="cmt"># -p: create parents, no error if it exists</span>
-cp -a personal-notes $B/                         <span class="cmt"># -a: keep dates and permissions</span>
-mv personal-notes .prog                          <span class="cmt"># leading dot: hidden from plain ls</span></pre></div>
-</div>
+## Full command sequence
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Keep it out of git under its new name</h3>
-  <div class="block local"><pre>sed -i 's#^personal-notes/$#.prog/#' .git/info/exclude   <span class="cmt"># -i: edit in place</span>
-tail -2 .git/info/exclude                                <span class="cmt"># check the rule now reads .prog/</span>
-git status --short                                       <span class="cmt"># empty: .prog/ is not seen as new</span></pre></div>
-</div>
+### Local · Back up, then rename the folder
+```local
+B=../pokedex-backups/2026-10-13-personal-notes   # backup folder, outside the repo
+mkdir -p $B                                      # -p: create parents, no error if it exists
+cp -a personal-notes $B/                         # -a: keep dates and permissions
+mv personal-notes .prog                          # leading dot: hidden from plain ls
+```
 
-<div class="block config">
-  <div class="file">.git/info/exclude (last lines)</div>
-<pre># personal notes: kept on this machine only, never committed
-.prog/</pre>
-</div>
+### Local · Keep it out of git under its new name
+```local
+sed -i 's#^personal-notes/$#.prog/#' .git/info/exclude   # -i: edit in place
+tail -2 .git/info/exclude                                # check the rule now reads .prog/
+git status --short                                       # empty: .prog/ is not seen as new
+```
 
-<div class="callout concept"><b>Concept ·</b> <code>.git/info/exclude</code> works like <code>.gitignore</code>, but it
-  lives inside <code>.git/</code> and is never committed. A public repo doesn't even reveal that the folder exists.</div>
+---
+```config: .git/info/exclude (last lines)
+# personal notes: kept on this machine only, never committed
+.prog/
+```
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Find every old reference</h3>
-  <div class="block local"><pre>grep -rn "personal-notes" &lt;memory-dir&gt; .prog          <span class="cmt"># -r: recursive, -n: line numbers</span>
-sed -i 's#personal-notes/#.prog/#g' &lt;memory-files&gt;    <span class="cmt"># g: every match on a line</span></pre></div>
-</div>
+> Concept · `.git/info/exclude` works like `.gitignore`, but it lives inside `.git/` and is never committed. A public repo doesn't even reveal that the folder exists.
 
-<div class="callout gotcha"><b>Gotcha ·</b> back up first, even for a plain rename. And the first grep found one more file than expected
-  (<code>pokemon-world-style.md</code>). Always grep again after a rename before calling it done.</div>
+### Local · Find every old reference
+```local
+grep -rn "personal-notes" <memory-dir> .prog  # -r: recursive, -n: line numbers
+sed -i 's#personal-notes/#.prog/#g' <memory-files>  # g: every match on a line
+```
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Scan and commit the story</h3>
-  <div class="block local"><pre>git config user.email                      <span class="cmt"># confirm the repo's noreply identity</span>
-grep -nEi "/home/|claude.ai" story.md      <span class="cmt"># -E: extended regex, -i: any case; none = clean</span>
-git add story.md                           <span class="cmt"># stage only the new file</span>
-git commit -F -                            <span class="cmt"># -F -: message from stdin (a heredoc)</span></pre></div>
-</div>
+---
+> Gotcha · back up first, even for a plain rename. And the first grep found one more file than expected (`pokemon-world-style.md`). Always grep again after a rename before calling it done.
 
-<h2 class="concept">The shape of story.md</h2>
-<table>
-  <tr><th>Section</th><th>What it holds</th></tr>
-  <tr><td>Where it started</td><td>The question "what if the anime Pokédex actually worked?" Measured shape, every part does something, live PokéAPI data</td></tr>
-  <tr><td>1. Background → room</td><td>A living room with a TV showing the same page as the Pokédex</td></tr>
-  <tr><td>2. Never realistic</td><td>Photo backgrounds dropped; everything looks like the Pokémon world</td></tr>
-  <tr><td>3. S.S. Anne</td><td>Game Boy Color pixel-art cabin in Vermilion, porthole visitors</td></tr>
-  <tr><td>4. Linked screen</td><td>Poké Ball wall screen and Pokédex act as one system</td></tr>
-  <tr><td>5. Easter eggs</td><td>Ten eggs for Red/Blue fans; public as the Pokéggdex</td></tr>
-  <tr><td>6. Many scenes</td><td>Pokédex as its own component; more scenes, picked from a menu</td></tr>
-  <tr><td>Still true</td><td>The Pokédex is the centre, and every part still does something</td></tr>
-</table>
+### Local · Scan and commit the story
+```local
+git config user.email                      # confirm the repo's noreply identity
+grep -nEi "/home/|claude.ai" story.md      # -E: extended regex, -i: any case; none = clean
+git add story.md                           # stage only the new file
+git commit -F -                            # -F -: message from stdin (a heredoc)
+```
 
-<div class="callout concept"><b>Concept ·</b> git log only starts at the cabin. The earlier phases came from
-  <code>design/pokedex-design-document.md</code>, the pre-cabin backup and Claude's memory notes.</div>
+## The shape of story.md
 
-<h2 class="paths">Where things live</h2>
-<table>
-  <tr><th>What</th><th>Path</th></tr>
-  <tr><td>Private session notes</td><td><code>.prog/progress dd-mm-yyyy.md</code>, <code>.prog/sticky.md</code></td></tr>
-  <tr><td>Ignore rule for them</td><td><code>.git/info/exclude</code></td></tr>
-  <tr><td>Backup of the old folder</td><td><code>pokedex-backups/2026-10-13-personal-notes/</code></td></tr>
-  <tr><td>The project story</td><td><code>story.md</code> (repo root, public)</td></tr>
-</table>
+| Section | What it holds
+| Where it started | The question "what if the anime Pokédex actually worked?" Measured shape, every part does something, live PokéAPI data
+| 1. Background → room | A living room with a TV showing the same page as the Pokédex
+| 2. Never realistic | Photo backgrounds dropped; everything looks like the Pokémon world
+| 3. S.S. Anne | Game Boy Color pixel-art cabin in Vermilion, porthole visitors
+| 4. Linked screen | Poké Ball wall screen and Pokédex act as one system
+| 5. Easter eggs | Ten eggs for Red/Blue fans; public as the Pokéggdex
+| 6. Many scenes | Pokédex as its own component; more scenes, picked from a menu
+| Still true | The Pokédex is the centre, and every part still does something
 
-<p class="part-of">Part of Pokédex · see
-  <a href="../index.html#pokedex-01-git-manual-push" target="_top">01 Git: Manual Commit &amp; Push</a> for how commits reach GitHub</p>
+> Concept · git log only starts at the cabin. The earlier phases came from `design/pokedex-design-document.md`, the pre-cabin backup and Claude's memory notes.
 
-<script src="note.js"></script>
-</body>
-</html>
+## Where things live
+
+| What | Path
+| Private session notes | `.prog/progress dd-mm-yyyy.md`, `.prog/sticky.md`
+| Ignore rule for them | `.git/info/exclude`
+| Backup of the old folder | `pokedex-backups/2026-10-13-personal-notes/`
+| The project story | `story.md` (repo root, public)
+
+Part of Pokédex · see [[pokedex-01-git-manual-push]] for how commits reach GitHub
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

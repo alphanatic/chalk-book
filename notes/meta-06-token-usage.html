@@ -1,0 +1,144 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Read one section, not the whole note
+
+Measured what an AI pays to read the chalk book, then gave every note section ids, put command names in the catalogue and wrote a four-step search ladder into `CLAUDE.md`. An older preferences file was checked against the current rules; its six conflicts wait as decisions.
+
+Every later session can find a fact for a few hundred tokens instead of a few thousand.
+
+## What we covered
+
+- Measured the cost: a note is 3,000–4,500 tokens; `CLAUDE.md` about 3,700, loaded every session
+- Ids on the five standard headings in all 15 notes and the template: `covered`, `steps`, `bugs`, `paths`, `practices`
+- Command names added to `skills` in `site/notes.js` for 12 notes, so search finds `lsblk` or `useradd`
+- New rules: **Read little first** (§7), **Trim output** (§4), "What we covered" stands in for the note (§3)
+- The guide note synced; `memory-dump` now asks for every distinctive command in `skills`
+- The ladder's `grep` failed under ugrep; fixed with `-P`
+- An older preferences file analysed read-only: palette matches, six conflicts became decision items
+- A session handoff written in `.prog/`, with the commit left for the user's yes
+
+## What a read costs
+
+{keep}
+| What is read | Size | About
+| One catalogue entry in `site/notes.js` (title, summary, skills) | 1 line | 60 tokens
+| One section, e.g. the bugs of `tinker-town-04` | 2.6 KB HTML | 300 tokens
+| One note as plain text in `site/search-index.js` | half the HTML | 1,500–2,000 tokens
+| One note as HTML | 12–17 KB | 3,000–4,500 tokens
+| `CLAUDE.md`, at the start of every session in the project | 14.8 KB | 3,700 tokens
+> Concept · The rules file costs as much as a whole note, every session, even when no note is opened. Shrinking it saves more than any change to the notes.
+
+## Full command sequence
+
+### Local · Measure
+```local
+wc -c notes/*.html site/search-index.js  # -c: bytes per file; ~4 bytes is one token
+wc -c CLAUDE.md  # 14,794 bytes, loaded every session here
+```
+
+### Local · Give the standard headings ids
+```html
+<div class="block local"><pre>sed -i 's|&lt;h2 class="gotcha"&gt;Bugs|&lt;h2 id="bugs" class="gotcha"&gt;Bugs|' notes/*.html  <span class="cmt"># -i: in place</span></pre></div>
+```
+| Heading | Id
+| What we covered | `covered`
+| Full command sequence | `steps`
+| Bugs hit & fixed | `bugs`
+| Where things live | `paths`
+| Best practices | `practices`
+> Concept · "What we covered" and "Best practices" share `class="best"`. Only the id tells them apart. Supporting sections vary per note and get no id.
+
+### Local · Verify every heading got its id
+```local
+grep -o '<h2 id="[a-z]*"' notes/*.html | cut -d'"' -f2 | sort | uniq -c   # count per id
+```
+```output
+  11 bugs
+  16 covered  # 15 notes + the template
+  15 paths
+  12 practices
+  13 steps
+```
+
+### Local · Command names into the catalogue
+1. A short `node` script read only the `block local` and `block remote` code of each note, and listed the first word of every line.
+2. Distinctive commands went into that note's `skills`; everyday ones (`cd`, `cp`, `mv`, `nano`) stayed out.
+3. `skills` feeds search only and is never shown, so a long list costs nothing on the site.
+```local
+grep -n -i 'lsblk' site/notes.js  # -n: line number, -i: any case; now finds the storage note
+```
+
+### Local · The search ladder: stop at the first step that answers
+```local
+grep -n -i 'fstab' site/notes.js                                # 1. which note (~100 tokens)
+grep -o -i -P '.{0,150}fstab.{0,150}' site/search-index.js      # 2. hits, 150 chars each side
+sed -n '/<h2 id="bugs"/,/<h2 /p' notes/<note>.html             # 3. one section (~300–800)
+```
+Step 4 is the whole note, only when the task needs all of it. `-o` prints only the match; `-P` uses Perl regex; `sed -n '/a/,/b/p'` prints from the line matching *a* to the next matching *b*.
+
+### Local · Check
+```local
+.claude/skills/memory-dump/check.sh  # rebuilds the index, then privacy and catalogue checks
+```
+
+## When the whole note is worth it
+
+{keep}
+| The ladder stops early | Read most or all of it
+| "Have I ever set up LVM?" | "Redo the EBS resize from scratch on a new instance."
+| "What was my fstab line?" | "Update the skill-vetting note with what we learned."
+| "What was the logrotate permission error?" | "Make a new note in the same style as meta-01."
+| "Which notes mention `xxd`?" | "Check the pokedex notes for anything private."
+|  | "Quiz me on module 2" · "Compare SSH in note 01 and later notes"
+> Best practice · A summary across many notes starts from the catalogue and each note's `covered` section, and opens full notes only on request.
+
+## An older preferences file
+
+{keep}
+A preferences file from earlier chats was read without changing anything. Its palette matched `chalk-pastel.css` exactly. Six points conflict with the current rules and wait in the private backlog as decisions, under a new **Token** tier.
+| Topic | Older file | Now
+| Repo visibility | Public | Private, per the handoff
+| Login name | A nickname, no need to scrub | Never written
+| Config comments | On every line | Config blocks stay clean
+| Offer a note after | About 20 prompts | About 60 minutes of content
+| Delivery | An artifact | Local site, PDF on demand
+| Placeholders | Always explained | Named to explain themselves
+> Gotcha · "Comment every config line" is the exact cause of the logrotate bug in [[tinker-town-04-cron-logrotate|Tinker Town 04]]: `rotate 7 # comment` broke the file.
+> Concept · Worth adopting from it: **Prerequisites**, **Verify** and **Undo / teardown** sections, which make a one-off recipe repeatable cold.
+
+## Bugs hit & fixed
+
+#### Bug · The ladder's grep failed
+cause: `grep` here is ugrep. With `-E '.{0,150}word.{0,150}'` on UTF-8 text it stops: `ugrep: error: error at position 84 … exceeds complexity limits`. The rule had gone into `CLAUDE.md` untested; note 04 had already recorded the same bug.
+fix: `-P` (Perl regex) works in ugrep and in GNU grep. `CLAUDE.md` §7 now says `-P`.
+```local
+grep -o -i -P '.{0,150}fstab.{0,150}' site/search-index.js  # 9 hits, no error
+```
+
+#### Bug · `echo ====` in zsh
+cause: zsh expands a word starting with `=` to a command's path: `(eval):1: === not found`. The whole chained command failed.
+fix: Use `echo ---` as a separator.
+
+#### Bug · Command list full of prose
+cause: A regex over whole note files took the first word of every line, so words like `and` and `the` came out as commands.
+fix: Read only the `<pre>` inside `block local` and `block remote`, with comments stripped.
+
+## Where things live
+
+| What | Path
+| The ladder and the new rules | `CLAUDE.md` §3, §4, §7 · `notes/00-chalk-book-guide.html`
+| The catalogue (step 1) | `site/notes.js`
+| Plain text of every note (step 2) | `site/search-index.js`, built by `site/build-index.mjs`
+| Heading ids for new notes | `.claude/skills/memory-dump/template.html`
+| Decisions and the session handoff | `.prog/` (private, never committed)
+
+## Best practices
+
+- **Cheapest read first** Catalogue, then hits, then one section; the whole note only when the task needs it.
+- **Test before it's a rule** Run every command before writing it into `CLAUDE.md`.
+- **Search the old bugs** The grep failure was already in note 04; the ladder would have found it.
+- **Measure, then cut** Byte counts showed the rules file, not the notes, was the biggest cost.
+
+Part of Chalk Book · follows [[meta-05-complete-tasks-page]] · the size work began in [[meta-04-claude-md-cleanup]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

@@ -61,26 +61,29 @@ briefly. Otherwise work with what is there.
 For each note:
 
 1. `cp .claude/skills/memory-dump/template.html notes/<name>.html`
-2. Replace every `{{…}}` placeholder, including `<title>` and the footer text in the `<style>` block.
-3. Keep the section order. Delete component examples the note doesn't use, and their legend chips.
+2. Write in chalk markup; the syntax is in the comment at the top of `notes/note.js`. Replace every `{{…}}`.
+   The title, eyebrow, page footer and legend are made from the note's `site/notes.js` entry (§5) and its
+   content, so the note has no header markup.
+3. Keep the section order. Delete the examples the note doesn't use.
 4. Follow the writing style in `CLAUDE.md`. The essentials:
-   - every command has a `<span class="cmt"># comment</span>` explaining it and its flags
-   - config blocks contain no comments. Use the `annotated` rows or a table instead
+   - every command has a comment after two spaces: `cmd  # what it does, and its flags`. `note.js` lines them up
+   - config blocks contain no comments. Use annotated lines (`code  »  note`) or a table instead
    - real names, paths and error messages; keep the mistakes as bug cards
    - short sentences, calm tone, no emoji
-5. **Colour only through palette classes** (`local`, `remote`, `config`, `concept`, `gotcha`,
-   `best`, `paths`, `console`) or `var(--…)` from `chalk-pastel.css`. No hex values.
+5. **Colour only through palette classes** (`local`, `remote`, `config`, `concept`, `gotcha`, `best`, `paths`,
+   `console`): as a block type, a tag, or `{class}`. No hex values.
 6. **Follow the privacy rule** in `CLAUDE.md` §4: no access secrets, placeholders for anything that
    locates a host or account, nothing from the user's private life.
-7. Wrap each small heading and the block that belongs to it in `<div class="keep">` so they
-   don't split across pages.
-8. Link related notes through the site: `<a href="../index.html#<note-id>" target="_top">`.
+7. Each `###` step starts a group that stays on one page. Put `{keep}` before a section heading whose table or
+   cards should stay with it, and `---` to end a group early.
+8. Link related notes with `[[note-id]]`, or `[[note-id|text]]` for other link text.
+9. Anything the markup can't say (a concept chain, a two-column layout) goes in a ```` ```html ```` block.
 
 ## 5. Add it to the site
 
 Add one entry per note to `CHALK_NOTES` in `site/notes.js`: `id` (file name without `.html`),
 `project`, `n`, `module` (if the project has a roadmap), `date`, `title`, a one-line `summary`
-and `skills` (tools and topics people would search for). If the note finishes a roadmap module,
+and `skills` (tools, topics and every distinctive command in the note: what people would search for). If the note finishes a roadmap module,
 set that module's `status` to `"done"`.
 
 Then rebuild the search index so the new text is searchable: `node site/build-index.mjs`.

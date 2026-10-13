@@ -1,255 +1,183 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chalk Book 01 — Site &amp; Workflow Build</title>
-<link rel="stylesheet" href="../chalk-pastel.css">
-<link rel="stylesheet" href="note-layout.css">
-<style>
-  @page { @bottom-center { content: "Chalk Book 01 — Site & Workflow Build · " counter(page) " / " counter(pages); } }
-</style>
-</head>
-<body>
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+<div class="legend"><span class="chip local">Local — your machine</span><span class="chip config">Config file</span><span class="chip concept">Concept</span><span class="chip gotcha">Gotcha</span><span class="chip best">Best practice</span><span class="chip paths">Paths</span></div>
+From a folder of PDFs to a browsable, searchable notebook
 
-<header class="hero">
-  <span class="eyebrow">Chalk Book · 01 · 2026-10-12</span>
-  <h1>Site &amp; Workflow Build</h1>
-  <p class="sub">From a folder of PDFs to a browsable, searchable notebook</p>
-  <p>Renamed log-book to Chalk Book. Set up a memory-dump skill that works from any folder.
-    Rebuilt the notes as pastel HTML and built a dark static site to browse, search and export them.
-    Pushed it all to a private GitHub repo.</p>
-  <p>Every later note comes out of this workflow. The rules live in <code>CLAUDE.md</code>, and the guide is a copy of them.</p>
-</header>
+Renamed log-book to Chalk Book. Set up a memory-dump skill that works from any folder. Rebuilt the notes as pastel HTML and built a dark static site to browse, search and export them. Pushed it all to a private GitHub repo.
 
-<div class="legend">
-  <span class="chip local">Local — your machine</span>
-  <span class="chip config">Config file</span>
-  <span class="chip concept">Concept</span>
-  <span class="chip gotcha">Gotcha</span>
-  <span class="chip best">Best practice</span>
-  <span class="chip paths">Paths</span>
-</div>
+Every later note comes out of this workflow. The rules live in `CLAUDE.md`, and the guide is a copy of them.
 
-<h2 class="best">What we covered</h2>
-<ul class="check">
-  <li>Renamed everything from <code>log-book</code> to <code>chalk-book</code></li>
-  <li>A personal pointer skill so "memory dump" and "chalk that up" work in every project</li>
-  <li>The AI offers a dump when the topic changes or about 60 minutes of content has built up</li>
-  <li>The file naming standard <code>&lt;project&gt;-&lt;NN&gt;-&lt;topic&gt;</code>, and the projects list (Project Tinker Town)</li>
-  <li>Rebuilt the original PDFs as HTML notes on <code>chalk-pastel.css</code>, and kept the originals in <code>archive/</code></li>
-  <li>A static site in Claude dark-mode greys, with no build step, that opens straight from disk</li>
-  <li>Full-text search with highlighting, a Recently viewed rail, and Export → Save as PDF</li>
-  <li>A persistent main footer with Contact, plus private Backlog and Complete Tasks pages in <code>.prog/</code></li>
-  <li>Pushed to the private GitHub repo <code>alphanatic/chalk-book</code> over HTTPS, with private folders kept out</li>
-</ul>
+## What we covered
 
-<h2 class="concept">The workflow</h2>
-<div class="keep">
-  <div class="chain"><span>Work in any project</span><i>→</i><span>"chalk that up"</span><i>→</i><span>memory-dump skill</span><i>→</i><span>note in notes/</span><i>→</i><span>site + push</span></div>
-  <table>
-    <tr><th>Piece</th><th>Where</th><th>Job</th></tr>
-    <tr><td>Pointer skill</td><td><code>~/.claude/skills/memory-dump/</code></td><td>Recognises the trigger words in any folder and points back to the chalk book</td></tr>
-    <tr><td>Real skill</td><td><code>.claude/skills/memory-dump/</code></td><td>The procedure: plan, template, catalogue, index, render check, commit</td></tr>
-    <tr><td>Prompting rule</td><td><code>~/.claude/CLAUDE.md</code></td><td>Offer a dump on a topic change or about 60 minutes of content, once per trigger</td></tr>
-    <tr><td>Rules</td><td><code>CLAUDE.md</code></td><td>The source of truth, mirrored in the guide's HTML and PDF</td></tr>
-  </table>
-</div>
-<div class="callout concept"><b>Concept ·</b> Claude Code only loads a project's <code>CLAUDE.md</code> and skills when it starts in that folder.
-  A small skill in <code>~/.claude/skills/</code> is visible everywhere, so it acts as a signpost back to the project.</div>
+- Renamed everything from `log-book` to `chalk-book`
+- A personal pointer skill so "memory dump" and "chalk that up" work in every project
+- The AI offers a dump when the topic changes or about 60 minutes of content has built up
+- The file naming standard `<project>-<NN>-<topic>`, and the projects list (Project Tinker Town)
+- Rebuilt the original PDFs as HTML notes on `chalk-pastel.css`, and kept the originals in `archive/`
+- A static site in Claude dark-mode greys, with no build step, that opens straight from disk
+- Full-text search with highlighting, a Recently viewed rail, and Export → Save as PDF
+- A persistent main footer with Contact, plus private Backlog and Complete Tasks pages in `.prog/`
+- Pushed to the private GitHub repo `alphanatic/chalk-book` over HTTPS, with private folders kept out
 
-<h2 class="local">Full command sequence</h2>
+## The workflow
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Add a note and refresh search</h3>
-  <div class="block local"><pre>n=meta-01-site-build                                    <span class="cmt"># the new note's name</span>
-cp .claude/skills/memory-dump/template.html notes/$n.html    <span class="cmt"># start from the skeleton</span>
-node site/build-index.mjs                               <span class="cmt"># rebuild site/search-index.js</span>
-.claude/skills/memory-dump/render.sh notes/$n.html /tmp      <span class="cmt"># A4 PDF via headless Brave</span>
-pdftoppm -r 70 -png /tmp/$n.pdf /tmp/p                  <span class="cmt"># one PNG per page</span></pre></div>
-</div>
+{keep}
+```html
+<div class="chain"><span>Work in any project</span><i>→</i><span>"chalk that up"</span><i>→</i><span>memory-dump skill</span><i>→</i><span>note in notes/</span><i>→</i><span>site + push</span></div>
+```
+| Piece | Where | Job
+| Pointer skill | `~/.claude/skills/memory-dump/` | Recognises the trigger words in any folder and points back to the chalk book
+| Real skill | `.claude/skills/memory-dump/` | The procedure: plan, template, catalogue, index, render check, commit
+| Prompting rule | `~/.claude/CLAUDE.md` | Offer a dump on a topic change or about 60 minutes of content, once per trigger
+| Rules | `CLAUDE.md` | The source of truth, mirrored in the guide's HTML and PDF
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>First push over HTTPS (no SSH key on this machine)</h3>
-  <div class="block local"><pre>git init -b main                                               <span class="cmt"># new repo, branch main</span>
-git config user.email "&lt;github-noreply-or-outlook&gt;"            <span class="cmt"># never a home address</span>
+---
+> Concept · Claude Code only loads a project's `CLAUDE.md` and skills when it starts in that folder. A small skill in `~/.claude/skills/` is visible everywhere, so it acts as a signpost back to the project.
+
+## Full command sequence
+
+### Local · Add a note and refresh search
+```local
+n=meta-01-site-build                                    # the new note's name
+cp .claude/skills/memory-dump/template.html notes/$n.html    # start from the skeleton
+node site/build-index.mjs                               # rebuild site/search-index.js
+.claude/skills/memory-dump/render.sh notes/$n.html /tmp      # A4 PDF via headless Brave
+pdftoppm -r 70 -png /tmp/$n.pdf /tmp/p                  # one PNG per page
+```
+
+### Local · First push over HTTPS (no SSH key on this machine)
+```local
+git init -b main                                               # new repo, branch main
+git config user.email "<github-noreply-or-outlook>"            # never a home address
 git remote add origin https://github.com/alphanatic/chalk-book.git
-gh auth setup-git                                              <span class="cmt"># gh acts as git's credential helper</span>
-git add -A &amp;&amp; git status --short                               <span class="cmt"># check nothing private is staged</span>
+gh auth setup-git                                              # gh acts as git's credential helper
+git add -A && git status --short                               # check nothing private is staged
 git commit -m "Chalk Book: original version"
-git push -u origin main                                        <span class="cmt"># -u: track origin/main</span></pre></div>
-</div>
+git push -u origin main                                        # -u: track origin/main
+```
 
-<div class="keep">
-  <h3><span class="tag config">Config</span>Private folders kept out of git</h3>
-  <div class="block config annotated">
-    <div class="file">.gitignore</div>
-    <div class="row"><pre>.research/</pre><span>market and competitor notes</span></div>
-    <div class="row"><pre>.prog/</pre><span>the Backlog and Complete Tasks pages</span></div>
-    <div class="row"><pre>.claude/settings.local.json</pre><span>personal permission rules</span></div>
-    <div class="row"><pre>archive/backlog-workflow/</pre><span>records of the old backlog design</span></div>
-    <div class="row"><pre>.vscode/</pre><span>editor settings</span></div>
-  </div>
-</div>
+### Config · Private folders kept out of git
+```config: .gitignore
+.research/  »  market and competitor notes
+.prog/  »  the Backlog and Complete Tasks pages
+.claude/settings.local.json  »  personal permission rules
+archive/backlog-workflow/  »  records of the old backlog design
+.vscode/  »  editor settings
+```
 
-<h2 class="concept">How the site works</h2>
+## How the site works
+
+```html
 <div class="cards four">
   <div class="local"><b>index.html</b>top bar, left menu, viewer, Recently viewed, main footer</div>
   <div class="config"><b>site/notes.js</b>catalogue: projects, roadmaps, notes</div>
   <div class="remote"><b>search-index.js</b>plain text of every note, generated</div>
   <div class="paths"><b>notes/*.html</b>one A4 sheet each, shown in an iframe</div>
 </div>
+```
 
-<div class="callout gotcha"><b>Gotcha ·</b> When the site is opened from disk (<code>file://</code>), every file counts as its own origin.
-  The site can't <code>fetch</code> data or reach into the note's iframe. So the data is loaded as <code>&lt;script&gt;</code> files,
-  and the site talks to the note with <code>postMessage</code>.</div>
+> Gotcha · When the site is opened from disk (`file://`), every file counts as its own origin. The site can't `fetch` data or reach into the note's iframe. So the data is loaded as `<script>` files, and the site talks to the note with `postMessage`.
 
-<div class="keep">
-  <h3><span class="tag concept">Concept</span>Messages between the site and a note</h3>
-  <table>
-    <tr><th>Site sends</th><th>Note (<code>notes/note.js</code>) does</th></tr>
-    <tr><td><code>"chalk:print"</code></td><td>Opens the print dialog: Export → Save as PDF</td></tr>
-    <tr><td><code>{type: "chalk:highlight", q}</code></td><td>Wraps every hit in <code>mark.chalk-hit</code>, even across elements, then scrolls to the first</td></tr>
-  </table>
-</div>
+### Concept · Messages between the site and a note
+| Site sends | Note (`notes/note.js`) does
+| `"chalk:print"` | Opens the print dialog: Export → Save as PDF
+| `{type: "chalk:highlight", q}` | Wraps every hit in `mark.chalk-hit`, even across elements, then scrolls to the first
 
-<div class="keep">
-  <h3><span class="tag paths">Routes</span>Site pages by address</h3>
-  <div class="block config">
-    <div class="file">site/app.js</div>
-<pre>const PAGES = {
+### Routes · Site pages by address {paths}
+```config: site/app.js
+const PAGES = {
   backlog: { title: "Backlog", file: ".prog/index.html", hideRecent: true },
   complete: { title: "Complete Tasks", file: ".prog/complete.html" },
   contact: { title: "Contact", file: "site/pages/contact.html" },
-};</pre>
-  </div>
-  <p class="muted"><code>index.html#contact</code> opens a page. Any other hash is treated as a note id. To add a page, put the file in
+};
+```
+```html
+<p class="muted"><code>index.html#contact</code> opens a page. Any other hash is treated as a note id. To add a page, put the file in
     <code>site/pages/</code>, then add it to <code>PAGES</code> and to the footer.</p>
-</div>
+```
 
-<div class="keep">
-  <h3><span class="tag best">Behaviour</span>Panels and header</h3>
-  <table>
-    <tr><th>Part</th><th>Behaviour</th></tr>
-    <tr><td>Left menu <code>nav#nav-menu</code></td><td>Starts as a rail (number + colour bar). Only the menu button opens and closes it</td></tr>
-    <tr><td>Recently viewed</td><td>A rail on the right. Hover slides it open over the note in 0.3 s; leaving slides it back. Last 10, kept in <code>localStorage</code></td></tr>
-    <tr><td>Search</td><td>Full text, phrase first. Each note is listed once with its hit count; opening it highlights every hit</td></tr>
-    <tr><td><code>&lt;chalk-wordmark&gt;</code></td><td>One custom element for the name: Chalk in blue, Book in yellow</td></tr>
-    <tr><td>Note titles</td><td><code>note.js</code> colours the words blue → pink → green → yellow, with every <code>&amp;</code> in lavender</td></tr>
-    <tr><td>Narrow windows</td><td>The name is hidden first (820 px), then the note title (600 px)</td></tr>
-  </table>
-</div>
+### Behaviour · Panels and header {best}
+| Part | Behaviour
+| Left menu `nav#nav-menu` | Starts as a rail (number + colour bar). Only the menu button opens and closes it
+| Recently viewed | A rail on the right. Hover slides it open over the note in 0.3 s; leaving slides it back. Last 10, kept in `localStorage`
+| Search | Full text, phrase first. Each note is listed once with its hit count; opening it highlights every hit
+| `<chalk-wordmark>` | One custom element for the name: Chalk in blue, Book in yellow
+| Note titles | `note.js` colours the words blue → pink → green → yellow, with every `&` in lavender
+| Narrow windows | The name is hidden first (820 px), then the note title (600 px)
 
-<div class="keep">
-  <h3><span class="tag paths">Private</span>Backlog and Complete Tasks</h3>
-  <ul class="steps">
-    <li>Both live in <code>.prog/</code>. They're gitignored, so online the footer links lead to empty pages.</li>
-    <li>They cover Chalk Book itself only. Work inside a project goes in that project's roadmap in <code>site/notes.js</code>.</li>
-    <li>An item moves to Complete Tasks <b>only when asked</b>: its whole card, with a Done chip and a date added.
-      It keeps its number and <code>id</code>, and no details are invented.</li>
-  </ul>
-</div>
+### Private · Backlog and Complete Tasks {paths}
+1. Both live in `.prog/`. They're gitignored, so online the footer links lead to empty pages.
+2. They cover Chalk Book itself only. Work inside a project goes in that project's roadmap in `site/notes.js`.
+3. An item moves to Complete Tasks **only when asked**: its whole card, with a Done chip and a date added. It keeps its number and `id`, and no details are invented.
 
-<h2 class="gotcha">Bugs hit &amp; fixed</h2>
+## Bugs hit & fixed
 
-<div class="bug">
-  <h4>Bug · note sheet showed a beige frame instead of dark</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>With no background on <code>html</code>, the browser spreads the <code>body</code> background
-      (paper) over the whole canvas of the iframe.</dd>
-    <dt class="fix">FIX</dt><dd>Give <code>html</code> a transparent "image" background, and set <code>color-scheme: dark</code> to match the site (screen only).</dd>
-  </dl>
-  <div class="block config"><div class="file">notes/note-layout.css</div>
-<pre>:root { color-scheme: dark; }
-html { background: linear-gradient(transparent, transparent); }</pre></div>
-</div>
+#### Bug · note sheet showed a beige frame instead of dark
+cause: With no background on `html`, the browser spreads the `body` background (paper) over the whole canvas of the iframe.
+fix: Give `html` a transparent "image" background, and set `color-scheme: dark` to match the site (screen only).
+```config: notes/note-layout.css
+:root { color-scheme: dark; }
+html { background: linear-gradient(transparent, transparent); }
+```
 
-<div class="bug">
-  <h4>Bug · hidden iframe still showing</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>A <code>display: block</code> rule beat the browser's built-in <code>[hidden]</code> style.</dd>
-    <dt class="fix">FIX</dt><dd><code>[hidden] { display: none !important }</code></dd>
-  </dl>
-</div>
+#### Bug · hidden iframe still showing
+cause: A `display: block` rule beat the browser's built-in `[hidden]` style.
+fix: `[hidden] { display: none !important }`
 
-<div class="bug">
-  <h4>Bug · searching "module 2" matched every note</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>The words were matched one at a time, and "module" and "2" appear almost everywhere.</dd>
-    <dt class="fix">FIX</dt><dd>Match the whole phrase first, and fall back to separate words only when the phrase isn't found.</dd>
-  </dl>
-</div>
+#### Bug · searching "module 2" matched every note
+cause: The words were matched one at a time, and "module" and "2" appear almost everywhere.
+fix: Match the whole phrase first, and fall back to separate words only when the phrase isn't found.
 
-<div class="bug">
-  <h4>Bug · highlighted header text unreadable</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>Light title text on a peach highlight.</dd>
-    <dt class="fix">FIX</dt><dd>Mark text uses <code>var(--ink)</code> on screen. In print, highlights are hidden and the text keeps its own colour (<code>color: inherit</code>).</dd>
-  </dl>
-</div>
+#### Bug · highlighted header text unreadable
+cause: Light title text on a peach highlight.
+fix: Mark text uses `var(--ink)` on screen. In print, highlights are hidden and the text keeps its own colour (`color: inherit`).
 
-<div class="bug">
-  <h4>Bug · Backlog opened halfway down the page</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>The route pointed to an anchor (<code>#naming-parts</code>) inside the page.</dd>
-    <dt class="fix">FIX</dt><dd>Route to the bare file, <code>.prog/index.html</code>.</dd>
-  </dl>
-</div>
+#### Bug · Backlog opened halfway down the page
+cause: The route pointed to an anchor (`#naming-parts`) inside the page.
+fix: Route to the bare file, `.prog/index.html`.
 
-<div class="bug">
-  <h4>Bug · headless test browser kept the profile locked</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>Piping a test into <code>| head</code> killed the script with EPIPE, and the headless Brave it started kept running.</dd>
-    <dt class="fix">FIX</dt><dd>Find and stop it, then don't pipe test runners into <code>head</code>.</dd>
-  </dl>
-  <div class="block local"><pre>pgrep -af remote-debugging-port    <span class="cmt"># -a: full command line, -f: match against it</span>
-kill &lt;pid&gt;                         <span class="cmt"># only a process you started yourself</span></pre></div>
-</div>
+#### Bug · headless test browser kept the profile locked
+cause: Piping a test into `| head` killed the script with EPIPE, and the headless Brave it started kept running.
+fix: Find and stop it, then don't pipe test runners into `head`.
+```local
+pgrep -af remote-debugging-port  # -a: full command line, -f: match against it
+kill <pid>  # only a process you started yourself
+```
 
-<div class="bug">
-  <h4>Bug · a public IP inside an archived PDF</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>An original PDF showed a server's public IP, which shouldn't be in the repo.</dd>
-    <dt class="fix">FIX</dt><dd>Redacted it with PyMuPDF in a scratch venv, replacing it with <code>&lt;instance-ip&gt;</code>, then amended the only commit and force-pushed.</dd>
-  </dl>
-  <div class="block local"><pre>for page in doc:                                     <span class="cmt"># doc = fitz.open("archive/….pdf")</span>
-    for r in page.search_for(ip):                    <span class="cmt"># every spot the text appears</span>
-        page.add_redact_annot(r, text="&lt;instance-ip&gt;")
-    page.apply_redactions()                          <span class="cmt"># deletes the text, not just hides it</span></pre></div>
-</div>
+#### Bug · a public IP inside an archived PDF
+cause: An original PDF showed a server's public IP, which shouldn't be in the repo.
+fix: Redacted it with PyMuPDF in a scratch venv, replacing it with `<instance-ip>`, then amended the only commit and force-pushed.
+```local
+for page in doc:                                     # doc = fitz.open("archive/….pdf")
+    for r in page.search_for(ip):                    # every spot the text appears
+        page.add_redact_annot(r, text="<instance-ip>")
+    page.apply_redactions()                          # deletes the text, not just hides it
+```
 
-<div class="callout gotcha"><b>Gotcha ·</b> A force-push rewrites the branch, but GitHub can still serve the old commit to anyone who has its exact link.
-  Keep private data out <i>before</i> the first push.</div>
+---
+> Gotcha · A force-push rewrites the branch, but GitHub can still serve the old commit to anyone who has its exact link. Keep private data out *before* the first push.
 
-<div class="keep">
-  <h2 class="paths">Where things live</h2>
-  <table>
-    <tr><th>What</th><th>Path</th></tr>
-    <tr><td>Rules (source of truth)</td><td><code>CLAUDE.md</code> → <code>notes/00-chalk-book-guide.html</code> → <code>00-chalk-book-guide.pdf</code></td></tr>
-    <tr><td>Note palette (user-owned)</td><td><code>chalk-pastel.css</code></td></tr>
-    <tr><td>Dark site greys</td><td><code>site/site-theme.css</code></td></tr>
-    <tr><td>Shared note layout and script</td><td><code>notes/note-layout.css</code>, <code>notes/note.js</code></td></tr>
-    <tr><td>Site logic and styles</td><td><code>site/app.js</code>, <code>site/app.css</code></td></tr>
-    <tr><td>Contact page</td><td><code>site/pages/contact.html</code></td></tr>
-    <tr><td>Private progress pages</td><td><code>.prog/index.html</code>, <code>.prog/complete.html</code></td></tr>
-    <tr><td>Original PDFs</td><td><code>archive/</code></td></tr>
-  </table>
-</div>
+{keep}
+## Where things live
+| What | Path
+| Rules (source of truth) | `CLAUDE.md` → `notes/00-chalk-book-guide.html` → `00-chalk-book-guide.pdf`
+| Note palette (user-owned) | `chalk-pastel.css`
+| Dark site greys | `site/site-theme.css`
+| Shared note layout and script | `notes/note-layout.css`, `notes/note.js`
+| Site logic and styles | `site/app.js`, `site/app.css`
+| Contact page | `site/pages/contact.html`
+| Private progress pages | `.prog/index.html`, `.prog/complete.html`
+| Original PDFs | `archive/`
 
-<h2 class="best">Best practices</h2>
-<div class="cards">
-  <div><b>Two palettes, kept apart</b>Notes use only <code>chalk-pastel.css</code>, and the site frame uses only <code>site-theme.css</code>. No hex values anywhere else.</div>
-  <div><b>No build step</b>Plain files that open from disk and can be hosted anywhere unchanged. Generated data goes into script files.</div>
-  <div><b>Test headless</b>Drive headless Brave over CDP from small node scripts to check layout, search and highlighting.</div>
-  <div><b>Access ≠ permission</b>Setting up push access is not a request to push. Push, publish or force-push only when asked, every time.</div>
-  <div><b>Private stays local</b>Backlog, research and records go in gitignored folders. Check <code>git status</code> before every commit.</div>
-  <div><b>Rules in one place</b>Change <code>CLAUDE.md</code> only on request, then update the guide HTML and PDF too.</div>
-</div>
+## Best practices
 
-<p class="part-of">Part of Chalk Book · see
-  <a href="../index.html#00-chalk-book-guide" target="_top">00 Chalk Book Guide</a> for the full rules</p>
+- **Two palettes, kept apart** Notes use only `chalk-pastel.css`, and the site frame uses only `site-theme.css`. No hex values anywhere else.
+- **No build step** Plain files that open from disk and can be hosted anywhere unchanged. Generated data goes into script files.
+- **Test headless** Drive headless Brave over CDP from small node scripts to check layout, search and highlighting.
+- **Access ≠ permission** Setting up push access is not a request to push. Push, publish or force-push only when asked, every time.
+- **Private stays local** Backlog, research and records go in gitignored folders. Check `git status` before every commit.
+- **Rules in one place** Change `CLAUDE.md` only on request, then update the guide HTML and PDF too.
 
-<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
-<script src="note.js"></script>
-</body>
-</html>
+Part of Chalk Book · see [[00-chalk-book-guide]] for the full rules
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

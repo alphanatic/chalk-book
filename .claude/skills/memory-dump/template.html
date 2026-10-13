@@ -1,131 +1,69 @@
-<!doctype html>
-<!-- Chalk-book note template. Copy to notes/<project>-<NN>-<topic>.html, replace every {{…}},
-     keep the sections in this order, delete component examples you don't use. -->
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{Project short name}} {{NN}} — {{Topic Title}}</title>
-<link rel="stylesheet" href="../chalk-pastel.css">
-<link rel="stylesheet" href="note-layout.css">
-<style>
-  @page { @bottom-center { content: "{{Project short name}} {{NN}} — {{Topic Title}} · " counter(page) " / " counter(pages); } }
-</style>
-</head>
-<body>
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+{{Short descriptive subtitle}}
+{{1–2 sentences, past tense: what was built or solved.}}
 
-<!-- 1 ── Header band -->
-<header class="hero">
-  <span class="eyebrow">{{Project name}} · {{NN}} · {{Module N, if the project has modules}} · {{YYYY-MM-DD}}</span>
-  <h1>{{Topic Title}}</h1>  <!-- note.js colours the words: blue, pink, green, yellow -->
-  <p class="sub">{{Short descriptive subtitle}}</p>
-  <p>{{1–2 sentences, past tense: what was built or solved.}}</p>
-  <p>{{Optional: why it matters to later notes.}}</p>
-</header>
+{{Optional: why it matters to later notes.}}
 
-<!-- 2 ── Legend: only the block types this note uses -->
-<div class="legend">
-  <span class="chip local">Local — your machine</span>
-  <span class="chip remote">Remote — the server</span>
-  <span class="chip config">Config file</span>
-  <span class="chip concept">Concept</span>
-  <span class="chip console">AWS Console</span>
-  <span class="chip gotcha">Gotcha</span>
-  <span class="chip best">Best practice</span>
-  <span class="chip paths">Paths</span>
-</div>
+## What we covered
+- {{Outcome, one line, with `inline code` for names}}
 
-<!-- 3 ── What we covered -->
-<h2 class="best">What we covered</h2>
-<ul class="check">
-  <li>{{Outcome, one line, with <code>inline code</code> for names}}</li>
-</ul>
+## Full command sequence
 
-<!-- 4 ── Full command sequence -->
-<h2 class="local">Full command sequence</h2>
+### Remote · {{Step heading}}
+```remote
+sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
+```
 
-<div class="keep">
-  <h3><span class="tag remote">Remote</span>{{Step heading}}</h3>
-  <div class="block remote"><pre>sudo mkdir -p /mnt/data    <span class="cmt"># -p: create parents, no error if it exists</span></pre></div>
-</div>
+### Local · {{Step heading}}
+```local
+ssh lab-ubuntu-01  # connect using ~/.ssh/config
+```
+```config: /path/to/file
+{{file contents — never add comments inside}}
+```
+```config: /etc/systemd/system/example.service
+[Unit]  »  metadata + ordering
+Description=Example  »  shown in systemctl status
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>{{Step heading}}</h3>
-  <div class="block local"><pre>ssh lab-ubuntu-01    <span class="cmt"># connect using ~/.ssh/config</span></pre></div>
-</div>
+[Service]  »  how to run it
+```
+```output
+NAME      SIZE TYPE
+nvme1n1     5G disk  # the new, empty volume
+```
 
-<!-- Config file, plain -->
-<div class="block config">
-  <div class="file">/path/to/file</div>
-<pre>{{file contents — never add comments inside}}</pre>
-</div>
+### AWS Console · {{Step heading}}
+1. {{Click path, e.g. EC2 → Volumes → Create volume}}
 
-<!-- Config file with notes beside each line -->
-<!-- add "wide" (class="block config annotated wide") for long code lines with short notes -->
-<div class="block config annotated">
-  <div class="file">/etc/systemd/system/example.service</div>
-  <div class="row"><pre>[Unit]</pre><span>metadata + ordering</span></div>
-  <div class="row"><pre>Description=Example</pre><span>shown in systemctl status</span></div>
-  <div class="gap"></div>
-  <div class="row"><pre>[Service]</pre><span>how to run it</span></div>
-</div>
+> Gotcha · {{The trap and how to avoid it.}}
+> Concept · {{The why behind it.}}
+> Best practice · {{The recommended way, and why.}}
+> Key rule · {{A hard requirement.}}
+> Naming note · Old name <span class="old">aws-lab-ubuntu-01</span> → `vm-ubuntu-lab-eun1-001`
 
-<!-- Command output -->
-<div class="block output"><pre>NAME      SIZE TYPE
-nvme1n1     5G disk    <span class="cmt"># the new, empty volume</span></pre></div>
+| {{Column}} | {{Column}}
+| {{Name}} | {{Meaning}}
 
-<!-- AWS Console step -->
-<div class="keep">
-  <h3><span class="tag console">AWS Console</span>{{Step heading}}</h3>
-  <ul class="steps"><li>{{Click path, e.g. EC2 → Volumes → Create volume}}</li></ul>
-</div>
+## Bugs hit & fixed
 
-<!-- Callouts -->
-<div class="callout gotcha"><b>Gotcha ·</b> {{The trap and how to avoid it.}}</div>
-<div class="callout concept"><b>Concept ·</b> {{The why behind it.}}</div>
-<div class="callout best"><b>Best practice ·</b> {{The recommended way, and why.}}</div>
-<div class="callout config"><b>Key rule ·</b> {{A hard requirement.}}</div>
-<div class="callout paths"><b>Naming note ·</b> Old name <span class="old">aws-lab-ubuntu-01</span> → <code>vm-ubuntu-lab-eun1-001</code></div>
+#### Bug · {{short name}}
+cause: {{What went wrong and why, with the real error message.}}
+fix: {{What fixed it.}}
+```remote
+{{fix commands}}  # what it does
+```
 
-<!-- Concept chain -->
-<div class="chain"><span>Disk</span><i>→</i><span>Physical Volume</span><i>→</i><span>Volume Group</span><i>→</i><span>Logical Volume</span></div>
+{keep}
+## Where things live
+| What | Path
+| {{purpose}} | `{{/path}}`
 
-<!-- Table (field explanations, quick reference, paths) -->
-<table>
-  <tr><th>{{Column}}</th><th>{{Column}}</th></tr>
-  <tr><td>{{Name}}</td><td>{{Meaning}}</td></tr>
-</table>
+{keep}
+## Best practices
+- **{{Short title}}** {{One line on the recommended way, and why.}}
+- **{{Short title}}** {{One line.}}
 
-<!-- 5 ── Bugs hit & fixed: one card per real error -->
-<h2 class="gotcha">Bugs hit &amp; fixed</h2>
-<div class="bug">
-  <h4>Bug · {{short name}}</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>{{What went wrong and why, with the real error message.}}</dd>
-    <dt class="fix">FIX</dt><dd>{{What fixed it.}}</dd>
-  </dl>
-  <div class="block remote"><pre>{{fix commands}}    <span class="cmt"># what it does</span></pre></div>
-</div>
-
-<!-- 6 ── Optional: Paths / Quick reference -->
-<h2 class="paths">Where things live</h2>
-<table>
-  <tr><th>What</th><th>Path</th></tr>
-  <tr><td>{{purpose}}</td><td><code>{{/path}}</code></td></tr>
-</table>
-
-<!-- 7 ── Optional: Best practices as cards (short bold title, one line) -->
-<h2 class="best">Best practices</h2>
-<div class="cards">
-  <div><b>{{Short title}}</b>{{One line on the recommended way, and why.}}</div>
-  <div><b>{{Short title}}</b>{{One line.}}</div>
-</div>
-
-<!-- 8 ── Closing line; link related notes through the site so links work in it and in a PDF viewer -->
-<p class="part-of">Part of {{Project name}} · see
-  <a href="../index.html#{{related-note-id}}" target="_top">{{NN Related Note}}</a> for {{why}}</p>
-
-<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
-<script src="note.js"></script>
-</body>
-</html>
+Part of {{Project name}} · see [[{{related-note-id}}]] for {{why}}
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

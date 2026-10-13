@@ -1,49 +1,24 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chalk Book — Project Guide</title>
-<link rel="stylesheet" href="../chalk-pastel.css">
-<link rel="stylesheet" href="note-layout.css">
-<style>
-  @page { @bottom-center { content: "Chalk Book — Project Guide · " counter(page) " / " counter(pages); } }
-</style>
-</head>
-<body>
+<script type=text/chalk>
+<span class="eyebrow">00 · Meta</span>
+<h1><span class="wm-chalk">Chalk</span> <span class="wm-book">Book</span> <span class="tc-pink">Guide</span></h1>
+Purpose, structure & conventions
 
-<header class="hero">
-  <span class="eyebrow">00 · Meta</span>
-  <h1><span class="wm-chalk">Chalk</span> <span class="wm-book">Book</span> <span class="tc-pink">Guide</span></h1>
-  <p class="sub">Purpose, structure &amp; conventions</p>
-  <p>A personal technical chalk book. After a session of problem-solving, building or learning with an AI,
-    the work is distilled into one calm, skimmable note that can be revisited later for a fast refresher,
-    on a small local site or as a PDF.</p>
-  <p>This is the read-only copy of <code>CLAUDE.md</code>, which is the source of truth.</p>
-</header>
+A personal technical chalk book. After a session of problem-solving, building or learning with an AI, the work is distilled into one calm, skimmable note that can be revisited later for a fast refresher, on a small local site or as a PDF.
 
-<div class="legend">
-  <span class="chip local">Local — your machine</span>
-  <span class="chip remote">Remote — the server</span>
-  <span class="chip config">Config file</span>
-  <span class="chip concept">Concept</span>
-  <span class="chip console">AWS Console</span>
-  <span class="chip gotcha">Gotcha</span>
-  <span class="chip best">Best practice</span>
-  <span class="chip paths">Paths</span>
-</div>
+This is the read-only copy of `CLAUDE.md`, which is the source of truth.
 
-<h2 class="best">Purpose</h2>
-<ul class="check">
-  <li><b>Capture</b> recent work while it is fresh: commands, configs, decisions, mistakes.</li>
-  <li><b>Revisit</b> it later and get the gist in under a minute.</li>
-  <li><b>Repeat</b> it cold, months later, without re-researching anything.</li>
-  <li><b>Trace</b> what was done, per project and date, so a future AI can recall which scenarios have been worked through.</li>
-</ul>
+## Purpose {best}
 
-<div class="keep">
-  <h3>Two kinds of knowledge</h3>
-  <div class="two">
+- **Capture** recent work while it is fresh: commands, configs, decisions, mistakes.
+- **Revisit** it later and get the gist in under a minute.
+- **Repeat** it cold, months later, without re-researching anything.
+- **Trace** what was done, per project and date, so a future AI can recall which scenarios have been worked through.
+
+### Two kinds of knowledge
+```html
+<div class="two">
     <div class="card local">
       <h4>Recurring</h4>
       <p>Used again and again: <code>systemctl</code>, ssh config, naming rules.</p>
@@ -55,77 +30,85 @@
       <p><b>The note is a complete recipe.</b> Every step in order, every flag explained, so it can be redone from zero.</p>
     </div>
   </div>
-</div>
-<div class="callout best"><b>Best practice ·</b> When in doubt, write for the forgetful future self. Assume nothing is remembered.</div>
+```
 
-<h2 class="paths">The collection</h2>
-<div class="block paths"><pre>chalk-book/
-├── README.md                     <span class="cmt"># what this is; points here</span>
-├── CLAUDE.md                     <span class="cmt"># this guide (source of truth)</span>
-├── chalk-pastel.css              <span class="cmt"># the note colour palette (user-owned)</span>
-├── index.html                    <span class="cmt"># the site: open it in a browser</span>
-├── site/                         <span class="cmt"># catalogue, menu, search (build-index.mjs), dark theme</span>
-├── notes/                        <span class="cmt"># one HTML file per note</span>
+---
+> Best practice · When in doubt, write for the forgetful future self. Assume nothing is remembered.
+
+## The collection {paths}
+
+```paths
+chalk-book/
+├── README.md                     # what this is; points here
+├── CLAUDE.md                     # this guide (source of truth)
+├── chalk-pastel.css              # the note colour palette (user-owned)
+├── index.html                    # the site: open it in a browser
+├── site/                         # catalogue, menu, search (build-index.mjs), dark theme
+├── notes/                        # one file per note, chalk markup
 │   ├── tinker-town-01-aws-ssh-firewall.html …
-│   ├── note-layout.css           <span class="cmt"># shared layout and components</span>
-│   └── fonts/                    <span class="cmt"># bundled Inter, renders offline</span>
-├── archive/                      <span class="cmt"># old PDFs, including the last guide PDF</span>
-│   └── backlog-workflow/         <span class="cmt"># the old backlog design (private)</span>
-├── .prog/, .research/            <span class="cmt"># private and gitignored: backlog, research</span>
-└── .claude/skills/memory-dump/   <span class="cmt"># the note-making workflow</span></pre></div>
+│   ├── note.js                   # turns chalk markup into the page
+│   ├── note-layout.css           # shared layout and components
+│   └── fonts/                    # bundled Inter, renders offline
+├── archive/                      # old PDFs, including the last guide PDF
+│   └── backlog-workflow/         # the old backlog design (private)
+├── .prog/, .research/            # private and gitignored: backlog, research
+└── .claude/skills/memory-dump/   # the note-making workflow
+```
 
-<div class="keep">
-  <h3>File naming</h3>
-  <div class="block config"><pre>&lt;project&gt;-&lt;NN&gt;-&lt;topic&gt;.html</pre></div>
-  <table>
-    <tr><th>Part</th><th>Rule</th><th>Example</th></tr>
-    <tr><td>project</td><td>Slug from the project list, so the name says where the work happened.</td><td><code>tinker-town</code></td></tr>
-    <tr><td>NN</td><td>Two digits, counting up within each project.</td><td><code>03</code></td></tr>
-    <tr><td>topic</td><td>2–4 words naming the subject, not the outcome.</td><td><code>cron-logrotate</code></td></tr>
-    <tr><td>scope</td><td>One topic per file. A long session becomes several notes.</td><td>—</td></tr>
-    <tr><td>date</td><td>Inside the note and in <code>site/notes.js</code>, not in the file name.</td><td><code>2026-08-30</code></td></tr>
-    <tr><td>00-</td><td>Reserved for meta files about the chalk book itself.</td><td><code>00-chalk-book-guide</code></td></tr>
-  </table>
-</div>
+### File naming
+```config
+<project>-<NN>-<topic>.html
+```
+| Part | Rule | Example
+| project | Slug from the project list, so the name says where the work happened. | `tinker-town`
+| NN | Two digits, counting up within each project. | `03`
+| topic | 2–4 words naming the subject, not the outcome. | `cron-logrotate`
+| scope | One topic per file. A long session becomes several notes. | —
+| date | Only in `site/notes.js`; the note's header is made from it. | `2026-08-30`
+| 00- | Reserved for meta files about the chalk book itself. | `00-chalk-book-guide`
 
-<div class="keep">
-  <h3>Projects</h3>
-  <table>
-    <tr><th>Slug</th><th>Display name</th><th>What it is</th></tr>
-    <tr><td><code>tinker-town</code></td><td>Project Tinker Town</td><td>Self-paced AWS Linux sysadmin lab, a one-week crash course in 7 modules</td></tr>
-    <tr><td><code>pokedex</code></td><td>Pokédex</td><td>The Pokédex web project</td></tr>
-    <tr><td><code>claude-code</code></td><td>Claude Code</td><td>Setting up and securing Claude Code itself</td></tr>
-    <tr><td><code>javascript</code></td><td>JavaScript</td><td>Learning JavaScript by reviewing and fixing a React todo app</td></tr>
-    <tr><td><code>meta</code></td><td>Chalk Book</td><td>Notes about the chalk book itself</td></tr>
-  </table>
-  <p class="muted">A new project gets a row here and in <code>CHALK_PROJECTS</code> in <code>site/notes.js</code>, which can also hold its roadmap of modules.</p>
-</div>
+### Projects
+| Slug | Display name | What it is
+| `tinker-town` | Project Tinker Town | Self-paced AWS Linux sysadmin lab, a one-week crash course in 7 modules
+| `pokedex` | Pokédex | The Pokédex web project
+| `claude-code` | Claude Code | Setting up and securing Claude Code itself
+| `javascript` | JavaScript | Learning JavaScript by reviewing and fixing a React todo app
+| `meta` | Chalk Book | Notes about the chalk book itself
+```html
+<p class="muted">A new project gets a row here and in <code>CHALK_PROJECTS</code> in <code>site/notes.js</code>, which can also hold its roadmap of modules.</p>
+```
 
-<div class="keep">
-  <h3>Note types</h3>
-  <div class="two">
+### Note types
+```html
+<div class="two">
     <div class="card"><h4>Walkthrough</h4><p>What was done in a session, start to finish. Most notes are this type.</p></div>
     <div class="card"><h4>Reference</h4><p>A cross-cutting rulebook other notes depend on, such as naming conventions. It says so in its summary.</p></div>
   </div>
-</div>
+```
 
-<h2 class="concept">Anatomy of a note</h2>
+## Anatomy of a note
+
+```html
 <p style="margin:0 0 6px">Every note follows the same top-to-bottom shape, so the eye always knows where to look.</p>
-<ul class="steps">
-  <li><b>Header band</b>: eyebrow chip <code>PROJECT TINKER TOWN · 03 · MODULE 1 · 2026-08-30</code>, title words coloured blue, pink, green, yellow in turn, a short subtitle, and a 1–2 sentence past-tense summary.</li>
-  <li><b>Legend</b>: colour chips for every block type used in the note.</li>
-  <li><b>What we covered</b>: a ✓ checklist of outcomes, skimmable on its own.</li>
-  <li><b>Full command sequence</b>: steps under short headings, each tagged <span class="tag local">Local</span> or <span class="tag remote">Remote</span></li>
-  <li><b>Supporting sections</b>: concepts, diagrams, field tables, quick-reference tables.</li>
-  <li><b>Bugs hit &amp; fixed</b>: one card per real error, <b>Cause</b> → <b>Fix</b>.</li>
-  <li><b>Where things live</b> and <b>Best practices</b> (short cards) as needed.</li>
-  <li><b>Part of</b> line: the project, with links to related notes through the site.</li>
-  <li><b>Footer</b> on printed pages: <code>Tinker Town 03 — Systemd Service · 1 / 3</code></li>
-</ul>
+```
 
-<div class="keep">
-  <h3>Block types</h3>
-  <table>
+1. **Header band**: eyebrow chip `PROJECT TINKER TOWN · 03 · MODULE 1 · 2026-08-30`, title words coloured blue, pink, green, yellow in turn, a short subtitle, and a 1–2 sentence past-tense summary.
+2. **Legend**: colour chips, made from the components on the page (heading dots don't count).
+3. **What we covered**: a ✓ checklist of outcomes, complete enough to stand in for the note.
+4. **Full command sequence**: steps under short headings, each tagged <span class="tag local">Local</span> or <span class="tag remote">Remote</span>
+5. **Supporting sections**: concepts, diagrams, field tables, quick-reference tables.
+6. **Bugs hit & fixed**: one card per real error, **Cause** → **Fix**.
+7. **Where things live** and **Best practices** (short cards) as needed.
+8. **Part of** line: the project, with links to related notes through the site.
+9. **Footer** on printed pages: `Tinker Town 03 — Systemd Service · 1 / 3`
+
+```html
+<p style="margin:6px 0 0">Notes are written in <b>chalk markup</b>: compact text that <code>note.js</code> turns into this shape in the browser, with no build step. The syntax is at the top of <code>note.js</code>; the template shows every part. Header, legend and footer are made for you. The standard headings get ids: <code>covered</code>, <code>steps</code>, <code>bugs</code>, <code>paths</code>, <code>practices</code>.</p>
+```
+
+### Block types
+```html
+<table>
     <tr><th>Block</th><th>Palette colour</th><th>Used for</th></tr>
     <tr class="local"><td><span class="sw"></span>Local</td><td><code>--sky</code></td><td>Commands run on your own machine</td></tr>
     <tr class="remote"><td><span class="sw"></span>Remote</td><td><code>--lav</code></td><td>Commands run on the server</td></tr>
@@ -136,99 +119,85 @@
     <tr class="paths"><td><span class="sw"></span>Paths</td><td><code>--pink</code></td><td>File and folder locations; tables; title accent</td></tr>
     <tr class="console"><td><span class="sw"></span>AWS Console</td><td><code>--coral</code></td><td>Steps done in a web console, not a shell</td></tr>
   </table>
-  <p class="muted">Inline callouts use a bold label and a dot: <b>Gotcha ·</b> <b>Concept ·</b> <b>Key rule ·</b> <b>Naming note ·</b> <b>Updated rule ·</b></p>
-</div>
+```
+```html
+<p class="muted">Inline callouts use a bold label and a dot: <b>Gotcha ·</b> <b>Concept ·</b> <b>Key rule ·</b> <b>Naming note ·</b> <b>Updated rule ·</b></p>
+```
 
-<h2 class="local">Writing style</h2>
-<ul class="check">
-  <li><b>Skim first.</b> Headings, checklists and tables carry the story; prose only fills gaps.</li>
-  <li><b>Short.</b> Sentences under ~20 words. No intro paragraphs, no filler.</li>
-  <li><b>Every command gets a comment</b> explaining what it does and what each flag means.</li>
-  <li><b>Config files stay clean.</b> Annotations sit beside the file or in a field table, never inside it.</li>
-  <li><b>Real by default, except access, location and private life.</b> Actual commands, paths and error messages, but:
-    no keys, passwords or tokens; placeholders such as <code>&lt;instance-ip&gt;</code> for public IPs, account IDs and emails;
-    nothing about the user's private life. Anything that looks like an admin account is always <code>adm-kiwi</code>: never a name, never a placeholder, live or test.</li>
-  <li><b>Keep the mistakes.</b> Errors and their fixes are often the most valuable part.</li>
-  <li><b>Respect history.</b> When a convention changes, mark old names as legacy instead of rewriting earlier notes.</li>
-  <li><b>Calm tone.</b> Plain, friendly and factual. No hype, no emoji.</li>
-</ul>
-<div class="block remote"><pre>sudo mkdir -p /mnt/data    <span class="cmt"># -p: create parents, no error if it exists</span></pre></div>
-<div class="callout gotcha"><b>Gotcha ·</b> Many config formats break on inline comments. That is why config blocks are never annotated inside the block itself.</div>
+## Writing style {local}
 
-<h2 class="config">Visual style</h2>
-<div class="callout paths"><b>Key rule ·</b> <code>chalk-pastel.css</code> is the palette for every note, until the user says otherwise.
-  Colours are used only through its variables, never as hex values. The file belongs to the user.</div>
-<div class="keep">
-  <h3>How the palette is built</h3>
-  <table>
-    <tr><th>Part</th><th>Example</th><th>Used for</th></tr>
-    <tr><td>chalk</td><td><code>--lav</code></td><td>Chips, borders, left bars</td></tr>
-    <tr><td>-bg</td><td><code>--lav-bg</code></td><td>Box tints</td></tr>
-    <tr><td>-ink</td><td><code>--lav-ink</code></td><td>Coloured text, comments</td></tr>
-    <tr><td>-chip</td><td><code>--lav-chip</code></td><td>Text on a chalk chip</td></tr>
-  </table>
-</div>
-<div class="callout concept"><b>Concept ·</b> Notes link the palette instead of copying it. Changing <code>chalk-pastel.css</code> restyles every note at its next render; PDFs keep their look until re-rendered.</div>
+- **Skim first.** Headings, checklists and tables carry the story; prose only fills gaps.
+- **Short.** Sentences under ~20 words. No intro paragraphs, no filler.
+- **Every command gets a comment** explaining what it does and what each flag means.
+- **Config files stay clean.** Annotations sit beside the file or in a field table, never inside it.
+- **Real by default, except access, location and private life.** Actual commands, paths and error messages, but: no keys, passwords or tokens; placeholders such as `<instance-ip>` for public IPs, account IDs and emails; nothing about the user's private life. Anything that looks like an admin account is always `adm-kiwi`: never a name, never a placeholder, live or test.
+- **Keep the mistakes.** Errors and their fixes are often the most valuable part.
+- **Trim output.** Keep the few lines of output or log that matter, never the whole dump.
+- **Respect history.** When a convention changes, mark old names as legacy instead of rewriting earlier notes.
+- **Calm tone.** Plain, friendly and factual. No hype, no emoji.
+
+```remote
+sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
+```
+
+> Gotcha · Many config formats break on inline comments. That is why config blocks are never annotated inside the block itself.
+
+## Visual style {config}
+
+>{paths} Key rule · `chalk-pastel.css` is the palette for every note, until the user says otherwise. Colours are used only through its variables, never as hex values. The file belongs to the user.
+
+### How the palette is built
+| Part | Example | Used for
+| chalk | `--lav` | Chips, borders, left bars
+| -bg | `--lav-bg` | Box tints
+| -ink | `--lav-ink` | Coloured text, comments
+| -chip | `--lav-chip` | Text on a chalk chip
+
+---
+> Concept · Notes link the palette instead of copying it. Changing `chalk-pastel.css` restyles every note at its next render; PDFs keep their look until re-rendered.
+
+```html
 <p class="muted">Layout lives in <code>notes/note-layout.css</code>: A4 on <code>--paper</code>, an <code>--asphalt</code> header band, Inter (bundled) for text, DejaVu Sans Mono (from the system, falls back to any monospace) for code, soft tinted blocks.</p>
+```
 
-<div class="keep">
-  <h3>The site</h3>
-  <ul class="check">
-    <li><code>index.html</code> opens straight from disk, no build step. How it looks and behaves is in the code and in <code>meta-01-site-build</code>.</li>
-    <li>Site colours live in <code>site/site-theme.css</code>, never in the note palette. The name is always the shared <code>&lt;chalk-wordmark&gt;</code>.</li>
-    <li>After adding or changing a note, rebuild the search index: <code>node site/build-index.mjs</code>.</li>
-    <li>A new site page goes in <code>site/pages/</code>, then into <code>PAGES</code> in <code>site/app.js</code> and the main footer. New Export options are items in the Export menu.</li>
-    <li>Backlog and Complete Tasks are private pages in <code>.prog/</code>, gitignored, about Chalk Book itself only.
-      A finished item moves to Complete Tasks only when the user asks, unchanged except a Done chip and a date.</li>
-  </ul>
-</div>
+### The site
+- `index.html` opens straight from disk, no build step. How it looks and behaves is in the code and in `meta-01-site-build`.
+- Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`.
+- After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
+- A new site page goes in `site/pages/`, then into `PAGES` in `site/app.js` and the main footer. New Export options are items in the Export menu.
+- Backlog and Complete Tasks are private pages in `.prog/`, gitignored, about Chalk Book itself only. A finished item moves to Complete Tasks only when the user asks, unchanged except a Done chip and a date.
 
-<h2 class="gotcha">How notes are made &amp; changed</h2>
-<div class="callout concept"><b>Concept ·</b> The notes are <b>read-only by design</b>. Nobody edits a note in a viewer; every change goes through an AI session.</div>
+## How notes are made & changed {gotcha}
 
-<div class="keep">
-  <h3>Adding a note: the memory-dump skill</h3>
-  <ul class="steps">
-    <li>Work on something, in any project folder.</li>
-    <li>While it is fresh, say <b>“memory-dump”</b> or <b>“chalk that up”</b>. A personal pointer skill makes this work in every folder.
-      An AI may also offer a dump when the topic changes or about an hour of content has built up.</li>
-    <li>The skill plans the notes, fills the template in <code>notes/</code>, adds them to <code>site/notes.js</code>, rebuilds the search index,
-      runs <code>check.sh</code> and checks every page, then hands over following the user's own git preferences.</li>
-    <li>Check the note on the site and ask for any changes in the same session.</li>
-  </ul>
-</div>
+> Concept · The notes are **read-only by design**. Nobody edits a note in a viewer; every change goes through an AI session.
 
-<div class="keep">
-  <h3>Changing a note or this guide</h3>
-  <ul class="check">
-    <li>Ask for the change in a session. The AI edits the HTML source or <code>CLAUDE.md</code>.</li>
-    <li>Note PDFs are made on demand from the site; the originals from before the HTML rebuild and the last guide PDF are kept in <code>archive/</code>.</li>
-  </ul>
-</div>
+### Adding a note: the memory-dump skill
+1. Work on something, in any project folder.
+2. While it is fresh, say **“memory-dump”** or **“chalk that up”**. A personal pointer skill makes this work in every folder. An AI may also offer a dump when the topic changes or about an hour of content has built up.
+3. The skill plans the notes, fills the template in `notes/`, adds them to `site/notes.js`, rebuilds the search index, runs `check.sh` and checks every page, then hands over following the user's own git preferences.
+4. Check the note on the site and ask for any changes in the same session.
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Rendering and checks</h3>
-  <div class="block local"><pre>.claude/skills/memory-dump/render.sh notes/&lt;name&gt;.html [out-dir]   <span class="cmt"># → &lt;name&gt;.pdf</span>
-.claude/skills/memory-dump/check.sh [--render]                      <span class="cmt"># must pass before every commit</span></pre></div>
-</div>
+### Changing a note or this guide
+- Ask for the change in a session. The AI edits the note's markup or `CLAUDE.md`.
+- Note PDFs are made on demand from the site; the originals from before the HTML rebuild and the last guide PDF are kept in `archive/`.
 
-<h2 class="concept">Rules for AI assistants</h2>
-<ul class="check">
-  <li>Read <code>CLAUDE.md</code> before creating or changing anything in the chalk book.</li>
-  <li>Use the <code>memory-dump</code> skill to make notes, and <code>chalk-pastel.css</code> for every colour.</li>
-  <li>Match the existing notes' structure and look exactly; open one as a reference if unsure.</li>
-  <li>Never edit, rename or delete an existing note or archived PDF unless the user asks.</li>
-  <li>Keep <code>CLAUDE.md</code> and this guide's HTML in sync, and change them only when the user asks.</li>
-  <li>Keep private data out <i>before</i> it is committed: GitHub may still serve a pushed commit after a force-push.
-    If something slips through, tell the user; don't rewrite history without asking.</li>
-  <li><b>Git follows the person.</b> Committing, pushing and commit-message style come from the current user's own
-    instructions, never from this guide. If none are given, ask before any git action.</li>
-  <li><b>Git wording.</b> Use git's own terms exactly: <i>stage</i>, <i>commit</i>, <i>push</i>, <i>pull</i>, <i>revert</i>, <i>reset</i>.
-    If a request doesn't map clearly to one git action, ask, offering 1–3 options with a short description each.</li>
-  <li><b>Commit messages document the work:</b> a title, then a body saying what changed and why.</li>
-</ul>
+### Local · Rendering and checks
+```local
+.claude/skills/memory-dump/render.sh notes/<name>.html [out-dir]   # → <name>.pdf
+.claude/skills/memory-dump/check.sh [--render]                      # must pass before every commit
+```
 
-<!-- lets the chalk-book site print this note (Save as PDF) and highlight search hits -->
-<script src="note.js"></script>
-</body>
-</html>
+## Rules for AI assistants
+
+- Read `CLAUDE.md` before creating or changing anything in the chalk book.
+- Use the `memory-dump` skill to make notes, and `chalk-pastel.css` for every colour.
+- Match the existing notes' structure and look exactly; open one as a reference if unsure.
+- **Read little first.** To find something, stop at the first step that answers it: the catalogue in `site/notes.js`, then hits with context in `site/search-index.js`, then one section (from `## Bugs` to the next `##`), and the whole note only when the task needs all of it.
+- Never edit, rename or delete an existing note or archived PDF unless the user asks.
+- Keep `CLAUDE.md` and this guide's HTML in sync, and change them only when the user asks.
+- Keep private data out *before* it is committed: GitHub may still serve a pushed commit after a force-push. If something slips through, tell the user; don't rewrite history without asking.
+- **Git follows the person.** Committing, pushing and commit-message style come from the current user's own instructions, never from this guide. If none are given, ask before any git action.
+- **Git wording.** Use git's own terms exactly: *stage*, *commit*, *push*, *pull*, *revert*, *reset*. If a request doesn't map clearly to one git action, ask, offering 1–3 options with a short description each.
+- **Commit messages document the work:** a title, then a body saying what changed and why.
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

@@ -46,11 +46,11 @@ chalk-book/
 │   ├── app.js, app.css           ← menu, search, viewer, Export
 │   ├── site-theme.css            ← the dark surroundings (not used by notes)
 │   └── pages/                    ← the site's own pages: contact (page.css styles it)
-├── notes/                        ← one HTML file per note, the source of truth for content
+├── notes/                        ← one file per note, chalk markup in an HTML shell: the source of truth for content
 │   ├── tinker-town-01-aws-ssh-firewall.html …
 │   ├── 00-chalk-book-guide.html  ← this guide as a note
 │   ├── note-layout.css           ← shared layout and components
-│   ├── note.js                   ← lets the site print a note and highlight search hits
+│   ├── note.js                   ← turns chalk markup into the page; lets the site print it and highlight search hits
 │   └── fonts/                    ← bundled Inter, so rendering works offline
 ├── archive/                      ← old PDFs: from before the HTML rebuild, and the last guide PDF
 │   └── backlog-workflow/         ← the old backlog design (private, gitignored)
@@ -72,7 +72,7 @@ chalk-book/
 - `NN` is two digits and counts up within each project, so `10` sorts after `09`.
 - `topic` is 2–4 words naming the subject, not the outcome: `cron-logrotate`, not `fixed-my-logs`.
 - Everything is lowercase kebab-case. One topic per file; a long session becomes several notes.
-- The date lives inside the note (eyebrow chip) and in `site/notes.js`, not in the file name.
+- The date, title, number and module live only in `site/notes.js`; the note's header and footer are made from it.
 - `00-` is reserved for meta files about the chalk book itself.
 
 ### Projects
@@ -106,8 +106,8 @@ Every note follows the same top-to-bottom shape, so the eye always knows where t
      (done by `notes/note.js`); every `&` is purple chalk (`--lav`), other symbols stay white
    - Subtitle: a short descriptive phrase
    - Summary: 1–2 sentences, past tense — what was built and why it matters to later notes
-2. **Legend** — a row of colour chips for every block type used in that note
-3. **What we covered** — checklist of ✓ outcomes, one line each, skimmable on its own
+2. **Legend** — a row of colour chips, made from the components on the page (heading dots don't count)
+3. **What we covered** — checklist of ✓ outcomes, one line each, complete enough to stand in for the note
 4. **Full command sequence** — the steps, grouped under short headings, each tagged
    `Local` or `Remote`
 5. **Supporting sections** as needed — concepts, diagrams, field tables, quick-reference tables
@@ -115,6 +115,11 @@ Every note follows the same top-to-bottom shape, so the eye always knows where t
 7. **Where things live** and **Best practices** (short cards) as needed
 8. **Part of** line — the project, with links to related notes through the site
 9. **Footer** (printed pages) — `Tinker Town 03 — Systemd Service · 1 / 3`
+
+Notes are written in **chalk markup**: compact text that `notes/note.js` turns into this shape in the browser, with
+no build step. The syntax is in the comment at the top of `note.js`, and `template.html` shows every part. The header,
+legend and footer are made for you. Anything the markup can't say goes in a ```` ```html ```` block, unchanged.
+The standard headings get ids on the page: `covered`, `steps`, `bugs`, `paths`, `practices`.
 
 ### Block types and colours
 
@@ -147,6 +152,7 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
     patterns and examples alike. Commands stay exactly as run, with `adm-kiwi` in place of the name. Notes don't explain the
     substitution. The "Respect history" rule doesn't apply here: old admin names are never shown, not even struck through.
 - **Keep the mistakes.** Errors and their fixes are often the most valuable part. Record them as Bug cards.
+- **Trim output.** Keep the few lines of output or log that matter, never the whole dump.
 - **Respect history.** When a convention changes, update the reference note and mark old
   names as legacy (struck through, with a *Naming note*), rather than rewriting earlier notes.
 - **Calm tone.** Plain, friendly and factual. No hype, no emoji.
@@ -161,7 +167,7 @@ Soft, warm and easy on the eyes. Pastels only, no harsh borders, generous white 
 
 **`chalk-pastel.css` is the palette for every note, until the user says otherwise.**
 
-- Every note links it (`<link rel="stylesheet" href="../chalk-pastel.css">` from `notes/`).
+- Every note loads it through `note.js`, before `note-layout.css` and the note's own `<style>`, if any.
 - Colours are used only through its variables, e.g. `var(--lav-bg)`. No hard-coded hex values
   in notes or in `note-layout.css`.
 - Each colour comes in four parts: the chalk colour for chips and borders, `-bg` for box tints,
@@ -214,11 +220,11 @@ goes through an AI session.
 
 **Changing a note or this guide**
 
-- Ask for the change in a session. The AI edits the HTML source, or `CLAUDE.md`.
+- Ask for the change in a session. The AI edits the note's markup, or `CLAUDE.md`.
 
 **Rendering**
 
-Notes are HTML + CSS printed to A4 by a headless Chromium-based browser (Brave here):
+Notes are built by `note.js` and printed to A4 by a headless Chromium-based browser (Brave here):
 
 ```
 .claude/skills/memory-dump/render.sh notes/<name>.html [out-dir]   # → <name>.pdf, default: project root
@@ -232,6 +238,10 @@ the HTML rebuild and the last guide PDF (2026-10-13), unchanged and no longer up
 - Read this file before creating or changing anything in the chalk book.
 - Use the `memory-dump` skill to make notes, and `chalk-pastel.css` for every colour.
 - Match the existing notes' structure and look exactly; open one as a reference if unsure.
+- **Read little first.** To find something, stop at the first step that answers it: the catalogue (`site/notes.js`)
+  → hits with context, `grep -o -i -P '.{0,150}<word>.{0,150}' site/search-index.js` → one section,
+  `sed -n '/^## Bugs/,/^## /p' notes/<name>.html` → the whole note only when the task needs all of it
+  (redoing a recipe, editing a note, a privacy check, a new note in its style).
 - Never edit, rename or delete an existing note or archived PDF unless the user asks.
 - Change this guide only when the user asks, and keep `CLAUDE.md` and the guide's HTML in sync.
 - Keep private data out *before* it is committed. A pushed commit can't be fully taken back: GitHub may still serve it

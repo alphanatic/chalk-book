@@ -1,88 +1,55 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chalk Book 03 — README &amp; Git Rules</title>
-<link rel="stylesheet" href="../chalk-pastel.css">
-<link rel="stylesheet" href="note-layout.css">
-<style>
-  @page { @bottom-center { content: "Chalk Book 03 — README & Git Rules · " counter(page) " / " counter(pages); } }
-</style>
-</head>
-<body>
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A front page for the repo, and git that follows the person
 
-<header class="hero">
-  <span class="eyebrow">Chalk Book · 03 · 2026-10-13</span>
-  <h1>README &amp; Git Rules</h1>
-  <p class="sub">A front page for the repo, and git that follows the person</p>
-  <p>Added a short <code>README.md</code> that points to <code>CLAUDE.md</code>. Rewrote the git rules so the repo no longer
-    holds one person's habits: each user's own preferences decide committing, pushing and message style.</p>
-  <p>Backlog items 4 and 6 are done. Every later session asks before each commit and uses git's exact terms.</p>
-</header>
+Added a short `README.md` that points to `CLAUDE.md`. Rewrote the git rules so the repo no longer holds one person's habits: each user's own preferences decide committing, pushing and message style.
 
-<div class="legend">
-  <span class="chip local">Local — your machine</span>
-  <span class="chip config">Config file</span>
-  <span class="chip concept">Concept</span>
-  <span class="chip gotcha">Gotcha</span>
-  <span class="chip best">Best practice</span>
-  <span class="chip paths">Paths</span>
-</div>
+Backlog items 4 and 6 are done. Every later session asks before each commit and uses git's exact terms.
 
-<h2 class="best">What we covered</h2>
-<ul class="check">
-  <li><code>README.md</code>: purpose, how to view, how to add a note, a link to <code>CLAUDE.md</code>. Restates no rule</li>
-  <li>README added to the collection tree in <code>CLAUDE.md</code> §2, the guide HTML and the re-rendered guide PDF</li>
-  <li>Three repo rules in §7: <b>Git follows the person</b>, <b>Git wording</b>, <b>Commit messages document the work</b></li>
-  <li>Personal git preferences moved to the global <code>~/.claude/CLAUDE.md</code>: ask before each commit, never push unasked</li>
-  <li>The memory-dump skill's last step became <b>Hand over</b> instead of "commit, then offer to push"</li>
-  <li>An unpushed commit relabelled with <code>git commit --amend</code>, then three commits pushed</li>
-  <li>Backlog: item 4 (README) and item 6 (lasting rules) marked done with a timestamp; a stale git step fixed</li>
-</ul>
+## What we covered
 
-<h2 class="concept">Repo rules vs personal rules</h2>
-<div class="keep">
-  <table>
-    <tr><th>Where</th><th>Binds</th><th>Holds</th></tr>
-    <tr><td><code>CLAUDE.md</code> §7 (repo)</td><td>Anyone who works on the repo</td><td>Follow the user's own git preferences; if none, ask. Use git's exact terms. Messages have a title and a body</td></tr>
-    <tr><td><code>~/.claude/CLAUDE.md</code> (global)</td><td>One person, every project</td><td>Ask before each commit. Never push unasked. Titles of key words only, like note titles</td></tr>
-    <tr><td>Project memory</td><td>One person, this project</td><td>Points to the global file; restates nothing</td></tr>
-  </table>
-  <div class="callout concept"><b>Concept ·</b> Personal habits in a repo file bind the next contributor too. Keep the repo
-    neutral and let each person's own settings fill in the rest. Personal preferences come first, Claude's defaults second.</div>
-</div>
+- `README.md`: purpose, how to view, how to add a note, a link to `CLAUDE.md`. Restates no rule
+- README added to the collection tree in `CLAUDE.md` §2, the guide HTML and the re-rendered guide PDF
+- Three repo rules in §7: **Git follows the person**, **Git wording**, **Commit messages document the work**
+- Personal git preferences moved to the global `~/.claude/CLAUDE.md`: ask before each commit, never push unasked
+- The memory-dump skill's last step became **Hand over** instead of "commit, then offer to push"
+- An unpushed commit relabelled with `git commit --amend`, then three commits pushed
+- Backlog: item 4 (README) and item 6 (lasting rules) marked done with a timestamp; a stale git step fixed
 
-<div class="keep">
-  <h3>Git wording</h3>
-  <table>
-    <tr><th>Term</th><th>Command</th><th>What it does</th></tr>
-    <tr><td>stage</td><td><code>git add</code></td><td>Picks the changes for the next commit</td></tr>
-    <tr><td>commit</td><td><code>git commit</code></td><td>Saves a snapshot locally, with a message</td></tr>
-    <tr><td>amend</td><td><code>git commit --amend</code></td><td>Rewrites the latest commit. Safe only before it is pushed</td></tr>
-    <tr><td>push</td><td><code>git push</code></td><td>Sends local commits to GitHub</td></tr>
-    <tr><td>pull</td><td><code>git pull</code></td><td>Fetches and merges commits from GitHub</td></tr>
-    <tr><td>revert / reset</td><td><code>git revert</code> · <code>git reset</code></td><td>Undo with a new commit · move the branch back</td></tr>
-  </table>
-  <div class="callout config"><b>Key rule ·</b> If a request doesn't map clearly to one git action, ask. Offer 1–3 options,
-    each with its command and one line on what it does.</div>
-</div>
+## Repo rules vs personal rules
 
-<h2 class="local">Full command sequence</h2>
+{keep}
+| Where | Binds | Holds
+| `CLAUDE.md` §7 (repo) | Anyone who works on the repo | Follow the user's own git preferences; if none, ask. Use git's exact terms. Messages have a title and a body
+| `~/.claude/CLAUDE.md` (global) | One person, every project | Ask before each commit. Never push unasked. Titles of key words only, like note titles
+| Project memory | One person, this project | Points to the global file; restates nothing
+> Concept · Personal habits in a repo file bind the next contributor too. Keep the repo neutral and let each person's own settings fill in the rest. Personal preferences come first, Claude's defaults second.
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>README and the guide</h3>
-  <div class="block local"><pre>node site/build-index.mjs                 <span class="cmt"># guide changed: rebuild the search index</span>
+### Git wording
+| Term | Command | What it does
+| stage | `git add` | Picks the changes for the next commit
+| commit | `git commit` | Saves a snapshot locally, with a message
+| amend | `git commit --amend` | Rewrites the latest commit. Safe only before it is pushed
+| push | `git push` | Sends local commits to GitHub
+| pull | `git pull` | Fetches and merges commits from GitHub
+| revert / reset | `git revert` · `git reset` | Undo with a new commit · move the branch back
+> Key rule · If a request doesn't map clearly to one git action, ask. Offer 1–3 options, each with its command and one line on what it does.
+
+## Full command sequence
+
+### Local · README and the guide
+```local
+node site/build-index.mjs                 # guide changed: rebuild the search index
 .claude/skills/memory-dump/render.sh \
-  notes/00-chalk-book-guide.html .        <span class="cmt"># re-render the guide PDF into the root</span>
+  notes/00-chalk-book-guide.html .        # re-render the guide PDF into the root
 pdftotext 00-chalk-book-guide.pdf - \
-  | grep -n README                        <span class="cmt"># -: to stdout; confirm the new line is in</span>
-.claude/skills/memory-dump/check.sh       <span class="cmt"># every check must pass</span></pre></div>
-</div>
+  | grep -n README                        # -: to stdout; confirm the new line is in
+.claude/skills/memory-dump/check.sh       # every check must pass
+```
 
-<div class="block config">
-  <div class="file">README.md</div>
-<pre># Chalk Book
+---
+```config: README.md
+# Chalk Book
 
 A personal technical chalk book: one calm, skimmable note per topic, distilled from
 work sessions with an AI so it can be repeated cold months later.
@@ -99,80 +66,56 @@ In any Claude Code session, say "chalk that up" (the `memory-dump` skill).
 ## Rules
 
 How notes are named, written, styled and checked is all in [CLAUDE.md](CLAUDE.md).
-A readable copy is the guide note, `notes/00-chalk-book-guide.html`.</pre>
-</div>
-<div class="callout best"><b>Best practice ·</b> The README links to the rules instead of repeating them, so it can't drift.
-  A site link and a licence line wait for backlog items 3 and 5.</div>
+A readable copy is the guide note, `notes/00-chalk-book-guide.html`.
+```
 
-<div class="keep">
-  <h3><span class="tag local">Local</span>Relabel an unpushed commit, then push</h3>
-  <div class="block local"><pre>git log --oneline -2                    <span class="cmt"># check the commit to relabel is the latest one</span>
-git stash                               <span class="cmt"># park uncommitted changes so the amend leaves them out</span>
-git commit --amend -m "README &amp; ..."   <span class="cmt"># --amend: replace the latest commit</span>
-git stash pop                           <span class="cmt"># bring the parked changes back</span>
-git status -sb                          <span class="cmt"># -s: short, -b: branch line, shows "ahead 3"</span>
-git push                                <span class="cmt"># only after the user asked for it</span></pre></div>
-</div>
+> Best practice · The README links to the rules instead of repeating them, so it can't drift. A site link and a licence line wait for backlog items 3 and 5.
 
-<div class="keep">
-  <h3>Commit messages</h3>
-  <table>
-    <tr><th>Before</th><th>After</th></tr>
-    <tr><td><code>Add README.md; list it in the guide's collection tree</code></td><td><code>README &amp; Collection Tree</code> + a body on what and why</td></tr>
-    <tr><td><i>(new)</i></td><td><code>Git Rules &amp; Personal Preferences</code> + a body on what and why</td></tr>
-  </table>
-</div>
+### Local · Relabel an unpushed commit, then push
+```local
+git log --oneline -2                    # check the commit to relabel is the latest one
+git stash                               # park uncommitted changes so the amend leaves them out
+git commit --amend -m "README & ..."   # --amend: replace the latest commit
+git stash pop                           # bring the parked changes back
+git status -sb                          # -s: short, -b: branch line, shows "ahead 3"
+git push                                # only after the user asked for it
+```
 
-<h2 class="gotcha">Bugs hit &amp; fixed</h2>
-<div class="bug">
-  <h4>Bug · "Don't commit" taken literally</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>"I do not want you to commit anything any more" was read as "never commit". It could also
-      mean "never push" or "ask first".</dd>
-    <dt class="fix">FIX</dt><dd>Offered three options with a line each. The answer was <b>ask before each commit</b>. The
-      <b>Git wording</b> rule now makes asking the default for unclear git requests.</dd>
-  </dl>
-</div>
-<div class="bug">
-  <h4>Bug · Personal git habits in the repo</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd><code>CLAUDE.md</code>, the skill and the guide all said "commit locally, push only when
-      asked". That is one person's habit, and it bound anyone else who works on the repo.</dd>
-    <dt class="fix">FIX</dt><dd>The repo now only says to follow the user's own preferences. The habit itself moved to the
-      global <code>~/.claude/CLAUDE.md</code>.</dd>
-  </dl>
-</div>
-<div class="bug">
-  <h4>Bug · Message style read as design</h4>
-  <dl>
-    <dt class="cause">CAUSE</dt><dd>"Like my note titles" was turned into Title Case, <code>&amp;</code> joins and a word count.</dd>
-    <dt class="fix">FIX</dt><dd>It means only: key words that best capture the content. Anything unstated follows the
-      user's preferences first, Claude's defaults second.</dd>
-  </dl>
-</div>
+### Commit messages
+| Before | After
+| `Add README.md; list it in the guide's collection tree` | `README & Collection Tree` + a body on what and why
+| *(new)* | `Git Rules & Personal Preferences` + a body on what and why
 
-<h2 class="paths">Where things live</h2>
-<table>
-  <tr><th>What</th><th>Path</th></tr>
-  <tr><td>The repo's front page</td><td><code>README.md</code></td></tr>
-  <tr><td>Repo git rules</td><td><code>CLAUDE.md</code> §7</td></tr>
-  <tr><td>Personal git preferences</td><td><code>~/.claude/CLAUDE.md</code>, section "Git"</td></tr>
-  <tr><td>Skill hand-over step</td><td><code>.claude/skills/memory-dump/SKILL.md</code> step 7</td></tr>
-  <tr><td>Backlog and handoff (private)</td><td><code>.prog/index.html</code> · <code>.prog/handoff.md</code></td></tr>
-</table>
+## Bugs hit & fixed
 
-<h2 class="best">Best practices</h2>
-<div class="cards">
-  <div><b>Ask, don't guess</b>An unclear git request gets 1–3 options, each with its command.</div>
-  <div><b>Amend before pushing</b>Rewriting a commit is safe only while it is local.</div>
-  <div><b>Neutral repo</b>Repo files say what anyone needs; personal habits live in personal settings.</div>
-  <div><b>Timestamp done</b>A Done chip carries the date and time it was marked.</div>
-</div>
+#### Bug · "Don't commit" taken literally
+cause: "I do not want you to commit anything any more" was read as "never commit". It could also mean "never push" or "ask first".
+fix: Offered three options with a line each. The answer was **ask before each commit**. The **Git wording** rule now makes asking the default for unclear git requests.
 
-<p class="part-of">Part of Chalk Book · follows
-  <a href="../index.html#meta-02-privacy-checks" target="_top">02 Privacy Rule &amp; Check Script</a> · continued in
-  <a href="../index.html#meta-04-claude-md-cleanup" target="_top">04 CLAUDE.md Cleanup</a></p>
+#### Bug · Personal git habits in the repo
+cause: `CLAUDE.md`, the skill and the guide all said "commit locally, push only when asked". That is one person's habit, and it bound anyone else who works on the repo.
+fix: The repo now only says to follow the user's own preferences. The habit itself moved to the global `~/.claude/CLAUDE.md`.
 
-<script src="note.js"></script>
-</body>
-</html>
+#### Bug · Message style read as design
+cause: "Like my note titles" was turned into Title Case, `&` joins and a word count.
+fix: It means only: key words that best capture the content. Anything unstated follows the user's preferences first, Claude's defaults second.
+
+## Where things live
+
+| What | Path
+| The repo's front page | `README.md`
+| Repo git rules | `CLAUDE.md` §7
+| Personal git preferences | `~/.claude/CLAUDE.md`, section "Git"
+| Skill hand-over step | `.claude/skills/memory-dump/SKILL.md` step 7
+| Backlog and handoff (private) | `.prog/index.html` · `.prog/handoff.md`
+
+## Best practices
+
+- **Ask, don't guess** An unclear git request gets 1–3 options, each with its command.
+- **Amend before pushing** Rewriting a commit is safe only while it is local.
+- **Neutral repo** Repo files say what anyone needs; personal habits live in personal settings.
+- **Timestamp done** A Done chip carries the date and time it was marked.
+
+Part of Chalk Book · follows [[meta-02-privacy-checks]] · continued in [[meta-04-claude-md-cleanup]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
