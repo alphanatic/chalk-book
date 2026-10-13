@@ -82,6 +82,7 @@ chalk-book/
 | `tinker-town` | Project Tinker Town | Self-paced AWS Linux sysadmin lab, a one-week crash course in 7 modules |
 | `pokedex` | Pokédex | The Pokédex web project |
 | `claude-code` | Claude Code | Setting up and securing Claude Code itself |
+| `javascript` | JavaScript | Learning JavaScript by reviewing and fixing a React todo app |
 | `meta` | Chalk Book | Notes about the chalk book itself |
 
 Add a row before using a new project, and the same project to `CHALK_PROJECTS` in `site/notes.js`.

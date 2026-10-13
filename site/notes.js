@@ -22,6 +22,7 @@ window.CHALK_PROJECTS = {
   },
   "pokedex": { name: "Pokédex",    color: "sky" },
   "claude-code": { name: "Claude Code", color: "coral" },
+  "javascript": { name: "JavaScript", color: "mint" },
   "meta":    { name: "Chalk Book", color: "butter" },
 };
 
