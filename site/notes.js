@@ -100,6 +100,12 @@ window.CHALK_NOTES = [
     skills: ["claude.md", "documentation", "wc", "grep", "ugrep", "audit", "claude code"],
   },
   {
+    id: "meta-05-complete-tasks-page", project: "meta", n: 5, date: "2026-10-13",
+    title: "Complete Tasks Page",
+    summary: "Complete Tasks rebuilt in the backlog's look, done items only; legacy items renamed; natural sort.",
+    skills: ["html", "css", "sed", "intl.collator", "sorting", "headless browser", "zsh", "backlog"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
