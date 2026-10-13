@@ -61,15 +61,16 @@
 <div class="block paths"><pre>chalk-book/
 ├── README.md                     <span class="cmt"># what this is; points here</span>
 ├── CLAUDE.md                     <span class="cmt"># this guide (source of truth)</span>
-├── 00-chalk-book-guide.pdf       <span class="cmt"># read-only copy of this guide</span>
 ├── chalk-pastel.css              <span class="cmt"># the note colour palette (user-owned)</span>
 ├── index.html                    <span class="cmt"># the site: open it in a browser</span>
-├── site/                         <span class="cmt"># catalogue (notes.js), menu, search, dark theme</span>
+├── site/                         <span class="cmt"># catalogue, menu, search (build-index.mjs), dark theme</span>
 ├── notes/                        <span class="cmt"># one HTML file per note</span>
 │   ├── tinker-town-01-aws-ssh-firewall.html …
 │   ├── note-layout.css           <span class="cmt"># shared layout and components</span>
 │   └── fonts/                    <span class="cmt"># bundled Inter, renders offline</span>
-├── archive/                      <span class="cmt"># original PDFs from before the HTML rebuild</span>
+├── archive/                      <span class="cmt"># old PDFs, including the last guide PDF</span>
+│   └── backlog-workflow/         <span class="cmt"># the old backlog design (private)</span>
+├── .prog/, .research/            <span class="cmt"># private and gitignored: backlog, research</span>
 └── .claude/skills/memory-dump/   <span class="cmt"># the note-making workflow</span></pre></div>
 
 <div class="keep">
@@ -165,21 +166,17 @@
   </table>
 </div>
 <div class="callout concept"><b>Concept ·</b> Notes link the palette instead of copying it. Changing <code>chalk-pastel.css</code> restyles every note at its next render; PDFs keep their look until re-rendered.</div>
-<p class="muted">Layout lives in <code>notes/note-layout.css</code>: A4 on <code>--paper</code>, an <code>--asphalt</code> header band, Inter for text, DejaVu Sans Mono for code, soft tinted blocks with a coloured left bar.</p>
+<p class="muted">Layout lives in <code>notes/note-layout.css</code>: A4 on <code>--paper</code>, an <code>--asphalt</code> header band, Inter (bundled) for text, DejaVu Sans Mono (from the system, falls back to any monospace) for code, soft tinted blocks.</p>
 
 <div class="keep">
   <h3>The site</h3>
   <ul class="check">
-    <li><code>index.html</code> opens straight from disk, no build step. Each note shows as a pastel A4 sheet in a dark frame
-      in the warm greys of Claude's dark mode (<code>site/site-theme.css</code>, kept apart from the note palette).</li>
-    <li>Left menu: search on top, then notes per project with roadmap progress and planned modules. The ☰ button
-      (three chalk sticks) collapses it to a rail of note numbers and colour bars, with a chalk-stick tile for search.</li>
-    <li>Search reads the full text of every note; results replace the list while typing, each note once with its hit count,
-      and opening one highlights every hit. Rebuild the index with <code>node site/build-index.mjs</code>.</li>
-    <li>The persistent main footer links Home, Backlog and Complete Tasks (private pages in <code>.prog/</code>, never committed) and Contact.</li>
-    <li>Right panel: recently viewed notes, newest first. The name is one shared element, <code>&lt;chalk-wordmark&gt;</code>.</li>
-    <li><b>Export</b> opens a small menu; for now it holds <b>Save as PDF</b>, which opens the browser's print dialog for the open note.</li>
-    <li>The menu starts as a rail; the menu button opens and closes it. Recently viewed is a rail too, sliding open over the note in 0.3 s while hovered and closing as soon as the cursor leaves.</li>
+    <li><code>index.html</code> opens straight from disk, no build step. How it looks and behaves is in the code and in <code>meta-01-site-build</code>.</li>
+    <li>Site colours live in <code>site/site-theme.css</code>, never in the note palette. The name is always the shared <code>&lt;chalk-wordmark&gt;</code>.</li>
+    <li>After adding or changing a note, rebuild the search index: <code>node site/build-index.mjs</code>.</li>
+    <li>A new site page goes in <code>site/pages/</code>, then into <code>PAGES</code> in <code>site/app.js</code> and the main footer. New Export options are items in the Export menu.</li>
+    <li>Backlog and Complete Tasks are private pages in <code>.prog/</code>, gitignored, about Chalk Book itself only.
+      A finished item moves to Complete Tasks only when the user asks, unchanged except a Done chip and a date.</li>
   </ul>
 </div>
 
@@ -202,8 +199,7 @@
   <h3>Changing a note or this guide</h3>
   <ul class="check">
     <li>Ask for the change in a session. The AI edits the HTML source or <code>CLAUDE.md</code>.</li>
-    <li>After <code>CLAUDE.md</code> changes, this guide's HTML and PDF are updated so all three stay in sync.</li>
-    <li>Note PDFs are made on demand from the site; the originals from before the HTML rebuild are kept in <code>archive/</code>.</li>
+    <li>Note PDFs are made on demand from the site; the originals from before the HTML rebuild and the last guide PDF are kept in <code>archive/</code>.</li>
   </ul>
 </div>
 
@@ -219,7 +215,7 @@
   <li>Use the <code>memory-dump</code> skill to make notes, and <code>chalk-pastel.css</code> for every colour.</li>
   <li>Match the existing notes' structure and look exactly; open one as a reference if unsure.</li>
   <li>Never edit, rename or delete an existing note or archived PDF unless the user asks.</li>
-  <li>Keep <code>CLAUDE.md</code>, this guide's HTML and its PDF in sync, and change them only when the user asks.</li>
+  <li>Keep <code>CLAUDE.md</code> and this guide's HTML in sync, and change them only when the user asks.</li>
   <li>Keep private data out <i>before</i> it is committed: GitHub may still serve a pushed commit after a force-push.
     If something slips through, tell the user; don't rewrite history without asking.</li>
   <li><b>Git follows the person.</b> Committing, pushing and commit-message style come from the current user's own
