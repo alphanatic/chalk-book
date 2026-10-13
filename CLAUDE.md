@@ -54,12 +54,14 @@ chalk-book/
 │   └── fonts/                    ← bundled Inter, so rendering works offline
 ├── archive/                      ← old PDFs: from before the HTML rebuild, and the last guide PDF
 │   └── backlog-workflow/         ← the old backlog design (private, gitignored)
+├── .githooks/pre-commit          ← runs check.sh before each commit (turn on: see README)
 ├── .prog/, .research/            ← private and gitignored: backlog, complete tasks, research
 └── .claude/skills/memory-dump/   ← the note-making workflow
     ├── SKILL.md
     ├── template.html
     ├── render.sh
-    └── check.sh                  ← the checks every commit must pass
+    ├── check.sh                  ← the checks every commit must pass (run by .githooks/pre-commit)
+    └── compare.sh                ← renders notes at HEAD and now, and compares every page
 ```
 
 ### File naming
