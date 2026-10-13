@@ -42,9 +42,8 @@ h1 .wm-book  { color: var(--butter); }
 .hero .sub { color: var(--mint); }
 .hero code { background: var(--asphalt-chip); color: var(--butter); }
 
-/* ── Legend chips ────────────────────────────────────────── */
-.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
-.chip { font-size: 7pt; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+/* ── Palette classes: each sets --c, --c-bg, --c-ink, --c-chip ─ */
+.steps   { --c: var(--lav);    --c-chip: var(--lav-chip); }              /* numbered steps: lavender unless a class below says otherwise */
 .local   { --c: var(--sky);    --c-bg: var(--sky-bg);    --c-ink: var(--sky-ink);    --c-chip: var(--sky-chip); }
 .remote  { --c: var(--lav);    --c-bg: var(--lav-bg);    --c-ink: var(--lav-ink);    --c-chip: var(--lav-chip); }
 .config  { --c: var(--butter); --c-bg: var(--butter-bg); --c-ink: var(--butter-ink); --c-chip: var(--butter-chip); }
@@ -53,7 +52,7 @@ h1 .wm-book  { color: var(--butter); }
 .best    { --c: var(--mint);   --c-bg: var(--mint-bg);   --c-ink: var(--mint-ink);   --c-chip: var(--mint-chip); }
 .paths   { --c: var(--pink);   --c-bg: var(--pink-bg);   --c-ink: var(--pink-ink);   --c-chip: var(--pink-chip); }
 .console { --c: var(--coral);  --c-bg: var(--coral-bg);  --c-ink: var(--coral-ink);  --c-chip: var(--coral-chip); }
-.chip, .tag { background: var(--c); color: var(--c-chip); }
+.tag { background: var(--c); color: var(--c-chip); }
 
 /* ── Headings ────────────────────────────────────────────── */
 h2 { font-size: 12.5pt; margin: 22px 0 10px; display: flex; align-items: center; gap: 9px; break-after: avoid; }
@@ -122,7 +121,7 @@ td:first-child { font-weight: 600; }
 .steps { counter-reset: s; list-style: none; padding: 0; margin: 4px 0; }
 .steps li { counter-increment: s; padding: 4px 0 4px 28px; position: relative; }
 .steps li::before { content: counter(s); position: absolute; left: 0; top: 4px; width: 18px; height: 18px;
-  border-radius: 50%; background: var(--lav); color: var(--lav-chip); font-size: 7.5pt; font-weight: 700;
+  border-radius: 50%; background: var(--c); color: var(--c-chip); font-size: 7.5pt; font-weight: 700;
   display: flex; align-items: center; justify-content: center; }
 .muted { color: var(--ink-soft); font-size: 8.5pt; }
 

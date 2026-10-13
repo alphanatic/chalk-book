@@ -42,10 +42,9 @@ function highlight(q) {
 
 /* Chalk markup: a note's compact source, turned into the note's HTML here, in the browser (no build step).
    A note holds <script type=text/chalk>…</script>, then <body> with ../site/notes.js and this file.
-   The header (title, eyebrow, page footer) and the legend are made from the note's entry in site/notes.js
-   and from what is on the page.
+   The header (title, eyebrow, page footer) is made from the note's entry in site/notes.js.
      first lines                 line 1 = subtitle, then summary paragraphs (blank line between), up to the first heading;
-                                 a raw <span class="eyebrow">, <h1> or <div class="legend"> line first replaces the made one
+                                 a raw <span class="eyebrow"> or <h1> line first replaces the made one
      ## Title {class}            section; the five standard titles get their id and colour by themselves
      ### Remote · Title {class}  step heading with a tag chip ({class} only for an unusual tag); starts a keep group
      #### Bug · name             bug card: then "cause: …" and "fix: …" lines; what follows goes in the card
@@ -56,7 +55,7 @@ function highlight(q) {
                                  Config lines "code  »  note" make an annotated block; a blank line there is a gap
      ```html                     raw HTML, up to the closing ```
      - item                      ✓ checklist; under "Best practices", "- **Title** text" makes a card
-     1. item                     numbered steps
+     1. item                     numbered steps, in the colour of the ### tag above them
      >{class} Label · text       callout; {class} only when the label isn't Gotcha, Concept, Best practice, Key rule, Naming note
      | a | b                     table, first row = header; \| is a literal pipe; end with | if the last cell is empty
      Part of …                   closing line
@@ -66,10 +65,6 @@ const SECTIONS = { "What we covered": ["covered", "best"], "Full command sequenc
   "Bugs hit & fixed": ["bugs", "gotcha"], "Where things live": ["paths", "paths"], "Best practices": ["practices", "best"] };
 const TAGS = { local: "local", remote: "remote", concept: "concept", config: "config", "config file": "config", "aws console": "console" };
 const CALLOUTS = { gotcha: "gotcha", concept: "concept", "best practice": "best", "key rule": "config", "naming note": "paths" };
-const LEGEND = { local: "Local — your machine", remote: "Remote — the server", config: "Config file", concept: "Concept",
-  console: "AWS Console", gotcha: "Gotcha", best: "Best practice", paths: "Paths" };
-// What makes a legend chip: the components on the page in that colour (heading dots don't count)
-const LEGEND_FROM = { gotcha: ".bug, .gotcha:not(h2)", best: "ul.check, .cards, .best:not(h2)", paths: "table, .paths:not(h2)" };
 
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -121,20 +116,20 @@ function renderChalk(src) {
 
   // Header: optional raw replacements, the subtitle, then summary paragraphs, up to the first heading
   const own = {};
-  for (let m; i < L.length && (m = L[i].match(/^<(span class="eyebrow"|h1|div class="legend")/)); i++) own[m[1].split(" ")[0]] = L[i];
+  for (let m; i < L.length && (m = L[i].match(/^<(span class="eyebrow"|h1)/)); i++) own[m[1].split(" ")[0]] = L[i];
   const intro = [L[i] && !/^#/.test(L[i]) ? L[i++] : ""];
   for (let p = ""; i <= L.length; i++) {
     if (i === L.length || /^#/.test(L[i]) || !L[i].trim()) { if (p) intro.push(p); p = ""; if (i === L.length || /^#/.test(L[i])) break; }
     else p += (p ? "\n" : "") + L[i];
   }
   const title = entry ? entry.title : id;
-  const eyebrow = entry ? `<span class="eyebrow">${esc([project?.name, nn, entry.module && `Module ${entry.module}`, entry.date]
+  const eyebrow = entry ? `<span class="eyebrow">${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
     .filter(Boolean).join(" · "))}</span>` : "";
   let out = `<header class="hero">${own.span ?? eyebrow}${own.h1 ?? `<h1>${esc(title)}</h1>`}`
     + (intro[0] ? `<p class="sub">${md(intro[0])}</p>` : "") + intro.slice(1).map(p => `<p>${md(p)}</p>`).join("")
     + "</header>";
 
-  let body = "", section = "", keepNext = false;
+  let body = "", section = "", tag = "", keepNext = false;    // tag: the palette class of the last ### tag
   const open = [], close = () => { while (open.length) body += open.pop(); };
   const group = (start, end) => { close(); body += start; open.push(end); keepNext = false; };
   const startKeep = () => { if (keepNext) group('<div class="keep">', "</div>"); };
@@ -147,18 +142,19 @@ function renderChalk(src) {
     if ((m = l.match(/^## (.+?)(?: \{(\w+)\})?$/))) {
       i++; close(); startKeep();
       const [sid, cls] = SECTIONS[m[1]] || ["", "concept"];
-      section = sid;
+      section = sid; tag = "";
       body += `<h2${sid ? ` id="${sid}"` : ""} class="${m[2] || cls}">${md(m[1])}</h2>`;
       continue;
     }
     if ((m = l.match(/^### (.+?)(?: \{(\w+)\})?$/))) {
       i++; group('<div class="keep">', "</div>");
-      const t = m[1].match(/^(.+?) · (.+)$/), tag = t && (m[2] || TAGS[t[1].toLowerCase()]);
+      const t = m[1].match(/^(.+?) · (.+)$/);
+      tag = (t && (m[2] || TAGS[t[1].toLowerCase()])) || "";
       body += tag ? `<h3><span class="tag ${tag}">${esc(t[1])}</span>${md(t[2])}</h3>` : `<h3>${md(m[1])}</h3>`;
       continue;
     }
     if ((m = l.match(/^#### (.+)$/))) {
-      i++; group('<div class="bug">', "</div>");
+      i++; tag = ""; group('<div class="bug">', "</div>");
       body += `<h4>${md(m[1])}</h4>`;
       let dl = "";
       while (i < L.length && (m = L[i].match(/^(cause|fix): (.*)$/))) { i++; dl += `<dt class="${m[1]}">${m[1].toUpperCase()}</dt><dd>${md(m[2] + more())}</dd>`; }
@@ -182,7 +178,7 @@ function renderChalk(src) {
     } else if (/^\d+\. /.test(l)) {
       const items = [];
       while (i < L.length && /^\d+\. /.test(L[i])) { const t = L[i++].replace(/^\d+\. /, ""); items.push(t + more()); }
-      body += `<ul class="steps">${items.map(t => `<li>${md(t)}</li>`).join("")}</ul>`;
+      body += `<ul class="steps${tag ? ` ${tag}` : ""}">${items.map(t => `<li>${md(t)}</li>`).join("")}</ul>`;
     } else if ((m = l.match(/^>(?:\{(\w+)\})? (.+?) · (.*)$/))) {
       i++;
       const text = m[3] + more();
@@ -209,9 +205,6 @@ function renderChalk(src) {
     textContent: `@page { @bottom-center { content: "${name.replace(/["\\]/g, "\\$&")} · " counter(page) " / " counter(pages); } }` }));
   const page = document.createElement("template");
   page.innerHTML = out + body;
-  const used = Object.keys(LEGEND).filter(c => page.content.querySelector(LEGEND_FROM[c] || `.${c}:not(h2)`));
-  page.content.querySelector(".hero").insertAdjacentHTML("afterend", own.div
-    ?? `<div class="legend">${used.map(c => `<span class="chip ${c}">${LEGEND[c]}</span>`).join("")}</div>`);
   document.body.prepend(page.content);
 }
 const chalkSource = document.querySelector('script[type="text/chalk"]');

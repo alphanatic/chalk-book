@@ -62,8 +62,8 @@ For each note:
 
 1. `cp .claude/skills/memory-dump/template.html notes/<name>.html`
 2. Write in chalk markup; the syntax is in the comment at the top of `notes/note.js`. Replace every `{{…}}`.
-   The title, eyebrow, page footer and legend are made from the note's `site/notes.js` entry (§5) and its
-   content, so the note has no header markup.
+   The title, eyebrow and page footer are made from the note's `site/notes.js` entry (§5), so the note has no
+   header markup. Notes have no legend.
 3. Keep the section order. Delete the examples the note doesn't use.
 4. Follow the writing style in `CLAUDE.md`. The essentials:
    - every command has a comment after two spaces: `cmd  # what it does, and its flags`. `note.js` lines them up
@@ -82,7 +82,7 @@ For each note:
 ## 5. Add it to the site
 
 Add one entry per note to `CHALK_NOTES` in `site/notes.js`: `id` (file name without `.html`),
-`project`, `n`, `module` (if the project has a roadmap), `date`, `title`, a one-line `summary`
+`project`, `n`, `module` (if the project has a roadmap) or an optional short `context` tag for the eyebrow, `date`, `title`, a one-line `summary`
 and `skills` (tools, topics and every distinctive command in the note: what people would search for). If the note finishes a roadmap module,
 set that module's `status` to `"done"`.
 

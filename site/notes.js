@@ -4,7 +4,8 @@
 
    Projects  name, palette colour, optional status and modules (the planned roadmap)
    Notes     id = file name without .html · project = key into CHALK_PROJECTS · n = number in the project
-             module = roadmap module it belongs to (optional) · date = YYYY-MM-DD */
+             module = roadmap module it belongs to (optional) · context = a short tag for the eyebrow when there is
+             no module (optional) · date = YYYY-MM-DD */
 
 window.CHALK_PROJECTS = {
   "tinker-town": {
@@ -64,7 +65,7 @@ window.CHALK_NOTES = [
     skills: ["aws", "ebs", "lvm", "fstab", "ext4", "filesystems", "mount", "lsblk", "blkid", "mkfs.ext4", "df", "umount", "resize2fs", "pvcreate", "vgcreate", "lvcreate", "lvextend"],
   },
   {
-    id: "pokedex-01-git-manual-push", project: "pokedex", n: 1, date: "2026-10-11",
+    id: "pokedex-01-git-manual-push", project: "pokedex", n: 1, context: "Git", date: "2026-10-11",
     title: "Git: Manual Commit & Push",
     summary: "Manual commit 44e0d5c in pokedex, git status, commit messages and trailers, .git/index with xxd.",
     skills: ["git", "github", "https", "personal access token", "xxd", "pacman", "pass"],

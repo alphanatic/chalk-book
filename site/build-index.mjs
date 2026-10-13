@@ -30,9 +30,9 @@ const stripTags = s => decode(s.replace(/<[^>]+>/g, " "));
 const chalkText = (src, id) => {
   const n = window.CHALK_NOTES.find(x => x.id === id), p = n && window.CHALK_PROJECTS[n.project];
   const lines = src.replace(/^\s*\n/, "").split("\n");
-  // Header from the catalogue, unless the note replaces its eyebrow or title with a raw line; a raw legend isn't indexed
-  let eyebrow = n ? [p?.name, nn(n), n.module && `Module ${n.module}`, n.date].filter(Boolean).join(" · ") : "", title = n?.title ?? "";
-  while (/^<(span class="eyebrow"|h1|div class="legend")/.test(lines[0] || "")) {
+  // Header from the catalogue, unless the note replaces its eyebrow or title with a raw line
+  let eyebrow = n ? [p?.name, nn(n), n.module ? `Module ${n.module}` : n.context, n.date].filter(Boolean).join(" · ") : "", title = n?.title ?? "";
+  while (/^<(span class="eyebrow"|h1)/.test(lines[0] || "")) {
     const l = lines.shift();
     if (l.startsWith("<span")) eyebrow = stripTags(l); else if (l.startsWith("<h1")) title = stripTags(l);
   }

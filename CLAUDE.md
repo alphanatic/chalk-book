@@ -103,24 +103,23 @@ A project can carry a roadmap of modules there; the site shows unfinished module
 Every note follows the same top-to-bottom shape, so the eye always knows where to look.
 
 1. **Header band** (dark)
-   - Eyebrow chip: `PROJECT TINKER TOWN · 03 · MODULE 1 · 2026-08-30` (project · number · module, if any · date)
+   - Eyebrow chip: `PROJECT TINKER TOWN · 03 · MODULE 1 · 2026-08-30` (project · number · module or `context`, if any · date)
    - Title, its words coloured in turn after the yellow chip: blue → pink → green → yellow
      (done by `notes/note.js`); every `&` is purple chalk (`--lav`), other symbols stay white
    - Subtitle: a short descriptive phrase
    - Summary: 1–2 sentences, past tense — what was built and why it matters to later notes
-2. **Legend** — a row of colour chips, made from the components on the page (heading dots don't count)
-3. **What we covered** — checklist of ✓ outcomes, one line each, complete enough to stand in for the note
-4. **Full command sequence** — the steps, grouped under short headings, each tagged
+2. **What we covered** — checklist of ✓ outcomes, one line each, complete enough to stand in for the note
+3. **Full command sequence** — the steps, grouped under short headings, each tagged
    `Local` or `Remote`
-5. **Supporting sections** as needed — concepts, diagrams, field tables, quick-reference tables
-6. **Bugs hit & fixed** — one card per real error: **Cause** → **Fix**
-7. **Where things live** and **Best practices** (short cards) as needed
-8. **Part of** line — the project, with links to related notes through the site
-9. **Footer** (printed pages) — `Tinker Town 03 — Systemd Service · 1 / 3`
+4. **Supporting sections** as needed — concepts, diagrams, field tables, quick-reference tables
+5. **Bugs hit & fixed** — one card per real error: **Cause** → **Fix**
+6. **Where things live** and **Best practices** (short cards) as needed
+7. **Part of** line — the project, with links to related notes through the site
+8. **Footer** (printed pages) — `Tinker Town 03 — Systemd Service · 1 / 3`
 
 Notes are written in **chalk markup**: compact text that `notes/note.js` turns into this shape in the browser, with
-no build step. The syntax is in the comment at the top of `note.js`, and `template.html` shows every part. The header,
-legend and footer are made for you. Anything the markup can't say goes in a ```` ```html ```` block, unchanged.
+no build step. The syntax is in the comment at the top of `note.js`, and `template.html` shows every part. The header and
+footer are made for you; notes have no legend, since each block's tag and label already say what it is. Anything the markup can't say goes in a ```` ```html ```` block, unchanged.
 The standard headings get ids on the page: `covered`, `steps`, `bugs`, `paths`, `practices`.
 
 ### Block types and colours
