@@ -23,6 +23,24 @@ This file is a reference, not a walkthrough — check back here whenever you nam
 
 >{paths} Updated rule · Cloud naming moved to the professional pattern `<type>-<workload>-<env>-<region>-<instance>`, the widely used Microsoft Cloud Adoption Framework style. Patterns 1 and 2 show the old form crossed out. Day 1 resources still carry the old names, e.g. <span class="old">aws-lab-ubuntu-01</span>.
 
+{keep}
+## What each part means {paths}
+| Part | The question it answers | In Tinker Town
+| `type` | What kind of resource is it? | `vm`, `kp`, `vpc`, `snet`, `sg`: see the next table
+| `workload` | What does it serve? | `ubuntu`, `web`, `core` (the network everything shares)
+| `env` | Which environment is it in? | Always `lab`: the whole project is one lab
+| `region` | Where does it run? | `eun1` (eu-north-1)
+| `instance` | Which one of its kind? | `001`, `002`, …
+> Key rule · `lab` is the environment, never the workload: `vpc-core-lab-eun1-001`, not `vpc-lab-dev-eun1-001`. Network examples for module 3: `vpc-core-lab-eun1-001`, `snet-public-lab-eun1-001`, `igw-core-lab-eun1-001`, `sg-web-lab-eun1-001`.
+
+{keep}
+## Common type prefixes {paths}
+| Type | Prefix | Type | Prefix
+| EC2 instance | `vm` | Security group | `sg`
+| Key pair | `kp` | Subnet | `snet`
+| VPC | `vpc` | Route table | `rt`
+| Internet gateway | `igw` | NAT gateway | `nat`
+
 ## The patterns {paths}
 
 ```html
@@ -63,14 +81,6 @@ This file is a reference, not a walkthrough — check back here whenever you nam
 | Systemd unit | `<purpose>.service` | `hello-loop.service`
 | Log directory | `/var/log/<service-name>/` | `/var/log/disk-report/`
 | Logrotate config | `/etc/logrotate.d/<service-name>` | `/etc/logrotate.d/disk-report`
-
-{keep}
-## Common type prefixes {paths}
-| Type | Prefix | Type | Prefix
-| EC2 instance | `vm` | Security group | `sg`
-| Key pair | `kp` | Subnet | `snet`
-| VPC | `vpc` | Route table | `rt`
-| Internet gateway | `igw` | NAT gateway | `nat`
 
 Part of Project Tinker Town · indexes [[tinker-town-01-aws-ssh-firewall]], [[tinker-town-02-linux-users-accounts]], [[tinker-town-03-systemd-service]] and [[tinker-town-04-cron-logrotate]]
 </script>
