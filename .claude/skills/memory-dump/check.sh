@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Check the chalk book before a commit: placeholders, colours, privacy, admin names, catalogue.
+# Check the chalk book before a commit: placeholders, colours, privacy, admin names, catalogue, skill descriptions.
 # Prints "file:line  reason" for each problem and exits non-zero if there is any.
 # Usage: check.sh [--render]    (--render also renders notes changed since the last commit)
 set -euo pipefail
@@ -80,8 +80,18 @@ EOF
 echo "9. Viewport"
 grep -L 'name="viewport"' notes/*.html | sed 's/$/:1/' | report "no viewport tag: phones show it zoomed out" || true
 
+echo "10. Skill descriptions"
+# The repo skill and the personal pointer skill (~/.claude/skills/memory-dump/) must describe themselves the same way
+pointer="$HOME/.claude/skills/memory-dump/SKILL.md"
+if [ -f "$pointer" ]; then
+  [ "$(grep -m1 '^description:' "$pointer")" = "$(grep -m1 '^description:' .claude/skills/memory-dump/SKILL.md)" ] \
+    || fail ".claude/skills/memory-dump/SKILL.md:3  description differs from the pointer skill in ~/.claude/skills/memory-dump/"
+else
+  echo "  skipped (no pointer skill)"
+fi
+
 if [ "${1:-}" = "--render" ]; then
-  echo "10. Render"
+  echo "11. Render"
   changed=$( { git diff --name-only HEAD -- 'notes/*.html'; git ls-files --others --exclude-standard -- 'notes/*.html'; } | sort -u)
   [ -n "$changed" ] || echo "  no changed notes"
   for f in $changed; do

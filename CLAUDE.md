@@ -195,11 +195,11 @@ in the code and in `meta-01-site-build`.
 - **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.prog/index.html` and
   `.prog/complete.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
   work inside a menu project belongs in its roadmap in `site/notes.js`.
-- **Moving a finished item** happens only when the user asks. Move its whole `<article>` from `.prog/index.html` to the
-  top of the matching section in `.prog/complete.html` (add a section if needed), unchanged except: `data-status="done"`,
-  the status chip becomes `<span class="chip done">Done</span>`, and a `<span class="date">YYYY-MM-DD</span>` is added
-  to its header. Keep its number and `id`. Move its overview row too, with the date in the Done column, and remove
-  both from the backlog. Never invent details for an item.
+- **Moving a finished item** happens only when the user asks. Move its whole `<article>` from `.prog/index.html` into
+  its tier section in `.prog/complete.html`, in rank order (add a section if needed), unchanged except:
+  `data-status="done"`, the Done chip, and a `<span class="date">YYYY-MM-DD</span>` right after the chip, taken from
+  the chip's `title` (never guessed). Keep its number and `id`. Move its overview row to the same position, then
+  remove both from the backlog. Never invent details for an item.
 
 ---
 
@@ -213,7 +213,7 @@ goes through an AI session.
 1. Work on something, in any project folder.
 2. While it is fresh, say **"memory-dump"**, "chalk that up" or similar. A personal pointer skill in
    `~/.claude/skills/memory-dump/` makes this work in every folder and leads back to this project.
-   An AI may also offer a dump when the topic changes or about an hour of content has built up.
+   An AI may also offer a dump; when is each user's own preference.
 3. The skill plans the note(s), copies `template.html` into `notes/`, fills it in following this
    guide, adds it to `site/notes.js`, rebuilds the search index, checks every page, then hands over
    following the user's own git preferences (§7).

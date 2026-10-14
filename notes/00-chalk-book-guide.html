@@ -165,7 +165,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 - Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - A new site page goes in `site/pages/`, then into `PAGES` in `site/app.js` and the main footer. New Export options are items in the Export menu.
-- Backlog and Complete Tasks are private pages in `.prog/`, gitignored, about Chalk Book itself only. A finished item moves to Complete Tasks only when the user asks, unchanged except a Done chip and a date.
+- Backlog and Complete Tasks are private pages in `.prog/`, gitignored, about Chalk Book itself only. A finished item moves to Complete Tasks only when the user asks: into its tier section in rank order, unchanged except a Done chip and a date, and it leaves the backlog.
 
 ## How notes are made & changed {gotcha}
 
@@ -173,7 +173,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 
 ### Adding a note: the memory-dump skill
 1. Work on something, in any project folder.
-2. While it is fresh, say **“memory-dump”** or **“chalk that up”**. A personal pointer skill makes this work in every folder. An AI may also offer a dump when the topic changes or about an hour of content has built up.
+2. While it is fresh, say **“memory-dump”** or **“chalk that up”**. A personal pointer skill makes this work in every folder. An AI may also offer a dump; when is each user's own preference.
 3. The skill plans the notes, fills the template in `notes/`, adds them to `site/notes.js`, rebuilds the search index, runs `check.sh` and checks every page, then hands over following the user's own git preferences.
 4. Check the note on the site and ask for any changes in the same session.
 
