@@ -23,8 +23,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
     // The private progress pages (.prog/ is gitignored), shown in the viewer
-    backlog: { title: "Backlog", file: ".prog/index.html", hideRecent: true },
-    complete: { title: "Complete Tasks", file: ".prog/complete.html" },
+    backlog: { title: "Backlog", file: ".prog/backlog.html", hideRecent: true },
+    complete: { title: "Complete Tasks", file: ".prog/complete-tasks.html" },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;

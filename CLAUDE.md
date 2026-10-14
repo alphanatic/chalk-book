@@ -192,14 +192,9 @@ in the code and in `meta-01-site-build`.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - Add a site page: create it in `site/pages/`, then add it to `PAGES` in `site/app.js` and to the main footer in `index.html`.
 - New Export options are added as items in the Export menu.
-- **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.prog/index.html` and
-  `.prog/complete.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
+- **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.prog/backlog.html` and
+  `.prog/complete-tasks.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
   work inside a menu project belongs in its roadmap in `site/notes.js`.
-- **Moving a finished item** happens only when the user asks. Move its whole `<article>` from `.prog/index.html` into
-  its tier section in `.prog/complete.html`, in rank order (add a section if needed), unchanged except:
-  `data-status="done"`, the Done chip, and a `<span class="date">YYYY-MM-DD</span>` right after the chip, taken from
-  the chip's `title` (never guessed). Keep its number and `id`. Move its overview row to the same position, then
-  remove both from the backlog. Never invent details for an item.
 
 ---
 
