@@ -33,8 +33,5 @@ code { font-family: "DejaVu Sans Mono", monospace; font-size: 12px; background: 
 .decision { --c: var(--butter); --c-chip: var(--butter-chip); }
 .idea     { --c: var(--lav);    --c-chip: var(--lav-chip); }
 .done     { --c: var(--mint);   --c-chip: var(--mint-chip); }
-.done b   { text-decoration: line-through 7px color-mix(in srgb, var(--coral) 80%, transparent); }   /* crossed off: pastel red, 20% transparent */
-
-
 
 .sky { --c: var(--sky); } .pink { --c: var(--pink); } .butter { --c: var(--butter); } .mint { --c: var(--mint); }
