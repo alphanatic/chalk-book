@@ -1,0 +1,165 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+VPC to running instance
+
+Built a custom VPC by hand in eu-north-1 (subnet, internet gateway, route table, security group), then launched a cheap ARM Ubuntu server into it with an ED25519 `.pem` key.
+
+The base for module 4: Nginx, the Elastic IP and the server-side hardening build on this network.
+
+## What we covered
+- VPC `vpc-core-prd-eun1-001`, `10.0.0.0/16`, created with "VPC only" so every part is built and named by hand
+- Public subnet `snet-public-prd-eun1-001`, `10.0.1.0/24` in `eu-north-1a`, auto-assign public IPv4 off
+- Internet gateway `igw-core-prd-eun1-001`, attached to the VPC
+- Route table `rt-public-prd-eun1-001`: `0.0.0.0/0` to the gateway, explicitly linked to the subnet
+- Security group: in 22 from `<my-ip>/32`, 80 and 443 from anywhere; out all traffic
+- Key pair `kp-web-prd-eun1-001`, ED25519, `.pem`
+- Instance `vm-web-prd-eun1-001`: Ubuntu 24.04 LTS arm64, `t4g.micro`, 8 GiB gp3, hardened launch settings
+- Every resource named with note 05's rule; four console mistakes caught and fixed
+
+>{paths} Naming note · This build uses env `prd`, not `lab`: it is a real server, not a lab exercise. A security group's *group name* can't start with `sg-`, so the group is `web-prd-eun1-001` and its `Name` tag is `sg-web-prd-eun1-001`.
+
+{keep}
+## Names
+| Resource | Name | Workload slot
+| VPC | `vpc-core-prd-eun1-001` | `core`: the network everything shares
+| Subnet | `snet-public-prd-eun1-001` | `public`: the kind of subnet, not who uses it
+| Internet gateway | `igw-core-prd-eun1-001` | `core`: the one way in and out, for everything
+| Route table | `rt-public-prd-eun1-001` | `public`: goes with the public subnet
+| Security group | `web-prd-eun1-001`, tag `sg-web-prd-eun1-001` | `web`: its rules exist for the web server only
+| Key pair | `kp-web-prd-eun1-001` | `web`
+| Instance | `vm-web-prd-eun1-001` | `web`
+> Concept · `core` is used for shared infrastructure. A VPC named `vpc-web-…` would mislead as soon as a second server joins it.
+
+## Full command sequence
+
+### AWS Console · VPC
+1. VPC → Your VPCs → Create VPC → **VPC only**
+2. Name `vpc-core-prd-eun1-001`, IPv4 CIDR `10.0.0.0/16`, no IPv6, tenancy **Default**, encryption control **None**
+3. After creating it: Actions → Edit VPC settings → tick **Enable DNS hostnames** ("VPC only" leaves it off)
+
+> Gotcha · Tenancy "Dedicated" and encryption control "Monitor"/"Enforce" cost extra. Default and None are free.
+
+### AWS Console · Subnet
+1. VPC → Subnets → Create subnet, VPC `vpc-core-prd-eun1-001`
+2. Name `snet-public-prd-eun1-001`, AZ `eu-north-1a`, CIDR `10.0.1.0/24`
+3. Check: **Auto-assign public IPv4 address = No**. The Elastic IP will give the address
+> Concept · A `/24` has 256 addresses; AWS keeps 5 per subnet, so 251 are free to use.
+
+### AWS Console · Internet gateway
+1. VPC → Internet gateways → Create internet gateway, name `igw-core-prd-eun1-001`
+2. Actions → Attach to VPC → `vpc-core-prd-eun1-001`; State shows **Attached**
+
+### AWS Console · Route table
+1. VPC → Route tables → Create route table, name `rt-public-prd-eun1-001`, VPC `vpc-core-prd-eun1-001`
+2. Routes → Edit routes → Add route: `0.0.0.0/0`, target **Internet Gateway** → `igw-core-prd-eun1-001`
+3. Subnet associations → Edit subnet associations → tick `snet-public-prd-eun1-001`
+
+| Destination | Target | Meaning
+| `10.0.0.0/16` | `local` | traffic inside the VPC stays inside (made automatically)
+| `0.0.0.0/0` | `igw-…` | everything else goes out through the gateway
+
+> Concept · A subnet is *public* only because its route table sends `0.0.0.0/0` to an internet gateway. Until then, a new subnet uses the VPC's main route table, which has no internet route. The main table stays private.
+
+### AWS Console · Security group
+1. VPC → Security groups → Create security group
+2. Group name `web-prd-eun1-001`, description `Web server: SSH from my IP, HTTP and HTTPS from anywhere`, VPC `vpc-core-prd-eun1-001`
+3. **Inbound** rules, then **Outbound** rules, then tag `Name` = `sg-web-prd-eun1-001`
+
+| Direction | Type | Port | Source / destination
+| Inbound | SSH | 22 | **My IP** → `<my-ip>/32`
+| Inbound | HTTP | 80 | Anywhere-IPv4 → `0.0.0.0/0`
+| Inbound | HTTPS | 443 | Anywhere-IPv4 → `0.0.0.0/0`
+| Outbound | All traffic | all | Anywhere-IPv4 → `0.0.0.0/0`
+
+> Concept · Security groups are *stateful*: replies to allowed inbound traffic go out without an outbound rule. The outbound rule is for traffic the server starts itself: `apt`, certbot, DNS lookups.
+> Gotcha · Name and description can't be edited after creation, and the description takes plain ASCII only. The yellow `0.0.0.0/0` warnings are expected on 80, 443 and outbound; never allow `0.0.0.0/0` on 22.
+
+### AWS Console · Key pair
+1. EC2 → Network & Security → Key pairs → Create key pair
+2. Name `kp-web-prd-eun1-001`, type **ED25519**, format **.pem**, tag `Name` = `kp-web-prd-eun1-001`
+3. The `.pem` downloads once. AWS keeps only the public key and can't send the private key again
+
+### Local · Store the key
+```local
+mv ~/Downloads/kp-web-prd-eun1-001.pem ~/.ssh/  # keys live in ~/.ssh, where SSH tooling looks
+chmod 400 ~/.ssh/kp-web-prd-eun1-001.pem  # 400: owner read-only; SSH refuses looser keys
+```
+
+{keep}
+### Concept · How the key pair logs you in
+| Part | Lives | Job
+| Public key | AWS puts it on the server at first boot, in `~/.ssh/authorized_keys` | the lock: safe to share
+| Private key (`.pem`) | only on your machine, in `~/.ssh/` | the key: proves it's you
+> Concept · The server sends a challenge, your machine signs it with the private key, the server checks the signature against the public key. The private key never leaves your machine. Lose it and you're locked out; leak it and anyone can log in.
+
+### AWS Console · Launch the instance
+1. EC2 → Instances → Launch instances, name `vm-web-prd-eun1-001`
+2. AMI: Quick Start → Ubuntu → **Ubuntu Server 24.04 LTS (HVM), SSD Volume Type**, architecture **64-bit (Arm)**
+3. Instance type `t4g.micro`, key pair `kp-web-prd-eun1-001`
+4. Network settings → Edit: the fields below, then **Launch instance**
+
+| Setting | Value | Why
+| VPC / subnet | `vpc-core-prd-eun1-001` / `snet-public-prd-eun1-001` | the network built above
+| Auto-assign public IP | Disable | the Elastic IP gives the address
+| Firewall | Select existing → `web-prd-eun1-001` | the group built above
+| Storage | 8 GiB gp3, encrypted, delete on termination | gp3 is cheaper than gp2; encryption is free
+| Termination protection | Enable | blocks an accidental terminate
+| Credit specification | Standard | caps CPU burst charges; t4g defaults to Unlimited
+| Metadata version | V2 only (token required) | blocks a known credential-theft attack
+| Detailed monitoring | off | costs extra
+| Purchasing option | None (on-demand) | Spot can be interrupted
+
+> Gotcha · Pick **64-bit (Arm)** before the instance type, or the `t4g` types don't show. The note "AMI contains instance store volumes…" is normal for this AMI.
+
+{keep}
+## Cost
+| Item | Per month (eu-north-1, on-demand)
+| `t4g.micro` ($0.0086/h) | ~$6.30, covered by free-tier credits while they last
+| Public IPv4 / Elastic IP ($0.005/h) | ~$3.65, from the moment it is attached
+| 8 GiB gp3 | ~$0.70
+| Data out | free up to 100 GB
+| **Total** | **~$10.65** (`t4g.nano` instead: ~$7.50)
+> Gotcha · Skipped on purpose: a NAT gateway (~$35/month) and a load balancer (~$18/month). One public server needs neither. An Elastic IP that isn't attached is still billed.
+
+## Bugs hit & fixed
+
+#### Bug · security group name rejected
+cause: "A security group name cannot begin with sg-". AWS reserves `sg-` for security group *IDs* (`sg-0abc…`), so `sg-web-prd-eun1-001` can't be the group name.
+fix: Group name `web-prd-eun1-001`; the `Name` tag keeps `sg-web-prd-eun1-001`, and the console's Name column shows the tag.
+
+#### Bug · inbound rules added under Outbound
+cause: SSH, HTTP and HTTPS were added with the **Add rule** button under *Outbound rules*. Inbound stayed empty, so nothing could reach the server.
+fix: Delete them from outbound and add them under *Inbound rules*.
+
+#### Bug · outbound All traffic rule deleted
+cause: While fixing the bug above, the default **All traffic → `0.0.0.0/0`** outbound rule was deleted and the wrong rows kept. The server couldn't start any connection of its own.
+fix: Outbound → Add rule → All traffic, Anywhere-IPv4. Target: 3 inbound rules, 1 outbound rule.
+
+#### Bug · tag key `name` in lowercase
+cause: Tag keys are case-sensitive. The console's Name column reads only `Name`, so a `name` tag leaves it blank.
+fix: Key `Name`, with a capital N.
+
+{keep}
+## Still to do
+| Step | Why
+| Confirm DNS hostnames on and the `Name` tag on the security group | set, but not checked on screen
+| Tag the root volume `vol-web-prd-eun1-001` | the launch wizard names only the instance
+| Allocate and attach Elastic IP `eip-web-prd-eun1-001` | no public IP yet, so no SSH yet
+| `~/.ssh/config` entry `Host vm-web-prd-eun1-001 web` | `ssh web` with no flags, as in note 01
+| Hostname, swap, sshd hardening, UFW, `adm-kiwi` | notes 01 and 02 on the new server
+| Nginx, then a domain and certbot | module 4
+| AWS Budget alert | catches surprise charges early
+
+{keep}
+## Best practices
+- **Build the VPC by hand once** "VPC only" plus four small steps shows what "VPC and more" hides.
+- **One public subnet is enough** No NAT gateway or load balancer for a single server.
+- **SSH from one IP only** `<my-ip>/32` on port 22; re-pick "My IP" when your home IP changes.
+- **Tag `Name` everywhere** The console's Name column reads only the `Name` tag, capital N.
+- **ARM is cheaper** Graviton `t4g` types cost less than `t3` for the same work.
+- **Standard credits** Caps the bill; Unlimited can charge for long CPU bursts.
+- **Check before Create** Names and descriptions can't be edited afterwards.
+
+Part of Project Tinker Town · module 3 · names from [[tinker-town-05-naming-conventions]], key and SSH basics from [[tinker-town-01-aws-ssh-firewall]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

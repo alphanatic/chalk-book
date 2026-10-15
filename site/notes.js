@@ -65,6 +65,12 @@ window.CHALK_NOTES = [
     skills: ["aws", "ebs", "lvm", "fstab", "ext4", "filesystems", "mount", "lsblk", "blkid", "mkfs.ext4", "df", "umount", "resize2fs", "pvcreate", "vgcreate", "lvcreate", "lvextend"],
   },
   {
+    id: "tinker-town-07-vpc-networking", project: "tinker-town", n: 7, module: 3, date: "2026-10-14",
+    title: "VPC Networking & EC2 Launch",
+    summary: "Custom VPC by hand: subnet, internet gateway, route table, security group; t4g.micro Ubuntu arm64 with an ED25519 .pem key.",
+    skills: ["aws", "vpc", "subnet", "internet gateway", "route table", "security groups", "ec2", "key pair", "ed25519", "pem", "t4g", "graviton", "arm64", "imdsv2", "gp3", "elastic ip", "tags", "cost", "naming", "chmod", "mv"],
+  },
+  {
     id: "pokedex-01-git-manual-push", project: "pokedex", n: 1, context: "Git", date: "2026-10-11",
     title: "Git: Manual Commit & Push",
     summary: "Manual commit 44e0d5c in pokedex, git status, commit messages and trailers, .git/index with xxd.",
