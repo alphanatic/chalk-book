@@ -125,6 +125,12 @@ window.CHALK_NOTES = [
     skills: ["chalk markup", "markdown", "html", "javascript", "renderer", "note.js", "node", "converter", "imagemagick", "compare", "pdftotext", "pdftoppm", "regression testing", "build-index", "template", "tokens"],
   },
   {
+    id: "meta-08-session-log-analysis", project: "meta", n: 8, context: "Analysis", date: "2026-10-17",
+    title: "Session Logs & Rule History",
+    summary: "Analysed session archives, classified identity evidence, and traced rule changes without treating repeated snapshots as independent events.",
+    skills: ["jsonl", "python", "pathlib", "json", "collections.counter", "rg", "privacy", "provenance", "session history", "codex"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
