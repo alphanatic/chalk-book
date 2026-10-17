@@ -1,0 +1,116 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+nginx with its own site, live on the internet
+
+Installed nginx, gave the site its own web root, config and log folder, replaced the default site and checked the page from outside.
+
+The server answers `http://<elastic-ip>` with its own page; a domain and HTTPS come next.
+
+## What we covered
+- nginx 1.24.0 installed, running and enabled at boot
+- Web root `/var/www/web/` with a first `index.html`, logs in `/var/log/nginx/web/`
+- Site config `/etc/nginx/sites-available/web`, linked into `sites-enabled`, default site unlinked
+- `nginx -t && systemctl reload nginx`: reload only after the test passes
+- `200 OK` from Local, and the request seen in the site's own access log
+- The site steps were run by Claude from its terminal over `ssh web`, after the install was done by hand
+
+## Full command sequence
+
+### Remote · Install
+```remote
+sudo apt update  # refresh the package lists
+sudo apt install -y nginx  # installs, starts and enables nginx
+systemctl status nginx --no-pager  # expect active (running); --no-pager prints and returns
+```
+At this point `http://<elastic-ip>` already showed "Welcome to nginx!": UFW and the security group allow port 80.
+
+### Remote · Web root, log folder, first page
+```remote
+sudo mkdir -p /var/www/web /var/log/nginx/web  # -p: parents, no error if they exist
+echo "<h1>web is up</h1>" | sudo tee /var/www/web/index.html  # a first page to prove it works
+```
+> Gotcha · nginx doesn't create a missing log folder. `nginx -t` then fails with `open() "/var/log/nginx/web/access.log" failed (2: No such file or directory)`.
+
+### Local · The site config, sent over SSH
+```local
+ssh web 'sudo tee /etc/nginx/sites-available/web' <<'EOF'  # lines up to EOF become the file
+```
+```config: /etc/nginx/sites-available/web
+server {  »  one site
+    listen 80 default_server;  »  port 80, IPv4; catch requests no other site claims
+    listen [::]:80 default_server;  »  the same for IPv6
+    server_name _;  »  any name, until a domain is set
+
+    root /var/www/web;  »  where the files are
+    index index.html;  »  the file that serves /
+
+    access_log /var/log/nginx/web/access.log;  »  this site's own logs
+    error_log /var/log/nginx/web/error.log;  »
+
+    location / {  »
+        try_files $uri $uri/ =404;  »  the file, the folder, or 404
+    }  »
+}  »
+```
+`EOF` on its own line ends the input. The quotes in `<<'EOF'` stop the local shell from expanding `$uri`. Typed on the server, `sudo nano /etc/nginx/sites-available/web` does the same.
+
+### Remote · Enable the site
+```remote
+sudo ln -sf /etc/nginx/sites-available/web /etc/nginx/sites-enabled/web  # -s: symlink; -f: replace
+```
+```remote
+sudo rm -f /etc/nginx/sites-enabled/default  # unlink the default site; -f: no error if gone
+ls -l /etc/nginx/sites-enabled/  # only: web -> ../sites-available/web
+sudo nginx -t && sudo systemctl reload nginx  # &&: reload only if the test passes
+```
+```output
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+> Concept · nginx loads only what is in `sites-enabled`. The files themselves stay in `sites-available`, so a site is turned on or off by adding or removing a link. `default` and `web` both say `default_server`, so only one of them may be enabled.
+
+### Local · Check from outside
+```local
+curl -I http://<elastic-ip>  # -I: headers only
+curl http://<elastic-ip>  # the page itself
+```
+```output
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+<h1>web is up</h1>
+```
+```remote
+sudo tail -n 2 /var/log/nginx/web/access.log  # the request above, in the site's own log
+```
+> Gotcha · A browser tab opened before the reload still shows "Welcome to nginx!". Refresh it.
+
+{keep}
+## Where things live
+| What | Path
+| Site config | `/etc/nginx/sites-available/web`
+| Enabled sites (links) | `/etc/nginx/sites-enabled/`
+| Web root | `/var/www/web/`
+| Site logs | `/var/log/nginx/web/access.log`, `error.log`
+| Main config | `/etc/nginx/nginx.conf`
+| Default site (unlinked, kept) | `/etc/nginx/sites-available/default`
+
+{keep}
+## Next
+| Step | Why
+| AWS Budget alert | catches surprise charges early
+| `adm-kiwi` admin account | personal login instead of `ubuntu`, as in [[tinker-town-02-linux-users-accounts]]
+| Domain, then certbot | `server_name` and HTTPS on 443
+| `sudo apt autoremove` | remove the old kernel; the disk is 8 GB
+| Tag the root volume `vol-web-prd-eun1-001` | still untagged since launch
+
+{keep}
+## Best practices
+- **One folder per site** Web root, config and log folder all named after the site.
+- **Test, then reload** `nginx -t &&` stops a broken config from going live.
+- **Reload, not restart** Reload applies config without dropping connections.
+- **Unlink, don't delete** Remove the link in `sites-enabled`; keep the file in `sites-available`.
+- **Check from outside** `curl` from Local proves the security group, UFW and nginx together.
+
+Part of Project Tinker Town · module 4 · after [[tinker-town-10-ssh-hardening-ufw]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

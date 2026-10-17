@@ -1,0 +1,139 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+sshd drop-in & firewall, with a way back in
+
+Hardened SSH on the new server with a drop-in file instead of editing `sshd_config`, compared the settings before and after, and turned on UFW, with a fallback session open the whole time.
+
+Only ports 22, 80 and 443 are open; root and password logins are off.
+
+## What we covered
+- Three terminals with fixed jobs: work, fallback, test
+- A "before" picture of what sshd actually uses, from `sshd -T`
+- Drop-in `/etc/ssh/sshd_config.d/01-hardening.conf`, written with one `printf | tee` line
+- `sshd -t` before restart, `sshd -T` after, then new-login and password-refused tests
+- UFW: deny in, allow out, OpenSSH + 80 + 443, `show added` checked before `enable`
+- Two mistakes: a drop-in that was never written, two ufw commands merged by a paste
+
+>{concept} Updated rule · [[tinker-town-01-aws-ssh-firewall]] edited `/etc/ssh/sshd_config` itself. Here the settings live in a drop-in, which package updates leave alone and which is easy to read, copy and remove.
+
+{keep}
+## Three terminals, three jobs
+| Terminal | Connected to | Job
+| Work | server | every command runs here
+| Fallback | server | logged in **before** any change, then left alone
+| Test | Local | new-login tests after each change
+> Concept · A session that is already open survives a broken sshd config or firewall. As long as the fallback stays logged in, any mistake can be undone from it.
+
+## Full command sequence
+
+### Remote · The "before" picture
+```remote
+ls /etc/ssh/sshd_config.d/  # existing drop-ins: 60-cloudimg-settings.conf
+```
+```remote
+sudo sshd -T | grep -E '^(permitrootlogin|maxauthtries|x11forwarding) '  # -T: settings in use
+```
+
+{keep}
+| Setting | Ubuntu 24.04 AMI | After
+| `permitrootlogin` | `without-password` | `no`
+| `passwordauthentication` | `no` (set by the cloud image) | `no`
+| `kbdinteractiveauthentication` | `no` | `no`
+| `pubkeyauthentication` | `yes` | `yes`
+| `maxauthtries` | `6` | `3`
+| `x11forwarding` | `yes` | `no`
+
+> Concept · sshd reads `sshd_config.d/*.conf` in name order, before the rest of `sshd_config`, and the **first** value found wins. `01-` sorts before the image's own `60-cloudimg-settings.conf`.
+
+### Remote · Write the drop-in
+```remote
+printf '%s\n' 'PermitRootLogin no' 'PasswordAuthentication no' \
+    'KbdInteractiveAuthentication no' 'PubkeyAuthentication yes' \
+    'MaxAuthTries 3' 'X11Forwarding no' | sudo tee /etc/ssh/sshd_config.d/01-hardening.conf
+```
+`printf '%s\n'` prints each quoted piece on its own line; `sudo tee` writes them to the file and echoes them back. It was run as one line: no editor, nothing for a paste to break.
+
+```config: /etc/ssh/sshd_config.d/01-hardening.conf
+PermitRootLogin no  »  no direct root login, not even with a key
+PasswordAuthentication no  »  keys only
+KbdInteractiveAuthentication no  »  the other password-style path
+PubkeyAuthentication yes  »  key login on
+MaxAuthTries 3  »  drop after 3 failed attempts
+X11Forwarding no  »  no graphical forwarding on a server
+```
+
+### Remote · Test, apply, compare
+```remote
+sudo sshd -t  # test the config; silence means OK
+sudo systemctl restart ssh  # apply; open sessions stay connected
+```
+```remote
+sudo sshd -T | grep -E '^(permitrootlogin|maxauthtries|x11forwarding) '  # the "after" picture
+```
+```output
+maxauthtries 3
+permitrootlogin no
+x11forwarding no
+```
+
+### Local · Test from outside
+```local
+ssh web  # a new login still works
+ssh -o PubkeyAuthentication=no web  # -o: offer no key; expect Permission denied (publickey)
+```
+> Gotcha · The password test passed even *before* the drop-in existed, because the cloud image had already turned passwords off. Only `sshd -T` proves the new file is in use.
+
+### Remote · UFW firewall
+```remote
+sudo ufw default deny incoming  # block everything inbound unless allowed
+sudo ufw default allow outgoing  # the server can still reach apt, DNS, certbot
+sudo ufw allow OpenSSH  # port 22, before enable, or you lock yourself out
+sudo ufw allow 80/tcp  # HTTP
+sudo ufw allow 443/tcp  # HTTPS
+sudo ufw show added  # rules waiting to apply; must list ufw allow OpenSSH
+sudo ufw enable  # "may disrupt existing ssh connections": y
+sudo ufw status verbose  # check the result
+```
+```output
+Status: active
+Default: deny (incoming), allow (outgoing), disabled (routed)
+22/tcp (OpenSSH)    ALLOW IN    Anywhere
+80/tcp              ALLOW IN    Anywhere
+443/tcp             ALLOW IN    Anywhere
+```
+The same three rules follow with `(v6)`. A new `ssh web` from the test terminal then proved SSH still gets through.
+
+> Concept · UFW and the AWS security group are two separate layers. A packet has to pass both: the security group at the AWS edge, UFW on the server.
+> Gotcha · `ufw allow 'Nginx Full'` only works once nginx is installed, because the profile comes with the package. Ports `80/tcp` and `443/tcp` work at any time.
+
+## Bugs hit & fixed
+
+#### Bug · sshd -T still showed the old values
+cause: After "the hardening", `sshd -T` still showed `maxauthtries 6`, `permitrootlogin without-password`, `x11forwarding yes`. `ls /etc/ssh/sshd_config.d/` listed only `60-cloudimg-settings.conf`: the drop-in had never been written. The `nano` step was skipped.
+fix: Write it with the one-line `printf … | sudo tee`, then `sshd -t`, restart, `sshd -T`. `sshd -T` reads the files from disk, so it shows a new file even before the restart.
+
+#### Bug · ERROR: Invalid syntax
+cause: Two commands pasted together ran as `sudo ufw default allow outgoingsudo ufw allow OpenSSH`. ufw rejected the whole line and printed its help. Nothing changed, and the firewall wasn't on yet, so there was no lockout risk.
+fix: Run each command on its own line, then confirm with `sudo ufw show added` before `enable`.
+
+{keep}
+## Where things live
+| What | Path
+| Hardening drop-in | `/etc/ssh/sshd_config.d/01-hardening.conf`
+| Cloud image drop-in | `/etc/ssh/sshd_config.d/60-cloudimg-settings.conf`
+| Main sshd config (unchanged) | `/etc/ssh/sshd_config`
+| UFW rules | `/etc/ufw/user.rules`, `/etc/ufw/user6.rules`
+| UFW log (blocked attempts) | `/var/log/ufw.log`
+
+{keep}
+## Best practices
+- **Fallback session first** Open it before the change, close it only after the tests pass.
+- **Drop-ins over edits** Low number to win, and the main file stays untouched.
+- **Before and after** `sshd -T` shows what sshd really uses; compare both pictures.
+- **`sshd -t` before restart** Never restart sshd on an untested config.
+- **OpenSSH before enable** And check `ufw show added` first.
+- **One command per paste** A merged paste is the most common mistake in this session.
+
+Part of Project Tinker Town · module 4 · after [[tinker-town-09-server-first-setup]]; next [[tinker-town-11-nginx-first-site]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

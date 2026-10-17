@@ -1,0 +1,142 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Hostname, updates, new kernel & swap
+
+Gave the new server its real name and made it stick past cloud-init, brought Ubuntu fully up to date with a new kernel and a reboot, and added 1 GB of swap for the 1 GiB instance.
+
+Hardening and nginx go on top of this base.
+
+## What we covered
+- Hostname `vm-web-prd-eun1-001`, resolvable in `/etc/hosts`, kept by cloud-init across reboots
+- `apt upgrade`: Ubuntu 24.04.4 → 24.04.5, kernel `6.17.0-1017-aws` → `7.0.0-1014-aws`, reboot
+- `kitty-terminfo` installed, so `nano` and other full-screen tools work from a Kitty terminal
+- 1 GB `/swapfile`, on at boot through `/etc/fstab`, `vm.swappiness=10`
+- Stayed on 24.04 LTS: the `New release '26.04.1 LTS' available` message ignored
+- Four mistakes: a merged paste, a non-command, a missing terminfo, a doubled fstab line
+
+## Full command sequence
+
+### Remote · Hostname
+```remote
+sudo hostnamectl set-hostname vm-web-prd-eun1-001  # the name the server calls itself
+echo "127.0.1.1 vm-web-prd-eun1-001" | sudo tee -a /etc/hosts  # -a: append; sudo can resolve it
+```
+```remote
+echo "preserve_hostname: true" | sudo tee /etc/cloud/cloud.cfg.d/99-preserve-hostname.cfg  # keep
+```
+```remote
+hostnamectl  # check: Static hostname
+```
+> Concept · On EC2, cloud-init can set the hostname back to `ip-10-0-1-140` on every boot. `preserve_hostname: true` in a file in `cloud.cfg.d/` tells it to leave the name alone. cloud-init reads only files ending in `.cfg` there.
+
+The prompt keeps the old name until the next login.
+
+### Remote · Update the OS
+```remote
+sudo apt update  # refresh the package lists
+sudo apt upgrade -y  # install every update; -y answers yes
+ls /var/run/reboot-required  # exists: an update needs a reboot
+sudo reboot  # load the new kernel; the session drops
+```
+```output
+Pending kernel upgrade!
+Running kernel version:
+  6.17.0-1017-aws
+Diagnostics:
+  The currently running kernel version is not the expected kernel version 7.0.0-1014-aws.
+```
+> Concept · This message is from `needrestart`. It also lists *service restarts being deferred* and *user sessions running outdated binaries*, including your own SSH session. One reboot clears all three.
+> Gotcha · `apt upgrade` updates packages within 24.04. `do-release-upgrade` would move the server to 26.04, a much bigger change. The login banner offers it every time; ignore it.
+
+### Local · Back in after the reboot
+```local
+ssh web  # "Connection refused" for ~30 s while it boots
+```
+```remote
+uname -r  # expect 7.0.0-1014-aws
+```
+The prompt now reads `ubuntu@vm-web-prd-eun1-001:~$`, which proves the hostname survived a boot.
+
+### Remote · Kitty terminfo
+```remote
+sudo apt install -y kitty-terminfo  # Kitty's terminal description, system-wide
+```
+> Concept · SSH passes `TERM=xterm-kitty` from a Kitty terminal. Without its terminfo the server can't draw full-screen programs. The package fixes it for every user, `sudo` included. [[tinker-town-01-aws-ssh-firewall]] used `export TERM=xterm-256color`, which lasts one session only.
+
+### Remote · Swap
+```remote
+sudo fallocate -l 1G /swapfile  # reserve a 1 GB file
+sudo chmod 600 /swapfile  # root only: swap can hold copies of memory
+sudo mkswap /swapfile  # format it as swap
+sudo swapon /swapfile  # turn it on now
+```
+```remote
+grep -q swapfile /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab  # once
+```
+```remote
+echo "vm.swappiness=10" | sudo tee /etc/sysctl.d/99-swappiness.conf  # prefer RAM
+sudo sysctl --system  # load sysctl.d now
+swapon --show  # check: /swapfile 1024M
+```
+```config: /etc/fstab (line added)
+/swapfile none swap sw 0 0  »  device, mount point, type, options, dump, fsck order
+```
+```config: /etc/sysctl.d/99-swappiness.conf
+vm.swappiness=10  »  default 60; low = prefer RAM
+```
+> Concept · `grep -q … ||` runs the `tee -a` only when the line is missing, so the step is safe to repeat. Without it, every run adds another line, as the bug below shows.
+
+## Bugs hit & fixed
+
+#### Bug · Too many arguments
+cause: Four hostname commands were pasted at once and lost their line breaks, so bash ran them as one line. `hostnamectl` got every other word as an argument: `Too many arguments.` The `| sudo tee` parts still ran and created empty, root-owned files named after the leftover words: `~/'preserve_hostname: true'` and `/etc/cloud/cloud.cfg.d/99-preserve-hostname.cfghostnamectl`.
+fix: Run the commands one at a time, then check for and remove the strays. The quotes are needed because the name has a colon and a space.
+```remote
+ls -la ~ /etc/cloud/cloud.cfg.d/  # find the strays
+sudo rm /etc/cloud/cloud.cfg.d/99-preserve-hostname.cfghostnamectl  # stray 1
+sudo rm ~/'preserve_hostname: true'  # stray 2
+```
+
+#### Bug · systemctl: invalid option -- 'S'
+cause: `systemctl -S update` is an Arch habit (`pacman -Syu`) aimed at the wrong tool. Ubuntu updates go through `apt`.
+fix: `sudo apt update` and `sudo apt upgrade -y`.
+
+#### Bug · Error opening terminal: xterm-kitty
+cause: `sudo nano /etc/fstab` from a Kitty terminal, before the terminfo was installed.
+fix: `sudo apt install -y kitty-terminfo`.
+
+#### Bug · Swap line twice in fstab
+cause: `echo "/swapfile …" | sudo tee -a /etc/fstab` was run twice, so `/etc/fstab` held the line twice. `findmnt --verify` warned `target specified more than once`. At boot the second line fails, because the swap is already on.
+fix: Back up, look, delete the last line, reload and verify. The `nano` edit was tried first, but nothing was saved.
+```remote
+sudo cp /etc/fstab /etc/fstab.bak  # backup: fstab mistakes can stop a boot
+tail -n 3 /etc/fstab  # check: the two swap lines are last
+sudo sed -i '$d' /etc/fstab  # -i: edit in place; $d: delete the last line
+grep -c swapfile /etc/fstab  # expect 1
+sudo systemctl daemon-reload  # systemd rereads fstab
+sudo findmnt --verify  # 0 errors, 1 warning
+```
+> Gotcha · The one warning left, `non-bind mount source /swapfile is a directory or regular file`, is normal for a swap *file*.
+
+{keep}
+## Where things live
+| What | Path
+| Hostname resolution | `/etc/hosts`
+| cloud-init hostname setting | `/etc/cloud/cloud.cfg.d/99-preserve-hostname.cfg`
+| Swap file | `/swapfile`
+| Mounts at boot | `/etc/fstab` (backup `/etc/fstab.bak`)
+| Swappiness | `/etc/sysctl.d/99-swappiness.conf`
+| Reboot flag | `/var/run/reboot-required`
+
+{keep}
+## Best practices
+- **One command per paste** Several lines pasted together can merge into one broken command.
+- **Guard appends** `grep -q … ||` before `tee -a`, so a rerun adds nothing.
+- **Back up fstab first** And run `findmnt --verify` before any reboot.
+- **Reboot after a kernel update** `reboot-required` and `uname -r` tell you whether it's needed and whether it worked.
+- **Stay on the LTS** Package updates yes, release upgrades no.
+- **Watch the disk** 8 GB went from 37% to 53% with the swap file and a second kernel; `apt autoremove` is next.
+
+Part of Project Tinker Town · module 4 · after [[tinker-town-08-ssh-known-hosts]]; next [[tinker-town-10-ssh-hardening-ufw]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

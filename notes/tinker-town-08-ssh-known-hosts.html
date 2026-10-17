@@ -1,0 +1,127 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+From launched instance to `ssh web`
+
+Gave the new web server a fixed public address, checked its host key against AWS before trusting it, and set up an SSH alias, so `ssh web` logs in with no flags and no prompts.
+
+Every later step on `vm-web-prd-eun1-001` starts with `ssh web`.
+
+## What we covered
+- Elastic IP `eip-web-prd-eun1-001` allocated, tagged and associated with `vm-web-prd-eun1-001`
+- The real ED25519 host-key fingerprint read from the EC2 system log
+- First connection with `-i` and the `.pem`; fingerprint compared, then `yes` wrote `~/.ssh/known_hosts`
+- `~/.ssh/config` alias `Host vm-web-prd-eun1-001 web` with `IdentitiesOnly` and `HostKeyAlias`
+- Checked with `ssh-keygen -F` and a fresh `ssh web`
+- Two small mistakes: a skipped `yes`, a typo in `ssh-keygen -F`
+
+{keep}
+## Two files, two directions
+| File | Proves | Direction
+| `~/.ssh/kp-web-prd-eun1-001.pem` | **you** are allowed in | you → server
+| `~/.ssh/known_hosts` | **the server** is the real one | server → you
+> Concept · The `.pem` never goes into known_hosts. SSH writes the server's host key there when you answer `yes` on the first connection, then checks it on every connection after. A different key later means a different machine, or a rebuilt one.
+
+## Full command sequence
+
+### AWS Console · Elastic IP
+1. EC2 → Network & Security → Elastic IPs → **Allocate Elastic IP address**, border group `eu-north-1`
+2. Tags → `Name` = `eip-web-prd-eun1-001` → **Allocate**
+3. Select it → Actions → **Associate Elastic IP address** → Resource type **Instance** → `vm-web-prd-eun1-001` → **Associate**
+4. Check: Instances → `vm-web-prd-eun1-001` → **Public IPv4 address** shows the Elastic IP
+
+> Gotcha · An Elastic IP is billed by the hour, attached or not (~$3.65/month, see [[tinker-town-07-vpc-networking]]). Release it when the server goes.
+
+### AWS Console · The real host-key fingerprint
+1. EC2 → Instances → tick `vm-web-prd-eun1-001`
+2. Actions → Monitor and troubleshoot → **Get system log**
+3. Find `BEGIN SSH HOST KEY FINGERPRINTS` and note the line ending `(ED25519)`
+
+> Concept · The fingerprint is a short hash of the server's public host key. Reading it from AWS gives a second, trusted channel to compare with what SSH shows on first contact.
+
+### Local · First connection
+```local
+ls -l ~/.ssh/kp-web-prd-eun1-001.pem  # expect -r-------- (400)
+ssh -i ~/.ssh/kp-web-prd-eun1-001.pem ubuntu@<elastic-ip>  # -i: the private key to use
+```
+```output
+ED25519 key fingerprint is SHA256:<host-key-fingerprint>
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '<elastic-ip>' (ED25519) to the list of known hosts.
+```
+`ubuntu` is the default user on Ubuntu AMIs.
+
+1. Compare the `SHA256:` value with the system log; type the full word `yes` only if they match
+2. `exit`, then confirm the entry was saved:
+
+```local
+ssh-keygen -F <elastic-ip>  # -F: find this host in known_hosts
+```
+
+### Local · SSH config alias
+```local
+nano ~/.ssh/config  # add the block below
+chmod 600 ~/.ssh/config  # 600: owner read/write only
+ssh web  # first login through the alias
+```
+```config: ~/.ssh/config
+Host vm-web-prd-eun1-001 web  »  full name and short alias
+    HostName <elastic-ip>  »  the real address
+    User ubuntu  »  login user; adm-kiwi later
+    IdentityFile ~/.ssh/kp-web-prd-eun1-001.pem  »  the key to use
+    IdentitiesOnly yes  »  offer only this key
+    HostKeyAlias vm-web-prd-eun1-001  »  store the host key under the name
+```
+```output
+The authenticity of host 'vm-web-prd-eun1-001 (<elastic-ip>)' can't be established.
+This host key is known by the following other names/addresses:
+    ~/.ssh/known_hosts:8: <elastic-ip>
+```
+> Concept · `HostKeyAlias` files the host key under `vm-web-prd-eun1-001` instead of the IP, so SSH asks once more. SSH even points out that the same key is already known under the IP: same fingerprint, so `yes`. If the IP ever changes, nothing breaks.
+> Concept · `IdentitiesOnly yes` stops SSH offering every key in the agent first, which can end in `Too many authentication failures` before the right key is tried.
+
+### Local · Verify
+```local
+ssh-keygen -F vm-web-prd-eun1-001 -f ~/.ssh/known_hosts  # the entry under the alias name
+ssh web  # connects with no prompts
+```
+```local
+ssh -G web | grep -E '^(hostname|user|identityfile|hostkeyalias) '  # -G: the config SSH uses
+```
+
+{keep}
+## Local or server?
+| Prompt | You are on
+| `~ on ☁ (eu-north-1)` | your own machine (Local)
+| `ubuntu@ip-10-0-1-140:~$` | the server, before the hostname change
+| `ubuntu@vm-web-prd-eun1-001:~$` | the server, after [[tinker-town-09-server-first-setup]]
+> Gotcha · Editing `~/.ssh/config` and running `chmod` and `ssh web` all happen on Local. Only the last prompt after `ssh web` is the server.
+
+## Bugs hit & fixed
+
+#### Bug · Host key verification failed
+cause: The first `ssh -i …` stopped at the fingerprint prompt and was answered with Enter. Anything but the full word `yes` counts as no, so SSH quit with `Host key verification failed.`
+fix: Run the same command again and type `yes`.
+
+#### Bug · ssh-keygen -F prints nothing
+cause: `ssh-keygen -F` was given the IP with one digit missing. No match, so no output, which looks like the entry wasn't saved.
+fix: Copy the exact IP or alias that was used to connect.
+
+{keep}
+## Where things live
+| What | Path
+| Private key (local) | `~/.ssh/kp-web-prd-eun1-001.pem`
+| Known host keys (local) | `~/.ssh/known_hosts`
+| SSH alias (local) | `~/.ssh/config`
+| Host keys (server) | `/etc/ssh/ssh_host_*_key.pub`
+
+{keep}
+## Best practices
+- **Check the fingerprint** Compare with the system log before the first `yes`; it's the only moment trust is set.
+- **Alias by name** `HostKeyAlias` keeps known_hosts valid if the IP changes.
+- **One key per host** `IdentitiesOnly yes` avoids authentication-failure lockouts.
+- **Fixed address** An Elastic IP keeps the address across stop and start.
+- **Lock permissions** `400` on the key, `600` on the config.
+
+Part of Project Tinker Town · module 3 · builds on [[tinker-town-07-vpc-networking]] and [[tinker-town-01-aws-ssh-firewall]]; next [[tinker-town-09-server-first-setup]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
