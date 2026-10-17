@@ -1,0 +1,218 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A deploy user, a React app in a subfolder, two commands to ship
+
+Added a deploy-only user with its own key and no sudo, gave it the web folders, and put the pokeggdex React app live at `/pokeggdex/` beside the main site, with one nginx block per app.
+
+From now on a new version is one build and one rsync.
+
+## What we covered
+- `svc-deploy`: its own ed25519 key, no password, no sudo; owns `/var/www/web` and `/var/www/apps`
+- The public key installed with `sudo install` from `/dev/stdin`: owner and mode in one step
+- `web-deploy` SSH alias that reuses the server's trusted host key through `HostKeyAlias`
+- Vite `base: '/pokeggdex/'`, so the built links work in a subfolder
+- `rsync --delete` of `dist/` only: the server never sees the source and never builds
+- nginx: one `location` block per app under `/var/www/apps`, plus a redirect for the missing slash
+- Checked from outside with `curl`: 301, then 200 for the page, the lore page, an icon and the JS
+- Five small problems: a placeholder in the config, rsync missing locally, a slash 404, a scrambled terminal, a home folder `ubuntu` can't read
+
+{keep}
+## Two accounts, two jobs
+| Account | Logs in with | Can | Used for
+| `ubuntu` | `kp-web-prd-eun1-001.pem` | everything, through sudo | nginx config, system changes
+| `svc-deploy` | `~/.ssh/svc-deploy` | write the web folders, nothing else | every deploy
+> Concept · If the deploy key ever leaked, the worst case is changed website files. That is why it was given an empty passphrase: deploys run without prompts.
+
+{keep}
+## One site, many apps
+| URL | Folder on the server | Comes from
+| `/` | `/var/www/web/` | the main site
+| `/pokeggdex/` | `/var/www/apps/pokeggdex/` | `~/Projects/pokeggdex/dist/`
+| `/<next-app>/` | `/var/www/apps/<next-app>/` | the next React project
+> Concept · Each app has its own folder, so `rsync --delete` for one app can never remove another app's files.
+
+## Full command sequence
+
+### Local · Deploy key
+```local
+ssh-keygen -t ed25519 -f ~/.ssh/svc-deploy -C "svc-deploy@vm-web-prd-eun1-001"  # -f file, -C label
+```
+```local
+ls -l ~/.ssh/svc-deploy ~/.ssh/svc-deploy.pub  # private key must be -rw-------
+```
+Enter twice at the passphrase prompt left it empty.
+
+### Remote · User and folders
+```remote
+sudo useradd -m -s /bin/bash svc-deploy  # -m home, -s shell; no password, no sudo group
+sudo chown -R svc-deploy:svc-deploy /var/www/web  # -R: the folder and all inside
+```
+```remote
+sudo install -d -m 700 -o svc-deploy -g svc-deploy /home/svc-deploy/.ssh  # -d: make a folder
+```
+```remote
+sudo install -d -m 755 -o svc-deploy -g svc-deploy /var/www/apps /var/www/apps/pokeggdex  # apps
+```
+`install -d` makes the folder and sets its owner (`-o`, `-g`) and mode (`-m`) at once, so there's no window with the wrong permissions.
+
+### Local · Install the public key
+```local
+ssh web 'sudo install -m 600 -o svc-deploy -g svc-deploy /dev/stdin \
+    /home/svc-deploy/.ssh/authorized_keys' < ~/.ssh/svc-deploy.pub  # key in, 600, owned
+```
+`< …pub` feeds the key into the ssh command; on the server `install` copies it from `/dev/stdin`. Passwords are off, so `ssh-copy-id` can't log in as `svc-deploy`; the `ubuntu` login with sudo does it instead.
+
+```remote
+sudo ssh-keygen -lf /home/svc-deploy/.ssh/authorized_keys  # -l fingerprint, -f file
+```
+The fingerprint matched the one `ssh-keygen` printed on Local.
+
+### Local · SSH alias
+```config: ~/.ssh/config
+Host web-deploy  »  the deploy alias, next to web
+    HostName <elastic-ip>  »  same address as web
+    User svc-deploy  »  the deploy user
+    IdentityFile ~/.ssh/svc-deploy  »  its own key
+    IdentitiesOnly yes  »  offer only this key
+    HostKeyAlias vm-web-prd-eun1-001  »  reuse the host key already trusted: no new yes
+```
+```local
+ssh web-deploy 'whoami && touch /var/www/apps/pokeggdex/t \
+    && rm /var/www/apps/pokeggdex/t && echo write-ok'  # login and write test
+```
+```output
+svc-deploy
+write-ok
+```
+
+### Local · Build for a subfolder
+```config: ~/Projects/pokeggdex/vite.config.js
+base: '/pokeggdex/',  »  prefix for every link in the build
+```
+```local
+cd ~/Projects/pokeggdex && npm run build  # src/ → dist/: HTML, JS, CSS, icons
+grep -o 'src="[^"]*"' dist/index.html  # the built links must start with /pokeggdex/
+```
+| | Built link | Browser asks for
+| Without `base` | `/assets/main-….js` | `/assets/…`: not there, blank page
+| With `base` | `/pokeggdex/assets/main-….js` | `/pokeggdex/assets/…`: found
+> Concept · Links in the source that are relative (`lore/`, `./egg.css`) or built from `import.meta.env.BASE_URL` need no change. Only absolute `/…` paths would.
+
+### Local · Upload
+```local
+rsync -avz --delete ~/Projects/pokeggdex/dist/ \
+    web-deploy:/var/www/apps/pokeggdex/  # trailing / on dist/: copy what's inside
+```
+| Flag | Meaning
+| `-a` | archive: folders, times and modes kept
+| `-v` / `-z` | list each file / compress on the way
+| `--delete` | remove server files that are gone from `dist/`, such as old hashed bundles
+
+### Local · nginx: one block per app
+```local
+ssh web 'sudo cp /etc/nginx/sites-available/web /etc/nginx/sites-available/web.bak'  # backup
+```
+```local
+ssh web 'sudo tee /etc/nginx/sites-available/web' < nginx-web.conf  # upload the new config
+```
+```local
+ssh web 'sudo nginx -t && sudo systemctl reload nginx'  # reload only if the test passes
+```
+```config: /etc/nginx/sites-available/web
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    root /var/www/web;  »  the main site
+    index index.html;
+
+    access_log /var/log/nginx/web/access.log;
+    error_log /var/log/nginx/web/error.log;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location = /pokeggdex {  »  exactly this URL, no slash
+        return 301 /pokeggdex/;  »  send the browser to the slash version
+    }
+
+    location /pokeggdex/ {  »  everything under /pokeggdex/
+        root /var/www/apps;  »  root + URL path = /var/www/apps/pokeggdex/…
+        try_files $uri $uri/ /pokeggdex/index.html;  »  unknown paths get the app's page
+    }
+}
+```
+
+### Local · Check from outside
+```local
+curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' http://<elastic-ip>/pokeggdex  # -w: status
+```
+{keep}
+| URL | Result
+| `/pokeggdex` | 301 → `/pokeggdex/`
+| `/pokeggdex/` and `/pokeggdex/lore/` | 200
+| `/pokeggdex/energy/fire.png` | 200
+| `/pokeggdex/assets/main-….js` | 200, `application/javascript`
+| `/` | 200, the main site unchanged
+
+## Every deploy after this
+```local
+cd ~/Projects/pokeggdex && npm run build  # fresh dist/
+rsync -avz --delete ~/Projects/pokeggdex/dist/ web-deploy:/var/www/apps/pokeggdex/  # ship it
+```
+> Gotcha · Phone-layout bugs in the app are being addressed. Their fix ships with the same two commands.
+> Gotcha · Claude Code's auto mode stopped Claude's own rsync as a production deploy. The deploy steps were run by hand, which is the intended split.
+
+## Bugs hit & fixed
+
+#### Bug · HostName <elastic-ip>
+cause: The new `Host web-deploy` block was saved with the placeholder copied from the template, not the address.
+fix: Put in the same address as the `web` block, save, and check with `grep -A2 'Host web-deploy' ~/.ssh/config`.
+
+#### Bug · zsh: command not found: rsync
+cause: rsync was on the server but not on Local. Both ends need it.
+fix: `sudo pacman -S rsync` (Arch `extra` repo), then the same rsync again.
+
+#### Bug · 404 Not Found at /pokeggdex
+cause: `location /pokeggdex/` needs the slash. Without it the request fell to `location /`, which looked for `/var/www/web/pokeggdex`.
+fix: Add `location = /pokeggdex { return 301 /pokeggdex/; }`, then `nginx -t` and reload.
+
+#### Bug · Scrambled terminal on the server
+cause: Lines started with `<` and held leftover text from older commands: the line editor redrew badly in that session. Only the display was wrong; every command ran.
+fix: Check the result instead of the screen (`ls -ld`, `id svc-deploy`). `reset`, or a new `ssh web`, clears the display.
+
+#### Bug · ls: cannot access '/home/svc-deploy/.ssh': Permission denied
+cause: New home folders on Ubuntu 24.04 are `750`, and `ubuntu` is not in `svc-deploy`'s group. Not a fault: other users shouldn't read it.
+fix: Check with `sudo ls -la /home/svc-deploy/.ssh`.
+
+{keep}
+## Where things live
+| What | Path
+| Deploy key (Local) | `~/.ssh/svc-deploy`, `~/.ssh/svc-deploy.pub`
+| Deploy alias (Local) | `~/.ssh/config`, `Host web-deploy`
+| Allowed key (server) | `/home/svc-deploy/.ssh/authorized_keys`
+| Main site (server) | `/var/www/web/`
+| Apps (server) | `/var/www/apps/<app>/`
+| Site config and backup | `/etc/nginx/sites-available/web`, `web.bak`
+
+{keep}
+## Best practices
+- **A user for deploys** Its own key, no sudo, owns only the web folders.
+- **Build on Local** Upload `dist/` only; a 1 GB server shouldn't build.
+- **One folder per app** `--delete` then stays inside its own app.
+- **Set `base` per app** Built links must match the URL the app lives under.
+- **Backup, then `nginx -t &&` reload** A failed test leaves the old config serving.
+- **Check from outside** `curl` each URL, including the one without a slash.
+
+{keep}
+## Next
+| Step | What
+| Main site at `/` | The chalk book replaces the test page
+| Open app button | A link from the main site to `/pokeggdex/`
+| Private pages | Kept out of the upload, and their links hidden
+
+Part of Project Tinker Town · module 4 · after [[tinker-town-12-free-plan-cost-check]]; builds on [[tinker-town-11-nginx-first-site]] and [[tinker-town-08-ssh-known-hosts]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

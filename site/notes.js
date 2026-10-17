@@ -101,6 +101,12 @@ window.CHALK_NOTES = [
     skills: ["AWS Free plan", "credits", "billing", "Cost Explorer", "usage type", "EC2 - Other", "NAT gateway", "PublicIPv4:IdleAddress", "Elastic IP", "AWS Budgets", "budget credits", "Explore AWS", "delete VPC", "volume tag", "cost cleanup"],
   },
   {
+    id: "tinker-town-13-deploy-user-react-app", project: "tinker-town", n: 13, module: 4, date: "2026-10-18",
+    title: "Deploy User & React App",
+    summary: "svc-deploy with its own key and no sudo, a web-deploy alias, Vite base and rsync of dist/, nginx location per app; pokeggdex live at /pokeggdex/.",
+    skills: ["svc-deploy", "deploy user", "useradd", "install -d", "/dev/stdin", "authorized_keys", "ssh-keygen", "HostKeyAlias", "rsync", "--delete", "Vite", "base", "npm run build", "dist", "React", "nginx location", "return 301", "trailing slash", "curl", "pacman"],
+  },
+  {
     id: "pokedex-01-git-manual-push", project: "pokedex", n: 1, context: "Git", date: "2026-10-11",
     title: "Git: Manual Commit & Push",
     summary: "Manual commit 44e0d5c in pokedex, git status, commit messages and trailers, .git/index with xxd.",
