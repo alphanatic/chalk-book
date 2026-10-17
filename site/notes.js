@@ -131,6 +131,12 @@ window.CHALK_NOTES = [
     skills: ["jsonl", "python", "pathlib", "json", "collections.counter", "rg", "privacy", "provenance", "session history", "codex"],
   },
   {
+    id: "meta-09-codex-draft-intake", project: "meta", n: 9, context: "Git", date: "2026-10-17",
+    title: "Codex Draft Intake",
+    summary: "Checked changes since the last commit, found a Codex draft in the root, moved it into notes/ and fixed a pre-commit catch.",
+    skills: ["git status", "git diff", "git restore", "git push", "find", "bfs", "stat", "getfattr", "setsid", "dolphin", "brave", "codex", "check.sh", "pre-commit", "auto-memory", "zsh"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",

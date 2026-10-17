@@ -1,0 +1,122 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Checking changes, and taking in a note from another agent
+Checked what had changed since the last commit, found a draft Codex had left in the repo root, and moved it into the book as `meta-08`. The pre-commit check caught one line the manual run had missed.
+
+A recipe for the next time a file appears that no Claude session made.
+
+## What we covered
+- `git status` and `git diff` show what changed; `git restore` undoes a stray edit
+- `--ignored` and a time filter in `find` catch new files that git hides
+- `stat` tells when a file was written and by which login, never by which program
+- Opening a note on the site or a folder in Dolphin from a session, with `setsid -f`
+- A foreign draft goes into `notes/` in the standard shell, with its header moved to `site/notes.js`
+- `check.sh` scans tracked files only, so run it again after `git add`
+- Auto-memory lives outside the repo: `check.sh` never sees it, and Codex never reads it
+
+## Full command sequence
+
+### Local · See what changed since the last commit
+```local
+git status --short  # one line per file: M modified, ?? untracked
+git diff  # the changed lines themselves
+git restore notes/pokedex-01-git-manual-push.html  # put the file back as committed
+```
+```output
+-## The push routine {local}
++## The push routine {local}7
+```
+> Gotcha · A stray character after a `{tag}` stops chalk markup from reading the tag. The heading loses its colour, and nothing warns you.
+
+### Local · Scan for new files, ignored ones included
+```local
+git status --short -uall --ignored  # -uall: every untracked file; --ignored: gitignored too
+find . -path ./.git -prune -o -type f \
+  -newermt '2026-10-16T00:00' -print  # files written since that time, .git skipped
+```
+```output
+?? meta-08-session-log-analysis.html
+!! .claude/settings.local.json
+!! .vscode/settings.json
+```
+
+### Local · Read a file's properties, not its content
+```local
+stat meta-08-session-log-analysis.html  # owner, permissions, birth and modify times
+getfattr -d meta-08-session-log-analysis.html  # extended attributes, if an app left any
+```
+```output
+Access: (0644/-rw-r--r--)  Uid: ( 1000/<user>)
+Modify: 2026-10-17 02:17:27.498074385 +0200
+ Birth: 2026-10-17 02:17:27.497223078 +0200
+```
+> Concept · The owner is whoever's login ran the program: you, Claude or Codex look the same. Birth and modify one millisecond apart means one write by a program, not a person saving in an editor.
+
+### Local · Open things from a session
+```local
+cd ~/Projects/chalk-book  # the site opens from disk
+setsid -f brave \
+  "file://$PWD/index.html#meta-08-session-log-analysis"  # the note on the site
+setsid -f dolphin --select <path>  # "open in explorer"
+```
+> Concept · `setsid -f` starts the program in its own session and returns at once, so the window outlives the command.
+
+### Local · Take in the Codex draft
+1. Read its header comment: it listed the proposed catalogue entry and the steps for integrating it.
+2. Rebuilt it in `notes/` with the standard two-line shell, dropping `<base>`, the comment and the hand-written eyebrow and title.
+3. Removed one row that was no longer true ("This unintegrated draft · Repository root").
+4. Added the catalogue entry, with `context: "Analysis"`, then rebuilt the index.
+```local
+node site/build-index.mjs  # rebuild the search index
+.claude/skills/memory-dump/check.sh  # must pass before a commit
+git add notes/meta-08-session-log-analysis.html \
+  site/notes.js site/search-index.js  # stage the note, entry and index
+git commit  # the hook runs check.sh on the staged note
+git push origin main  # send it to GitHub
+```
+
+{keep}
+## What check.sh sees {concept}
+| File | Scanned?
+| Tracked `*.html`, `*.js`, `*.md`, `*.css`, `*.sh`, `*.json` | Yes, every check
+| Untracked `notes/*.html` | Only for the search-index check
+| Untracked files elsewhere, like a draft in the root | No
+| Auto-memory in `~/.claude/projects/…/memory/` | No, it is outside the repo
+> Gotcha · A new note passes a manual `check.sh` while it is untracked. Only after `git add` do the privacy checks read it.
+
+## Bugs hit & fixed
+
+#### Bug · Pre-commit stopped the meta-08 commit
+cause: Check 6, Admin accounts, flagged `meta-08-…html:98: … admin account must be written adm-kiwi`. A table cell began with the word admin joined by a hyphen, which reads as an admin account name. The manual run had passed because the note was not yet tracked.
+fix: Reworded the cell to `adm-kiwi naming had a separate explicit exception`, rebuilt the index and committed again.
+
+#### Bug · find: Invalid timestamp
+cause: `find` here is bfs, which rejected `-newermt '-24 hours'` with `bfs: error: Invalid timestamp.`
+fix: Give an ISO 8601 time instead.
+```local
+find . -type f -newermt '2026-10-16T00:00' -print  # ISO time: accepted by bfs and GNU find
+```
+
+#### Bug · zsh: ==== not found
+cause: A separator `echo =====` failed: in zsh a word starting with `=` expands to a command's path.
+fix: Use `---` as the separator, or quote it.
+
+{keep}
+## Where things live
+| What | Path
+| The Codex note, integrated | `notes/meta-08-session-log-analysis.html`
+| Its catalogue entry | `site/notes.js`
+| The checks | `.claude/skills/memory-dump/check.sh`
+| Auto-memory for this repo | `~/.claude/projects/-home-<user>-Projects-chalk-book/memory/`
+
+{keep}
+## Best practices
+- **Properties means metadata** Asked what a file's properties show, run `stat`; ask before reading the content.
+- **Ask what a word means** "Launch" could mean open, commit or push. Offer the options rather than guess.
+- **Stage, then check** Run `check.sh` after `git add`, or let the pre-commit hook catch it.
+- **Keep a foreign draft's words** Change only what is no longer true, and say what changed.
+- **Expect visitors** Codex may visit the repo now and then. A file no Claude session made is likely its work.
+
+Part of Chalk Book · the note taken in is [[meta-08-session-log-analysis]]; the checks are in [[meta-02-privacy-checks]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
