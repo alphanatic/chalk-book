@@ -1,0 +1,132 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+What every prompt carries, and keeping handoffs to three
+
+Read the `/usage` report, worked out what "always-on context" means, and measured which files ride along with every prompt in the chalk book. The biggest one was a rule to read all six session handoffs, about 13k tokens, so `.prog/` now keeps only the three newest and the rest move to an archive.
+
+A reference for the next time usage climbs: where the baseline comes from and which parts are mine to trim.
+
+## What we covered
+
+- Always-on context is what every request carries before I type: system prompt, tools, CLAUDE.md, memory index
+- 34% of a day's usage came from requests whose baseline alone was over 40k tokens
+- Built-in parts (system prompt, tool schemas, skill list) are about 20k+ and fixed
+- My parts: two CLAUDE.md files (~4.4k) and `MEMORY.md` (~0.2k)
+- The handoff rule made every session read six files, 52.9 KB or ~13k tokens, re-sent each prompt after
+- Four of the six were already merged into a newer handoff: ~29 KB of repeats
+- New rule: `.prog/` holds the 3 newest handoffs, all read; a new one moves the oldest to `.prog/handoff-archive/`
+- Handoffs are never merged, combined or edited, not even their banners
+- Long chats (>150k context) and 8-hour sessions drove most of the week; `/clear` between topics helps most
+
+## Reading /usage {concept}
+
+{keep}
+| Line in the report | What it means | What helps
+| **always-on context over 40k tokens** | The baseline sent with every request was already 40k+ before the prompt | Smaller CLAUDE.md, fewer handoffs, fewer plugins
+| **usage at >150k context** | The whole chat history is re-sent each turn; long chats get expensive | `/clear` between topics, `/compact`
+| **sessions active for 8+ hours** | The same long chats, seen by duration | Start fresh per topic
+| **Top skills** | Share of usage spent while a skill was loaded | Keep skill files lean
+
+> Concept · The behaviours overlap. They are not a breakdown that adds up to 100%.
+
+{keep}
+## What rides along with every prompt {concept}
+```output
+~/
+├── .claude/
+│   ├── CLAUDE.md  # 2.9 KB, ~0.7k tok, every prompt
+│   ├── settings.json  # applied by the harness, not sent
+│   └── projects/-home-<user>-Projects-chalk-book/memory/
+│       ├── MEMORY.md  # 0.7 KB, ~0.2k tok, every prompt
+│       └── session-handoff.md, …  # read only when relevant
+└── Projects/chalk-book/
+    ├── CLAUDE.md  # 14.9 KB, ~3.7k tok, every prompt
+    └── .prog/handoff-*.md  # read once per session, then in the history
+```
+> Concept · About 4 characters make a token. A file read early in a session costs again on every later turn, because the history is re-sent.
+
+## Full command sequence
+
+### Local · Measure what loads every session
+```local
+wc -c ~/.claude/CLAUDE.md \
+  ~/Projects/chalk-book/CLAUDE.md \
+  ~/.claude/projects/*chalk-book/memory/*.md  # -c: size in bytes
+ls .prog/handoff-*.md | xargs -r wc -c | tail -1  # -r: skip if no files; tail: the total
+```
+```output
+14892 Projects/chalk-book/CLAUDE.md
+52934 total
+```
+
+### Local · Check which handoffs repeat each other
+```local
+for f in .prog/handoff-*.md; do  # every handoff
+  echo "== $f"; sed -n '1,9p' "$f"  # -n with 1,9p: print only the opening lines
+done
+/usr/bin/grep -n '^#' .prog/handoff-*.md  # headings of each file; GNU grep, ugrep skips .prog/
+```
+> Concept · Each 2026-10-13 file opens with "Older handoff. The newest one … holds the current state", so they repeat the merged one.
+
+### Local · Rotate: keep the 3 newest
+```local
+mkdir -p .prog/handoff-archive  # -p: no error if it exists
+mv .prog/handoff-2026-10-13-readme-git-rules.md \
+   .prog/handoff-2026-10-13-phone-layout.md \
+   .prog/handoff-2026-10-13-complete-tasks.md \
+   .prog/handoff-archive/  # the three oldest, moved unchanged
+ls .prog/handoff-*.md  # three left: token-usage, merged-state, aws-webserver
+```
+> Gotcha · File names don't give the order within a day. The History list in `handoff-2026-10-14-merged-state.md` did: readme-git-rules → phone-layout → complete-tasks → token-usage.
+
+### Local · Each later session
+1. Read every `.prog/handoff-*.md` at the start, Gotchas included.
+2. At the end, write `handoff-<today>-<topic>.md`.
+3. Move the oldest of the others into `.prog/handoff-archive/`, unchanged, and say which one moved.
+
+{keep}
+## The rule, before and after
+| | Before | After
+| **Read at start** | Every handoff, six files | Every handoff in `.prog/`, at most three
+| **Size** | 52.9 KB, ~13k tokens | 34.8 KB, ~8.7k tokens
+| **Old files** | Stay in `.prog/` forever | Move to `.prog/handoff-archive/`, unread unless asked
+| **Merging** | A merged-state file collected the rest | Never; each handoff is its own record
+
+## Bugs hit & fixed
+
+#### Bug · Merging handoffs was the wrong fix
+cause: The first plan read only the newest merged file and merged older handoffs whenever three piled up. Each handoff is its own memory fingerprint, so merging would rewrite history.
+fix: Rejected before it was saved. The rule became a rotation: the three newest stay, the oldest moves out untouched.
+
+#### Bug · Banners edited with sed
+cause: While archiving, a `sed -i` pass changed the opening line of all six handoffs to say "Archived". That is an edit, and handoffs are never edited.
+fix: A reverse `sed -i` put every line back, checked one file at a time. The new rule now says "not even their banners".
+```local
+for f in .prog/handoff-archive/*.md; do sed -n 2p "$f"; done  # line 2 of each file
+```
+> Gotcha · `sed -n 2p a b c` prints line 2 of the joined stream, only once. Loop over the files to check each one.
+
+#### Bug · zsh: ==== not found
+cause: A bare `echo =====` separator failed again. zsh expands a word starting with `=` to a command path.
+fix: Quote it: `echo '-----'`. Same bug as [[claude-code-03-memory-access-map]].
+
+{keep}
+## Where things live
+| What | Path
+| Global instructions, every prompt | `~/.claude/CLAUDE.md`
+| Project rules, every prompt | `~/Projects/chalk-book/CLAUDE.md`
+| Memory index, every prompt | `~/.claude/projects/<folder>/memory/MEMORY.md`
+| The handoff rule | `~/.claude/projects/<folder>/memory/session-handoff.md`
+| Short-term memory, 3 newest handoffs | `~/Projects/chalk-book/.prog/handoff-*.md`
+| Older handoffs, unread | `~/Projects/chalk-book/.prog/handoff-archive/`
+
+{keep}
+## Best practices
+- **Measure first** `wc -c` on everything that loads at start shows where the baseline goes.
+- **Cap what's read every session** A rule that reads "all of them" grows without limit; rotate instead.
+- **Archive, don't rewrite** Moving a file keeps it intact; editing or merging changes the record.
+- **Fresh chats per topic** History costs more than the baseline over a long day; `/clear` between topics.
+
+Part of Claude Code · earlier work on memory in [[claude-code-03-memory-access-map]], tokens and the search ladder in [[meta-06-token-usage]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

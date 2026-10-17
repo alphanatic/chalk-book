@@ -155,6 +155,12 @@ window.CHALK_NOTES = [
     skills: ["claude code", "memory", "MEMORY.md", "claude.md", "permissions", "filesystem", "nano", "kitty", "setsid", "pgrep", "tree", "find", "id", "zsh", "access map"],
   },
   {
+    id: "claude-code-04-always-on-context", project: "claude-code", n: 4, date: "2026-10-17",
+    title: "Always-On Context & Handoff Cap",
+    summary: "What /usage means by always-on context, which files ride along with every prompt, and keeping only the 3 newest handoffs.",
+    skills: ["claude code", "/usage", "always-on context", "tokens", "context window", "claude.md", "MEMORY.md", "handoff", "archive", "wc", "sed", "mv", "/clear", "/compact", "zsh"],
+  },
+  {
     id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13",
     title: "Footer Links & Tabs",
     summary: "Same .map() pattern, different job: tabs set state with onClick, the footer navigates via the URL hash.",
