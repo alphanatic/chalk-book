@@ -1,0 +1,117 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Where the credits went, and how to make them last
+
+Checked the AWS Free plan's credits and burn rate, found the spending was five times the plan, and traced it with Cost Explorer to a NAT gateway and spare public IPs in an old test VPC.
+
+The web server itself costs about what [[tinker-town-07-vpc-networking]] estimated. The rest was leftovers.
+
+## What we covered
+- Root volume tagged `vol-web-prd-eun1-001` in the console
+- Billing home: month-to-date, forecast, and a cost breakdown by service
+- Credits page: what's left, what's used, when the Free plan ends
+- The runway: credits ÷ burn rate, and the budget per month that lasts to the end
+- Cost Explorer by usage type: `$0.00` everywhere, but the usage type names gave the answer
+- VPC dashboard and a blocked VPC delete: the NAT gateway, two stopped test instances, spare Elastic IPs
+- Why a default budget never alerts on the Free plan, and the $20 budget activity
+
+{keep}
+## Free plan rules
+| Rule | What it means
+| Credits pay for everything | The bill shows costs, but nothing is charged
+| The plan ends after 6 months **or** when credits run out | Whichever comes first
+| Then the account is suspended | 90 days to upgrade to a paid plan, else it's deleted
+| "Explore AWS" activities | $20 credit each: EC2 instance, RDS, Lambda, Bedrock, **a cost budget**
+> Gotcha · Credits make the bill look harmless. The real limit is the credits running out, which ends the plan early.
+
+## Full command sequence
+
+### AWS Console · Tag the root volume
+1. EC2 → Instances → `vm-web-prd-eun1-001` → **Storage** tab → click the volume ID
+2. **Tags** → **Manage tags** → Key `Name`, value `vol-web-prd-eun1-001` → **Save**
+3. Check: the Volumes list shows the name
+
+> Gotcha · A tag is set in AWS, not on the server. Typed at the server prompt, `vol-web-prd-eun1-001` gives `command not found`.
+
+### AWS Console · Billing and credits
+1. Account menu → **Billing and Cost Management** → Home: Cost summary and Cost breakdown
+2. Left menu → **Credits**: Summary and Active credits
+3. Account menu (top right): **Free plan status**, credits remaining and days remaining
+
+{keep}
+| What the pages showed | Value
+| Month-to-date / forecast for October | $30.34 / **$54.42**
+| Last month (September) | $35.07
+| Planned in [[tinker-town-07-vpc-networking]] | ~$10.65 a month
+| Credits issued / estimated left | $120 / **$53.12**
+| Free plan ends | 2027-02-28 (136 days)
+| Biggest service in the breakdown | **EC2 - Other**, about $1 a day
+
+### Concept · The runway
+| | Per day | Per month
+| Burn rate (forecast ÷ 31) | $1.75 | $54
+| To last 136 days on $53 | $0.39 | ~$11.70
+| With the $20 budget activity ($73) | $0.54 | ~$16
+At $1.75 a day the credits run out around mid-November. At the planned rate they last the full plan.
+
+> Concept · **EC2 - Other** is not instance hours. It holds disks, snapshots, NAT gateways and data transfer. Instance hours are **EC2 - Compute**.
+
+### AWS Console · Cost Explorer by usage type
+1. Billing → **Cost Explorer**
+2. Date range *Last 7 days*, Granularity *Daily*, Group by **Usage type**
+3. Read the table under the chart
+
+{keep}
+| Usage type | What it is | Verdict
+| `EUN1-RegionalNatGateway-Hours`, `-Bytes` | A NAT gateway in Stockholm | ~$1 a day, not needed
+| `EUN1-PublicIPv4:IdleAddress` | A public IP not in use | ~$3.65 a month, not needed
+| `EUN1-BoxUsage:t3.micro` | A test instance, now stopped | stops with the instance
+| `EUN1-BoxUsage:t4g.micro`, `EBS:VolumeUsage.gp3` | The web server and its disk | expected
+| `EUN1-PublicIPv4:InUseAddress` | The web server's Elastic IP | expected
+
+### AWS Console · Find the leftovers
+1. **VPC** → region Stockholm → dashboard: NAT Gateways **1**, Elastic IPs **3**, VPCs **2**, running instances **1**
+2. Tick the old test VPC `aws-towntest-vpc-01` → **Actions → Delete VPC**: *Unable to delete*
+3. The dialog lists what's left inside: two stopped instances, their two network interfaces, the NAT gateway
+
+{keep}
+| Cleanup order | Why
+| 1. Delete the NAT gateway | The biggest cost; takes a few minutes
+| 2. Terminate the two test instances | Deletes their disks; their network interfaces go with them
+| 3. Release the spare Elastic IPs | Keep only `eip-web-prd-eun1-001`
+| 4. Delete the VPC | Removes its subnets, route tables, gateway and security groups (all free)
+> Gotcha · A stopped instance stops compute charges only. Its disk and any Elastic IP keep billing until it's terminated and the IP released.
+
+## A budget that can alert
+| Setting | Value | Why
+| Start | The **Explore AWS** budget activity | Earns the $20 credit
+| Template | Monthly cost budget | Alerts at 85% and 100% actual, 100% forecast
+| Name / amount | `budget-monthly-12usd` / `12` | What lasts to the end of the plan
+| Charge types | **Credits unticked** (Edit → Advanced options) | Credits are included by default
+> Gotcha · With credits included, the Free plan's cost after credits is always $0, so the budget never alerts. The Zero spend template has the same problem.
+
+## Bugs hit & fixed
+
+#### Bug · Cost Explorer shows $0.00 for everything
+cause: Cost Explorer subtracted the credits, and on the Free plan they cover every cost, so every row nets to zero.
+fix: The usage type **names** still show what ran. For amounts, filter **Charge type** to leave out credits.
+
+#### Bug · vol-web-prd-eun1-001: command not found
+cause: The volume's `Name` tag value was typed at the server prompt, as if it were a command.
+fix: Tag it in the console (Storage tab → volume → Tags). The server can't tag itself.
+
+#### Bug · Delete VPC: Unable to delete
+cause: A VPC can't be deleted while instances, network interfaces or a NAT gateway are still in it.
+fix: Remove them first, in the cleanup order above, then delete the VPC.
+
+{keep}
+## Best practices
+- **Credits first** On the Free plan, watch credits left and days left, not the bill.
+- **Group by usage type** Service names are vague; usage types name the exact resource kind.
+- **Budget without credits** Otherwise it never fires on the Free plan.
+- **Terminate, don't just stop** Stopped test machines still pay for disks and IPs.
+- **No NAT for one public server** As [[tinker-town-07-vpc-networking]] decided: it costs more than the server.
+
+Part of Project Tinker Town · module 4 · after [[tinker-town-11-nginx-first-site]]; next [[tinker-town-13-deploy-user-react-app]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

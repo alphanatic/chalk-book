@@ -95,6 +95,12 @@ window.CHALK_NOTES = [
     skills: ["nginx", "sites-available", "sites-enabled", "server block", "default_server", "try_files", "nginx -t", "reload", "ln -s", "heredoc", "curl", "access log", "web server"],
   },
   {
+    id: "tinker-town-12-free-plan-cost-check", project: "tinker-town", n: 12, module: 4, date: "2026-10-17",
+    title: "Free Plan Cost Check",
+    summary: "Credits, burn rate and runway on the AWS Free plan; Cost Explorer by usage type traced the spend to a NAT gateway and idle IPs.",
+    skills: ["AWS Free plan", "credits", "billing", "Cost Explorer", "usage type", "EC2 - Other", "NAT gateway", "PublicIPv4:IdleAddress", "Elastic IP", "AWS Budgets", "budget credits", "Explore AWS", "delete VPC", "volume tag", "cost cleanup"],
+  },
+  {
     id: "pokedex-01-git-manual-push", project: "pokedex", n: 1, context: "Git", date: "2026-10-11",
     title: "Git: Manual Commit & Push",
     summary: "Manual commit 44e0d5c in pokedex, git status, commit messages and trailers, .git/index with xxd.",
