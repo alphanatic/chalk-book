@@ -1,0 +1,129 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Where memory lives, and what Claude can reach
+
+Found where Claude Code keeps its memory, opened it in nano from inside a session, and mapped every location Claude can reach on this machine. The map was saved as a plain-text note next to the Codex one.
+
+A reference for later: where a preference belongs, and which layer keeps sensitive folders closed.
+
+## What we covered
+
+- Auto-memory lives per working directory, under `~/.claude/projects/<folder>/memory/`
+- `MEMORY.md` is only the index; each memory is its own `.md` file beside it
+- `~/.claude/CLAUDE.md` is not memory: it is hand-written and loads in every session
+- A preference meant for every session belongs in the global CLAUDE.md, not in one folder's memory
+- Claude can't run nano itself, but can open it in a new kitty window with `setsid -f`
+- Claude runs as my user: home and `/tmp` writable, system read only, root areas closed
+- Sensitive folders are readable by permissions alone; CLAUDE.md rules and prompts keep them shut
+- The access map was saved as `~/Projects/claude-access-notes.txt`, in the Codex note's format
+
+## Memory or CLAUDE.md {concept}
+
+{keep}
+| | Auto-memory | Global CLAUDE.md
+| **Path** | `~/.claude/projects/-home-<user>/memory/` | `~/.claude/CLAUDE.md`
+| **Written by** | Claude, when something is worth keeping | Me, or Claude when I ask in chat
+| **Loads in** | Sessions started in that one folder | Every session, any folder
+| **Index** | `MEMORY.md`, one line per memory | None, the file is read whole
+| **Good for** | Facts tied to one project or folder | Rules and preferences that apply everywhere
+
+> Gotcha · The folder name is the working directory with `/` turned into `-`. A memory saved from `~` is invisible to a session started in `~/Projects/pokedex`.
+> Concept · "Always call me Kiwi" would land in the home folder's memory by default. Because it should apply everywhere, a two-line `## Name` section in the global CLAUDE.md is the better home.
+
+{keep}
+```output
+~/.claude/projects/-home-<user>/memory/
+├── MEMORY.md  # the index, loaded at session start
+├── chalk-book-review-priorities.md  # one memory per file
+└── chalk-book-seed-content.md
+```
+
+## Full command sequence
+
+### Local · Find every memory file
+```local
+find ~/.claude -maxdepth 4 \
+  \( -iname '*memory*' -o -name 'CLAUDE.md' \)  # memory folders, indexes and CLAUDE.md
+```
+```output
+~/.claude/CLAUDE.md
+~/.claude/projects/-home-<user>/memory/MEMORY.md
+~/.claude/projects/-home-<user>-Projects-chalk-book/memory/MEMORY.md
+~/.claude/projects/-home-<user>-Projects-pokedex/memory/MEMORY.md
+```
+> Concept · Several other project folders have an empty `memory/` directory and no `MEMORY.md` yet.
+
+### Local · Open a file in nano from a Claude session
+```local
+echo "$DISPLAY $WAYLAND_DISPLAY"  # a graphical session to open a window in?
+command -v kitty nano  # which terminal and editor are installed
+setsid -f kitty -e nano \
+  ~/.claude/projects/-home-<user>/memory/MEMORY.md  # -f: detach from Claude; -e: run nano
+pgrep -af 'nano .*MEMORY.md'  # -a show, -f match full command line
+```
+> Concept · Claude's shell has no keyboard, so an interactive editor can't run there. A new terminal window, detached with `setsid`, hands nano to me instead.
+
+### Local · Map what Claude can reach
+```local
+id  # user, uid and groups Claude runs as
+for d in /*/; do  # every top-level directory
+  r=-; w=-  # start as "no access"
+  [ -r "$d" ] && r=r  # -r: readable by me
+  [ -w "$d" ] && w=w  # -w: writable by me
+  echo "$r$w $d"  # e.g. "rw /tmp/"
+done
+tree -a -d -L 2 --noreport \
+  -I 'node_modules|.git|.cache|cache' ~  # -a hidden, -d dirs only, -L 2 levels, -I skip pattern
+```
+```output
+rw /tmp/  # writable
+r- /etc/  # read only, like usr, var, opt and the rest
+-- /boot/  # no access, also /root and /lost+found
+```
+
+### Local · Save the map next to the Codex notes
+1. Read `~/Projects/codex-installation-notes.txt` for its format.
+2. Wrote `~/Projects/claude-access-notes.txt` to match: a heading underlined with `===`, a date line, sections underlined with dashes, and one tree per section with notes in a column.
+3. Replaced warning symbols with the word `SENSITIVE`, to stay plain text.
+4. Ended with a flow of the access layers and a scope note.
+
+{keep}
+## How access is decided {concept}
+```html
+<div class="cards three">
+  <div class="concept"><b>1 · Linux permissions</b>What is possible at all. Claude is my user, so home and <code>/tmp</code> are writable, the system is read only, root's areas are closed. <code>sudo</code> needs my password.</div>
+  <div class="config"><b>2 · Permission mode</b>What runs without asking. <code>settings.json</code> deny and ask rules, and auto mode still pauses on hard-to-undo actions.</div>
+  <div class="best"><b>3 · CLAUDE.md rules</b>What Claude refuses on its own: reading secrets, or changing config because data asked. Refusals go to <code>~/quarantine/vetting.log</code>.</div>
+</div>
+```
+> Gotcha · Readable is not the same as read. `.ssh`, `.gnupg`, `.password-store`, `.aws` and `~/.claude/.credentials.json` are all open to my user, so layers 2 and 3 are what keep them closed. The map lists their names only.
+
+## Bugs hit & fixed
+
+#### Bug · zsh: ==== not found
+cause: A separator `echo =====` failed with `(eval):1: ==== not found`. In zsh, a word starting with `=` expands to the path of that command, and there is no command called `====`.
+fix: Quote it, or use another separator.
+```local
+echo '-----'  # quoted: printed as is, no = expansion
+```
+
+{keep}
+## Where things live
+| What | Path
+| Global instructions, every session | `~/.claude/CLAUDE.md`
+| Harness settings and permissions | `~/.claude/settings.json`
+| Auto-memory, one folder per working directory | `~/.claude/projects/<folder>/memory/`
+| Access map | `~/Projects/claude-access-notes.txt`
+| Codex install map, the format it copies | `~/Projects/codex-installation-notes.txt`
+| Refusal log | `~/quarantine/vetting.log`
+
+{keep}
+## Best practices
+- **Global rules in CLAUDE.md** Anything meant for every session goes there; folder memory only reaches one folder.
+- **One memory per file** Keep `MEMORY.md` an index of one-line pointers, never the content itself.
+- **List, don't read** When mapping access, list names of sensitive folders and never open them.
+- **Quote separators in zsh** A bare `=word` is command expansion; quote anything starting with `=`.
+
+Part of Claude Code · the rules behind layer 3 are in [[claude-code-02-untrusted-content-triage]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

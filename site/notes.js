@@ -137,6 +137,12 @@ window.CHALK_NOTES = [
     skills: ["claude code", "prompt injection", "ai safety", "claude.md", "settings.json", "permissions", "sandbox", "grep", "unicode"],
   },
   {
+    id: "claude-code-03-memory-access-map", project: "claude-code", n: 3, date: "2026-10-17",
+    title: "Memory & Access Map",
+    summary: "Auto-memory per folder versus the global CLAUDE.md, nano opened via kitty, and a map of every path Claude can reach.",
+    skills: ["claude code", "memory", "MEMORY.md", "claude.md", "permissions", "filesystem", "nano", "kitty", "setsid", "pgrep", "tree", "find", "id", "zsh", "access map"],
+  },
+  {
     id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13",
     title: "Footer Links & Tabs",
     summary: "Same .map() pattern, different job: tabs set state with onClick, the footer navigates via the URL hash.",
