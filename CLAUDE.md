@@ -45,6 +45,7 @@ chalk-book/
 │   ├── build-index.mjs           ← rebuilds search-index.js
 │   ├── app.js, app.css           ← menu, search, viewer, Export
 │   ├── site-theme.css            ← the dark surroundings (not used by notes)
+│   ├── progress.css, progress.js ← shared layout, filter and sorting of the private Backlog and Complete Tasks
 │   └── pages/                    ← the site's own pages: contact (page.css styles it)
 ├── notes/                        ← one file per note, chalk markup in an HTML shell: the source of truth for content
 │   ├── tinker-town-01-aws-ssh-firewall.html …
