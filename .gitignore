@@ -2,7 +2,7 @@
 .research/
 
 # Private progress: backlog and complete tasks for the chalk book itself — never committed
-.prog/
+.progress/
 
 # Personal Claude Code settings for this machine — never committed
 .claude/settings.local.json

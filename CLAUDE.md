@@ -55,7 +55,7 @@ chalk-book/
 ├── archive/                      ← old PDFs: from before the HTML rebuild, and the last guide PDF
 │   └── backlog-workflow/         ← the old backlog design (private, gitignored)
 ├── .githooks/pre-commit          ← runs check.sh before each commit (turn on: see README)
-├── .prog/, .research/            ← private and gitignored: backlog, complete tasks, research
+├── .progress/, .research/        ← private and gitignored: backlog, complete tasks, research
 └── .claude/skills/memory-dump/   ← the note-making workflow
     ├── SKILL.md
     ├── template.html
@@ -192,9 +192,10 @@ in the code and in `meta-01-site-build`.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - Add a site page: create it in `site/pages/`, then add it to `PAGES` in `site/app.js` and to the main footer in `index.html`.
 - New Export options are added as items in the Export menu.
-- **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.prog/backlog.html` and
-  `.prog/complete-tasks.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
-  work inside a menu project belongs in its roadmap in `site/notes.js`.
+- **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.progress/backlog.html` and
+  `.progress/complete-tasks.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
+  work inside a menu project belongs in its roadmap in `site/notes.js`. The folder was `.prog/` until 2026-10-18;
+  older notes keep that name.
 
 ---
 
