@@ -1,0 +1,153 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Where each skill lives, and what the claude.ai sync really does
+
+Listed every skill Claude Code can use and where it comes from: my own folders, the claude.ai account, or Claude Code itself. Found that sync only runs from the account down to this machine, so none of my own skills were in the cloud. Built a cloud version of `memory-dump` that finds the chalk book on GitHub when there's no clone.
+
+A reference for the next skill I write or upload: where it should live, and what breaks if it moves.
+
+## What we covered
+
+- Skills come from three places: my own folders, the claude.ai account (synced), and Claude Code (built in)
+- Mine: `handoff`, `whats-up` and the `memory-dump` pointer in `~/.claude/skills/`; the full `memory-dump` in the repo
+- 14 synced skills, all from Anthropic (`anthropic` or `anthropic-example`), shown as `anthropic-skills:…`
+- Sync is one-way, account → machine. A file dropped into the synced folder is never uploaded
+- The synced folder is managed: replaced copies went to `.trash/` (10 on 2026-10-09)
+- `~/.claude` is not a git repo, so only the repo's `memory-dump` is backed up (on GitHub)
+- Moving my skills into the synced folder would break things; uploading through claude.ai is the real route
+- Cloud `memory-dump`: local clone → clone in the session → raw GitHub; away from the repo it only drafts files
+- The chalk-book repo is public, not private as older handoffs said
+- No skill exists in both places yet
+
+## Three homes for skills {concept}
+```output
+~/.claude/skills/
+├── handoff/, whats-up/  # mine, this machine only
+├── memory-dump/  # mine: a pointer to the repo skill
+├── synced/<account-id>/  # from the claude.ai account
+│   ├── manifest.json  # the list the account sent: name, source, updatedAt
+│   └── pdf/, docx/, docs/, skill-creator/, …  # 14 skills, all Anthropic's
+└── .trash/  # copies the sync replaced
+~/Projects/chalk-book/.claude/skills/
+└── memory-dump/  # the full skill and its scripts
+```
+> Concept · Built-in skills (`code-review`, `init`, `loop`, `schedule`, …) ship with Claude Code. They have no folder of mine.
+
+## Full command sequence
+
+### Local · List the skill folders
+```local
+ls -la ~/.claude/skills/ ~/Projects/chalk-book/.claude/skills/  # -a: show .trash; -l: dates
+find ~/.claude/skills/synced -maxdepth 3 | head -60  # how deep the synced skills sit
+```
+
+### Local · Read the sync manifest
+```local
+node -e 'const m = require(process.argv[1] + "manifest.json");
+  for (const s of m.skills) console.log(s.name, s.source, s.updatedAt)' \
+  ~/.claude/skills/synced/<account-id>/  # one line per synced skill
+cat ~/.claude/skills/synced/<account-id>/.last-complete-round  # which client ran the last sync
+```
+```output
+pdf                    anthropic          2026-07-10
+docs                   anthropic-example  2026-09-30
+google-workspace       anthropic-example  2026-10-14
+```
+
+### Local · Check what is backed up
+```local
+git -C ~/.claude rev-parse --show-toplevel  # -C: run there; fails outside a repo
+git ls-files .claude/skills  # skill files the chalk-book repo tracks
+gh repo view <github-user>/chalk-book --json visibility  # public or private
+```
+```output
+fatal: not a git repository (or any parent up to mount point /)
+{"defaultBranchRef":{"name":"main"},"visibility":"PUBLIC"}
+```
+> Gotcha · The handoff from 2026-10-14 recorded the repo as private. Check with `gh repo view`, not from memory.
+
+### Local · Build the cloud memory-dump
+1. Write `memory-dump/SKILL.md` in the scratchpad, with the same `description:` as the repo skill.
+2. Zip it, then check the raw GitHub URL the skill will use.
+```local
+zip -rq memory-dump.zip memory-dump  # -r: the whole folder; -q: quiet
+unzip -l memory-dump.zip  # -l: list contents without unpacking
+curl -sI https://raw.githubusercontent.com/<github-user>/chalk-book/main/CLAUDE.md \
+  | head -1  # -s: silent; -I: headers only
+```
+```output
+HTTP/2 200
+```
+
+### claude.ai · Upload the skill {console}
+1. Settings → Capabilities → Skills → upload `memory-dump.zip`.
+2. Wait for the next sync to bring it down, then decide what happens to the local pointer.
+
+{keep}
+## How the cloud memory-dump finds the repo {concept}
+```output
+memory-dump (cloud)
+├── 1. ~/Projects/chalk-book/  # local clone: full workflow
+├── 2. a clone in this session  # cloud Claude Code: full workflow
+└── 3. raw.githubusercontent.com/<github-user>/chalk-book/main/  # no clone:
+    ├── 4. CLAUDE.md  # the rules
+    ├── 5. .claude/skills/memory-dump/  # SKILL.md, template.html
+    ├── 6. site/notes.js, notes/note.js  # catalogue, markup syntax
+    └── 7. site/search-index.js  # every note's text
+```
+
+{keep}
+| Where it runs | Can do | Can't do
+| Claude Code on this machine | Everything: write, render, check, offer a commit | —
+| Cloud Claude Code on the repo | Everything | Push without being asked
+| claude.ai web, desktop, phone | Draft note files and the `CHALK_NOTES` entry | Render, `check.sh`, commit, push
+
+> Key rule · Away from the repo, note numbers are provisional. A local session adds the files, runs `check.sh` and commits.
+
+{keep}
+## Why not move my skills into synced/ {gotcha}
+| Problem | Why
+| The next sync wipes them | The folder mirrors the account; extras end up in `.trash/`
+| They still aren't in the cloud | Sync only runs account → machine
+| Edits get overwritten | Every sync replaces the folder's contents
+| The pre-commit hook breaks | It runs `check.sh` from `.claude/skills/memory-dump/` in the repo
+| A check goes quiet | `check.sh` compares `~/.claude/skills/memory-dump/SKILL.md`; with no file it prints "skipped"
+| Names change | Synced skills show as `anthropic-skills:…`, and rules refer to the current names
+
+{keep}
+## Only in one place (2026-10-18)
+| Where | Skills
+| Only on this machine | `handoff`, `whats-up`, `memory-dump` (pointer and full)
+| Only in the cloud, `anthropic` | `pdf`, `docx`, `xlsx`, `pptx`
+| Only in the cloud, `anthropic-example` | `docs`, `chrome-browser`, `built-in-browser`, `computer-use`, `deep-research`, `google-workspace`, `import-memory`, `morning`, `setup-writing-style`, `skill-creator`
+
+## Bugs hit & fixed
+
+#### Bug · zsh: no matches found
+cause: `skills/synced/*/SKILL.md` matched nothing. The skills sit one level deeper, under the account folder, and zsh stops the whole command when a glob finds nothing.
+fix: Read `manifest.json` instead, or glob `synced/*/*/SKILL.md`.
+
+#### Bug · cd into a glob was refused
+cause: `cd synced/3ef…-*/ && ls .staging` was blocked by Claude Code's permission check: it couldn't resolve the `cd` target, and a deny rule (`~/.ssh/**`) might have matched.
+fix: The full absolute path, no `cd`, no glob.
+
+{keep}
+## Where things live
+| What | Path
+| My global skills | `~/.claude/skills/<name>/SKILL.md`
+| Skills synced from claude.ai | `~/.claude/skills/synced/<account-id>/`
+| What the account sent | `~/.claude/skills/synced/<account-id>/manifest.json`
+| Copies the sync replaced | `~/.claude/skills/.trash/`
+| Plugin sync, marketplaces | `~/.claude/plugins/synced/<account-id>/`
+| The full memory-dump skill | `~/Projects/chalk-book/.claude/skills/memory-dump/`
+
+{keep}
+## Best practices
+- **Upload, don't copy** A skill reaches the cloud through claude.ai's skill settings, never through the synced folder.
+- **One name, one place** A synced and a local skill with the same name compete; keep only one.
+- **Plan for no clone** A cloud skill can't count on local paths; give it a public URL and say what it can't do there.
+- **Back up your own skills** `~/.claude` is not in git; a small private repo keeps them safe.
+
+Part of Anthropic · vetting skills in [[claude-code-01-skill-vetting]], what loads every session in [[claude-code-04-always-on-context]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

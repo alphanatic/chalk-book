@@ -25,6 +25,7 @@ window.CHALK_PROJECTS = {
   "claude-code": { name: "Claude Code", color: "coral" },
   "javascript": { name: "JavaScript", color: "mint" },
   "arch-linux": { name: "Arch Linux", color: "peri" },
+  "anthropic": { name: "Anthropic", color: "peach" },
   "meta":    { name: "Chalk Book", color: "butter" },
 };
 
@@ -214,6 +215,12 @@ window.CHALK_NOTES = [
     title: "Device Hostnames",
     summary: "Reference: <type>-<owner>-<site>-<nn> for personal machines, e.g. ltp-crit-agi-01; mapped from the cloud pattern.",
     skills: ["naming", "conventions", "reference", "hostname", "ltp", "dsk", "srv", "cloud adoption framework"],
+  },
+  {
+    id: "anthropic-01-cloud-local-skills", project: "anthropic", n: 1, date: "2026-10-18",
+    title: "Cloud & Local Skills",
+    summary: "Where each skill lives, what the claude.ai sync does and doesn't do, and a memory-dump that finds the repo on GitHub.",
+    skills: ["claude code", "claude.ai", "skills", "SKILL.md", "sync", "manifest.json", "anthropic-skills", "memory-dump", "github", "raw.githubusercontent.com", "public repo", "backup", "ls", "node", "git ls-files", "git rev-parse", "gh repo view", "zip", "unzip", "curl", "zsh"],
   },
   {
     id: "00-chalk-book-guide", project: "meta", n: 0, date: "2026-10-11",

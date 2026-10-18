@@ -86,6 +86,7 @@ chalk-book/
 | `claude-code` | Claude Code | Setting up and securing Claude Code itself |
 | `javascript` | JavaScript | Learning JavaScript by reviewing and fixing a React todo app |
 | `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
+| `anthropic` | Anthropic | The claude.ai account: cloud skills, sync, and what reaches the local tools |
 | `meta` | Chalk Book | Notes about the chalk book itself |
 
 Add a row before using a new project, and the same project to `CHALK_PROJECTS` in `site/notes.js`.
