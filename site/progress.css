@@ -25,6 +25,9 @@ h2 { font-size: 19px; margin: 30px 0 12px; display: flex; align-items: center; g
 h2::before { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--c, var(--mint)); flex: none; }
 
 /* Tiers and statuses: filled chips. Each class sets --c, --c-bg, --c-ink, --c-chip from the palette */
+.parked    { --c: var(--output-line); --c-bg: var(--paper); --c-ink: var(--ink-soft); --c-chip: var(--ink-soft); }
+/* Parked: the chip takes its item's rank colour (progress.js adds the tier class); dashed so it never reads as the rank */
+.chip.parked { border-style: dashed; border-color: var(--c-ink); }
 .critical  { --c: var(--coral);  --c-bg: var(--coral-bg);  --c-ink: var(--coral-ink);  --c-chip: var(--coral-chip); }
 .important { --c: var(--butter); --c-bg: var(--butter-bg); --c-ink: var(--butter-ink); --c-chip: var(--butter-chip); }
 .less      { --c: var(--sky);    --c-bg: var(--sky-bg);    --c-ink: var(--sky-ink);    --c-chip: var(--sky-chip); }

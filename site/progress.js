@@ -5,6 +5,7 @@
 const CHIPS = {
   critical: ["chip", "Critical"], important: ["chip", "Important"], less: ["chip", "Less critical"], token: ["chip", "Token"],
   open: ["chip", "Open"], decision: ["chip", "Needs your decision"], draft: ["chip", "Draft"], done: ["chip", "Done"],
+  parked: ["chip", "Parked"],
   desktop: ["plat", "Desktop"], mobile: ["plat", "Mobile"], everywhere: ["plat", "Everywhere"],
   change: ["kind", "Change"], test: ["kind", "Test"], design: ["kind", "Design"],
 };
@@ -51,10 +52,16 @@ buttons.forEach(b => b.addEventListener("click", () => show(b.dataset.show)));
 // Sortable overview. Each header names how its column sorts; ties keep the page's own order
 const ORDER = {
   rank: ["critical", "important", "less", "token"],
-  status: ["decision", "open", "draft", "done"],
+  status: ["decision", "open", "draft", "done", "parked"],
   platform: ["desktop", "mobile", "everywhere"],
 };
 const table = document.querySelector(".scroll table");
+
+// Parked items stay in their rank's place; each Parked chip takes its item's rank colour
+document.querySelectorAll(".chip.parked").forEach(c => {
+  const tier = c.closest("article")?.dataset.tier ?? ORDER.rank.find(t => c.closest("tr")?.querySelector(`.chip.${t}`));
+  if (tier) c.classList.add(tier);
+});
 const head = table.rows[0];
 const rows = [...table.rows].slice(1);
 rows.forEach((r, i) => r.dataset.order = i);
