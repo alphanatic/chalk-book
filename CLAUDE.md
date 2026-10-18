@@ -85,6 +85,7 @@ chalk-book/
 | `pokedex` | Pokédex | The Pokédex web project |
 | `claude-code` | Claude Code | Setting up and securing Claude Code itself |
 | `javascript` | JavaScript | Learning JavaScript by reviewing and fixing a React todo app |
+| `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
 | `meta` | Chalk Book | Notes about the chalk book itself |
 
 Add a row before using a new project, and the same project to `CHALK_PROJECTS` in `site/notes.js`.
@@ -146,8 +147,12 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
   - **Location:** anything that locates or identifies a host or account (public IPs, AWS account IDs, resource IDs,
     emails, internet hostnames) becomes a placeholder, `<what-it-is>` in lowercase kebab-case. Reuse an existing name
     where one fits: `<instance-ip>`, `<my-ip>`, `<vpc-id>`. Private ranges (`10.0.0.0/16`) and `0.0.0.0/0` are fine.
-  - **Private life:** nothing about the user's life outside the work: real name or initials, home address, job search,
-    health, other people. When in doubt, leave it out and ask.
+  - **Private life:** nothing about the user's life outside the work: home address, job search, health, other people.
+    When in doubt, leave it out and ask.
+  - **Names:** `critonite` and `kiwi` are the owner's known aliases (`crit`, short for `critonite`, in hostnames).
+    They may appear in notes and commits (from 2026-10-18). Any other name of a person (real name, initials, another
+    username) becomes a made-up cartoony or fruity one, like `mango` or `noodle`, never `kiwi`. One person keeps
+    the same stand-in everywhere.
   - **Admin accounts:** anything that looks like an admin account (`adm-…`, `admin-…`, `…-admin`) is always written as
     `adm-kiwi`, never a real name and never a placeholder. This applies to live and test environments,
     patterns and examples alike. Commands stay exactly as run, with `adm-kiwi` in place of the name. Notes don't explain the
