@@ -199,6 +199,12 @@ window.CHALK_NOTES = [
     skills: ["claude code", "/usage", "always-on context", "tokens", "context window", "claude.md", "MEMORY.md", "handoff", "archive", "wc", "sed", "mv", "/clear", "/compact", "zsh"],
   },
   {
+    id: "claude-code-05-vault-bucket", project: "claude-code", n: 5, context: "Obsidian", date: "2026-10-18",
+    title: "Vault Bucket & Layout",
+    summary: "The bucket became a folder in the Obsidian vault with a one-line skill; vault files sorted by topic and named seed, branch or root.",
+    skills: ["claude code", "skills", "obsidian", "vault", "bucket", "inbox", "runbook", "naming", "perl", "find", "xargs", "grep", "mv", "cp -a", "rm", "zsh"],
+  },
+  {
     id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13",
     title: "Footer Links & Tabs",
     summary: "Same .map() pattern, different job: tabs set state with onClick, the footer navigates via the URL hash.",

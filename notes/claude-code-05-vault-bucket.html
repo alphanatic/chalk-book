@@ -1,0 +1,163 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+One way in for ideas, topic folders for the rest
+
+Retired the unbuilt the-bucket project and made the bucket a folder inside the Obsidian vault, with a global `bucket` skill that appends one line per item. The vault's loose files were sorted into topic folders and renamed by kind, with every link fixed.
+
+A reference for adding to the vault and for how its files are named, plus a review of the runbook template.
+
+## What we covered
+
+- Open work lives in four places: chalk-book handoffs, the private backlog, roadmaps in `site/notes.js`, the vault
+- A runbook is a step-by-step recipe for one routine task, so anyone can redo it exactly
+- Runbooks are small (2–8 KB, ~500–2,000 tokens) and read only when needed; they save re-research, not context
+- Runbook template review: good properties and error table; missing Undo, a check per step, a purpose line
+- the-bucket (JSONL + CLI + self-updating skill) was dropped for a loose inbox: dump now, structure later
+- Vault layout: `bucket/` is the way in; `server/`, `aws/`, `machines/` hold sorted work; `parked/` holds shelved ideas
+- File names: `<kind>-<YYYY-MM-DD>-<topic>.md`, with `seed` (idea), `branch` (runbook), `root` (note for AI sessions)
+- 12 files moved and renamed, 20 links fixed with one `perl` pass, backups taken first
+- New skill `~/.claude/skills/bucket/`: "bucket this: …" appends a line without reading the inbox
+- the-bucket's content was read in full, the useful parts moved into the vault, then the folder was deleted
+
+{keep}
+## Where open work lives {concept}
+```output
+~/
+├── Projects/chalk-book/.progress/  # private, gitignored
+│   ├── 1. handoff-*.md  # the 3 newest: "Open" and "Next steps"
+│   └── 2. backlog.html  # critical, important, needs a decision, draft
+├── Projects/chalk-book/site/
+│   └── 3. notes.js  # roadmaps: planned and in-progress modules
+└── Documents/claude-kiwi-brain/
+    └── 4. bucket/inbox.md  # one-liners not sorted yet
+```
+
+## What a runbook is {concept}
+
+A written procedure for a task done more than once: what it is for, what it needs, the steps in order, how to check each one, and what to do when it fails. A chalk-book note records what happened and why; a runbook is the clean version to follow next time.
+
+{keep}
+| Template part | Verdict
+| Properties: `order`, `requires`, `inputs`, `status`, `last-run` | Good: a script or AI can act on them
+| Placeholders table | Good: no real values, an example for each
+| Errors table (Error → Cause → Fix) | Good: the most valuable part
+| "Paste one command at a time" | Good: multi-line pastes merged into one line before
+| No Undo or Rollback section | Gap: SSH hardening and UFW can lock you out
+| No check line per step | Gap: unsaved `nano` edits went unnoticed before
+| No purpose line | Gap: one sentence under the title is enough
+| Tags, inputs and runs-on written twice | Gap: the two copies drift apart
+| Hand-written Index | Gap: breaks on a renamed heading; Obsidian's Outline pane does it
+
+> Key rule · No change now. Add the check lines and an Undo section the next time a runbook is used or written.
+
+## Full command sequence
+
+### Local · Read the old plan, then decide
+```local
+cat ~/Projects/the-bucket/plan-summary.txt  # the short version of PLAN.md
+/usr/bin/grep -n '^#' ~/Projects/the-bucket/PLAN.md  # headings only, before reading it whole
+```
+> Concept · PLAN.md had rejected "one Markdown file per idea" (shape drifts, slow to index). The new choice is looser on purpose: dump now, add structure when patterns show up.
+
+### Local · Find every link before renaming
+```local
+cd ~/Documents/claude-kiwi-brain  # the vault
+/usr/bin/grep -rnoE '(placeholder|ai-note|idea)-2026-[0-9-]+[a-z-]+' \
+  --exclude-dir=.obsidian .  # -r recurse, -n line, -o only the match, -E extended
+```
+
+### Local · Back up, make folders, move and rename
+```local
+cp -a ~/Documents/claude-kiwi-brain <scratchpad>/vault-backup  # -a: keep times and modes
+mkdir bucket server aws machines parked  # topic folders plus the way in
+mv -n placeholder-2026-10-17-aws-budget-alert.md \
+  aws/branch-2026-10-17-aws-budget-alert.md  # -n: never overwrite
+```
+
+### Local · Fix every link in one pass
+```local
+find . -name '*.md' -not -path './.obsidian/*' -print0 \
+  | xargs -0 perl -pi -e '
+s/(?<![\w-])placeholder-2026-10-17-([a-z-]+?)(?![\w-])/branch-2026-10-17-$1/g;
+s/(?<![\w-])ai-note-(2026-10-1[78]-[a-z-]+?)(?![\w-])/root-$1/g;
+s/(?<![\w-])idea-(2026-10-1[78]-[a-z-]+?)(?![\w-])/seed-$1/g;
+s/(?<![\w-])(ssh-pem-server-setup|cloud-server-first-setup)(?![\w-])/branch-2026-10-17-$1/g;'
+```
+> Concept · `(?<![\w-])` and `(?![\w-])` match only a whole name. Without them, `ssh-pem-server-setup` inside an already new name would be renamed twice. `-pi`: edit each file in place, line by line.
+
+> Gotcha · Obsidian links by file name, not folder. Moving files breaks nothing; renaming does, because `requires:` holds plain names that Obsidian won't update.
+
+### Local · Carry the-bucket over, then delete it
+1. Read every file, including its own memory folder in `~/.claude/projects/`.
+2. Move the runbook-automation seed to `server/`, with the new runbook names as links.
+3. Keep the strict design in short as a parked seed, in case the inbox outgrows plain lines.
+```local
+cp -a ~/Projects/the-bucket <scratchpad>/the-bucket-backup/project  # backup first
+rm -r ~/Projects/the-bucket \
+  ~/.claude/projects/-home-critonite-Projects-the-bucket/memory  # literal paths, no variables
+rmdir ~/.claude/projects/-home-critonite-Projects-the-bucket  # the empty folder left behind
+```
+
+{keep}
+## The vault now {concept}
+```output
+claude-kiwi-brain/
+├── bucket/
+│   ├── inbox.md  # one line per item: - [ ] date · item #kind
+│   └── seed-…  # grew, but has no home yet
+├── server/  # 6 runbooks (branch-…) and the automation seed
+├── aws/  # agent-access note (root-…) and the budget runbook
+├── machines/  # Arch setup note (root-…) and the backup idea (seed-…)
+├── parked/  # shelved ideas; "AI: hands off" ones are never acted on
+└── _templates/  # runbook.md, seed.md
+```
+
+{keep}
+| Kind | Prefix | Why the word
+| Idea | `seed-` | Planted; may grow or not
+| Runbook | `branch-` | Grows from what came before; chained by `order` and `requires`
+| Note for AI sessions | `root-` | Read first; holds the rest up
+
+> Best practice · The kind sits in the name and never changes. The growth stage lives in the `status` property, so nothing is renamed as it grows.
+
+### Local · The bucket skill
+```config: ~/.claude/skills/bucket/SKILL.md
+Add: append "- [ ] <date> · <item> #<kind>"  »  with >>, never reads the inbox
+Kinds: idea, question, todo, link  »  default idea
+"drop"  »  removes the line just added
+Grow: bucket/seed-<date>-<topic>.md  »  from _templates/seed.md; ticks and links the line
+Never: edit other lines or move files unasked  »  nor read the whole inbox
+```
+
+## Bugs hit & fixed
+
+#### Bug · Wrong tree from a merged listing
+cause: One `ls` of two folders printed both under one heading, so the vault's runbooks looked as if they were in `the-bucket/seeds/`.
+fix: Listed each folder on its own (`ls -la <dir>`) before drawing the tree, and corrected it in chat.
+
+#### Bug · `(eval):1: == not found`
+cause: zsh expands a word starting with `=`, so `echo ===` as a separator failed and stopped the command.
+fix: Quote separators or use dashes: `echo ---`.
+
+#### Bug · Draft linked a hands-off idea
+cause: The first inbox draft linked a parked idea whose banner says not to link it from anywhere.
+fix: Read the banners before drafting; hands-off ideas go to `parked/` and are never linked.
+
+{keep}
+## Where things live
+| What | Path
+| The vault | `~/Documents/claude-kiwi-brain/`
+| The bucket | `bucket/inbox.md`
+| Templates | `_templates/seed.md`, `_templates/runbook.md`
+| The skill | `~/.claude/skills/bucket/SKILL.md`
+
+{keep}
+## Best practices
+- **Back up before a mass rename** `cp -a` the whole folder first; it costs seconds.
+- **Find every link first** grep the old names, rename, then grep again for leftovers.
+- **Read before deleting** Every file, memory folders included; move what matters, then delete.
+- **Structure later** A new topic folder only when two or more items share a topic.
+
+Part of Claude Code · see [[claude-code-03-memory-access-map]] and [[claude-code-04-always-on-context]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
