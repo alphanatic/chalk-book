@@ -23,11 +23,15 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
     // The private progress pages (.progress/ is gitignored), shown in the viewer
-    backlog: { title: "Backlog", file: ".progress/backlog.html", hideRecent: true },
+    backlog: { title: "Backlog", file: ".progress/backlog.html" },
     complete: { title: "Complete Tasks", file: ".progress/complete-tasks.html" },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
+  // Side panels on wide screens: "closed" once closed there, open otherwise
+  const MENU_KEY = "chalk.menu", RECENT_KEY = "chalk.recent-panel";
+  const wanted = key => { try { return localStorage.getItem(key) !== "closed"; } catch { return true; } };
+  const keep = (key, open) => { if (!narrow.matches) try { localStorage.setItem(key, open ? "open" : "closed"); } catch {} };
 
   // ?filler=40 adds placeholder notes, to test how the panels behave when full
   const filler = Number(new URLSearchParams(location.search).get("filler")) || 0;
@@ -174,18 +178,28 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   }
   // Switch to the rail layout only once the slide has closed, so the text clips away instead of jumping
   menuEl.addEventListener("transitionend", e => { if (e.target === menuEl) syncMenu(); });
-  const resetMenu = () => setMenu(false);
+  // Wide screens open the menu unless it was last closed there; phones always start closed
+  const resetMenu = () => setMenu(!narrow.matches && wanted(MENU_KEY));
   function openSearch() {
     if (!menuOpen()) setMenu(true);
     search.focus();
   }
 
-  // ── Recently viewed. A rail; hovering slides it open over the note, leaving slides it straight back ──
+  // ── Recently viewed. Its button pins it open beside the note, like the menu. Closed, it is a rail;
+  //    hovering slides it open over the note, leaving slides it straight back ──
+  const recentBtn = $("recent-btn");
+  const recentOpen = () => body.classList.contains("recent-open");
   function syncRecent() {
-    if (body.classList.contains("recent-peek")) body.classList.remove("recent-rail");
+    if (recentOpen() || body.classList.contains("recent-peek")) body.classList.remove("recent-rail");
     else if (recentEl.getBoundingClientRect().width <= 60) body.classList.add("recent-rail");
   }
-  recentEl.addEventListener("mouseenter", () => { body.classList.add("recent-peek"); syncRecent(); });
+  function setRecent(open) {
+    body.classList.toggle("recent-open", open);
+    recentBtn.setAttribute("aria-expanded", open);
+    syncRecent();
+  }
+  const resetRecent = () => setRecent(!narrow.matches && wanted(RECENT_KEY));
+  recentEl.addEventListener("mouseenter", () => { if (!recentOpen()) body.classList.add("recent-peek"); syncRecent(); });
   recentEl.addEventListener("mouseleave", () => { body.classList.remove("recent-peek"); syncRecent(); });
   recentEl.addEventListener("transitionend", e => { if (e.target === recentEl) syncRecent(); });
 
@@ -193,7 +207,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   function show(id) {
     const page = PAGES[id];
     const n = page ? null : notes.find(x => x.id === id && x.file);
-    body.classList.toggle("no-recent", !!page?.hideRecent);
+    body.classList.toggle("no-recent", !!page);   // Recently viewed belongs to Home and the notes, not the site's pages
     currentId = n ? n.id : null;
     for (const a of document.querySelectorAll(".main-footer-btn"))
       a.toggleAttribute("aria-current", a.dataset.page === (page ? id : n ? "-" : ""));
@@ -250,7 +264,17 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   }
 
   // ── Wiring ───────────────────────────────────────────────
-  menuBtn.addEventListener("click", () => setMenu(!menuOpen()));
+  menuBtn.addEventListener("click", () => {
+    const open = !menuOpen();
+    setMenu(open);
+    keep(MENU_KEY, open);
+  });
+  recentBtn.addEventListener("click", () => {
+    const open = !recentOpen();
+    body.classList.remove("recent-peek");
+    setRecent(open);
+    keep(RECENT_KEY, open);
+  });
   $("search-rail").addEventListener("click", openSearch);
   $("scrim").addEventListener("click", () => setMenu(false));
   frame.addEventListener("load", sendHighlight);
@@ -259,7 +283,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   document.addEventListener("click", e => { if (!exportMenu.hidden && !e.target.closest(".export")) setExport(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !exportMenu.hidden) { setExport(false); exportBtn.focus(); } });
 
-  narrow.addEventListener("change", resetMenu);
+  narrow.addEventListener("change", () => { resetMenu(); resetRecent(); });
 
   search.addEventListener("input", renderSearch);
   search.addEventListener("keydown", e => {
@@ -283,6 +307,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 
   resetMenu();
+  resetRecent();
   renderMenu();
   renderSearch();
   show(decodeURIComponent(location.hash.slice(1)));

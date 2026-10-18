@@ -27,7 +27,7 @@ kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
 :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
 /* ── Top bar ─────────────────────────────────────────────── */
-.topbar { grid-area: top; position: relative; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 0;
+.topbar { grid-area: top; position: relative; display: flex; align-items: center; gap: 14px; padding: 0;
   background: var(--shell-side); border-bottom: 1px solid var(--shell-line); }
 .topbar-rail { width: var(--rail); flex: none; display: grid; place-items: center; }   /* ☰ sits centred over the rail */
 .icon-btn { width: 36px; height: 36px; display: grid; place-items: center; flex: none;
@@ -35,11 +35,16 @@ kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
 .icon-btn:hover { background: var(--shell-raise); }
 .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 /* Menu button: three chalk sticks lying down */
-.icon-btn .chalk-sticks { width: 24px; height: 24px; }
+.icon-btn :is(.chalk-sticks, .chalk-clock) { width: 24px; height: 24px; }
 .chalk-sticks rect { stroke: none; }
 .chalk-sticks .pink { fill: var(--pink); }
 .chalk-sticks .butter { fill: var(--butter); }
 .chalk-sticks .sky { fill: var(--sky); }
+.chalk-clock circle { stroke: var(--lav); stroke-width: 2.2; }
+.chalk-clock rect { stroke: none; }
+.chalk-clock .butter { fill: var(--butter); }
+.chalk-clock .pink { fill: var(--pink); }
+.no-recent #recent-btn { visibility: hidden; }     /* keeps its place, so the top bar doesn't shift */
 /* The name hugs the left, next to the menu button. Plain text, not a link */
 .brand { font-weight: 700; font-size: 17px; color: var(--shell-text); white-space: nowrap; cursor: default; }
 /* <chalk-wordmark>: the one name used everywhere — Chalk in blue, Book in yellow. Size comes from where it sits */
@@ -76,6 +81,9 @@ chalk-wordmark .book  { color: var(--butter); }
 body:not(.rail) .panel.left .panel-body { min-width: var(--panel); }     /* no reflow while sliding: text just clips */
 .panel.right { grid-area: right; border-left: 1px solid var(--shell-line);
   justify-self: end; position: relative; width: var(--rail); transition: width .3s ease, box-shadow .3s ease; }
+/* Open: the recently viewed button pins it beside the note, like the menu */
+body.recent-open { --right-w: var(--panel); }
+.recent-open .panel.right { width: var(--panel); }
 /* Hidden on pages that don't need it (the backlog): its column closes */
 body.no-recent { --right-w: 0px; }
 body.no-recent .panel.right { display: none; }
@@ -208,4 +216,5 @@ body:not(.recent-rail) .panel.right .panel-body { min-width: var(--panel); }
   .home { left: 0; }
   .topbar .btn { width: auto; aspect-ratio: auto; height: 38px; padding: 0 14px; }
   .export { margin-left: auto; }
+  .topbar-rail.right { display: none; }
 }
