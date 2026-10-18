@@ -166,7 +166,8 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 - `index.html` opens straight from disk, no build step. How it looks and behaves is in the code and in `meta-01-site-build`.
 - Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
-- A new site page goes in `site/pages/`, then into `PAGES` in `site/app.js` and the main footer. New Export options are items in the Export menu.
+- Sets of buttons or labels in order (footer links, Export options, legend chips, table columns) are one list in the script, which makes one element per entry.
+- A new site page goes in `site/pages/`, then into `PAGES` and `FOOTER` in `site/app.js`. New Export options are entries in `EXPORTS`.
 - Backlog and Complete Tasks are private pages in `.progress/`, gitignored, about Chalk Book itself only.
 
 >{concept} Naming note · The private folder was <span class="old">.prog/</span> until 2026-10-18. Older notes keep the old name, as it was then.

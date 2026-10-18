@@ -1,4 +1,40 @@
-// Backlog and Complete Tasks: platform filter and sortable overview, shared by the private pages in .progress/
+// Backlog and Complete Tasks: legends, platform filter and sortable overview, shared by the private pages in .progress/
+
+// ── Sets of buttons and labels, in order. The pages hold only empty containers; one element per entry is made here ──
+// Legend chips by key: [kind of chip, label]. Each page's .legend names its keys in data-chips; "|" is a separator
+const CHIPS = {
+  critical: ["chip", "Critical"], important: ["chip", "Important"], less: ["chip", "Less critical"], token: ["chip", "Token"],
+  open: ["chip", "Open"], decision: ["chip", "Needs your decision"], draft: ["chip", "Draft"], done: ["chip", "Done"],
+  desktop: ["plat", "Desktop"], mobile: ["plat", "Mobile"], everywhere: ["plat", "Everywhere"],
+  change: ["kind", "Change"], test: ["kind", "Test"], design: ["kind", "Design"],
+};
+// Platform filter buttons: [value, label]
+const FILTERS = [["all", "All"], ["desktop", "Desktop"], ["mobile", "Mobile"], ["everywhere", "Everywhere"]];
+// Overview columns: [sort key, header]. How each key sorts is in key, further down
+const COLUMNS = [["n", "#"], ["item", "Item"], ["rank", "Rank"], ["platform", "Platform"], ["kind", "Kind"],
+  ["status", "Status"], ["created", "Created"]];
+
+const make = (tag, cls, text) => Object.assign(document.createElement(tag), cls ? { className: cls } : {}, text ? { textContent: text } : {});
+function chipFor(key) {
+  if (key === "|") return make("span", "sep");
+  const [type, label] = CHIPS[key];
+  if (type === "kind") return make("span", "kind", label);
+  const span = make("span", `${type} ${key}`);
+  if (type === "plat") span.innerHTML = `<svg><use href="#i-${key}"/></svg>`;
+  span.append(label);
+  return span;
+}
+document.querySelectorAll(".legend[data-chips]").forEach(l => l.append(...l.dataset.chips.split(" ").map(chipFor)));
+document.querySelector(".filter").append(...FILTERS.map(([value, label]) => {
+  const b = make("button", "", label);
+  b.type = "button";
+  b.dataset.show = value;
+  b.setAttribute("aria-pressed", value === "all");
+  return b;
+}));
+const headRow = document.querySelector(".scroll table").insertRow(0);
+headRow.append(...COLUMNS.map(([key, label]) => { const th = make("th", "", label); th.dataset.sort = key; return th; }));
+
 // Platform filter: shows matching items and overview rows; hides a tier heading when none of its items remain
 const buttons = document.querySelectorAll(".filter button");
 function show(p) {

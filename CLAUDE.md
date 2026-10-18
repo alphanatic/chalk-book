@@ -197,8 +197,10 @@ in the code and in `meta-01-site-build`.
 - Site colours live in `site/site-theme.css`, never in `chalk-pastel.css`.
 - The name is always the shared `<chalk-wordmark>` element.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
-- Add a site page: create it in `site/pages/`, then add it to `PAGES` in `site/app.js` and to the main footer in `index.html`.
-- New Export options are added as items in the Export menu.
+- **Sets are lists.** Any set of buttons or labels in order (footer links, Export options, legend chips, table columns)
+  is one ordered list in the script, which makes one element per entry. The page holds only an empty container.
+- Add a site page: create it in `site/pages/`, then add it to `PAGES` and `FOOTER` in `site/app.js`.
+- New Export options are entries in `EXPORTS` in `site/app.js`.
 - **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.progress/backlog.html` and
   `.progress/complete-tasks.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
   work inside a menu project belongs in its roadmap in `site/notes.js`. The folder was `.prog/` until 2026-10-18;

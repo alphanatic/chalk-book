@@ -25,19 +25,14 @@
   </div>
   <span class="brand"><chalk-wordmark></chalk-wordmark></span>
   <span class="current" id="current"></span>
-  <!-- Export: a small menu of ways to take the open note elsewhere. Mail options can join later -->
+  <!-- Export: a small menu of ways to take the open note elsewhere. New options are entries in EXPORTS -->
   <div class="export">
     <button class="btn" id="export-btn" type="button" aria-haspopup="menu" aria-expanded="false"
       aria-controls="export-menu" disabled>
       Export
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
     </button>
-    <div class="export-menu" id="export-menu" role="menu" hidden>
-      <button class="export-item mint" id="save-pdf" type="button" role="menuitem">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/></svg>
-        Save as PDF
-      </button>
-    </div>
+    <div class="export-menu" id="export-menu" role="menu" hidden></div>  <!-- one item per entry in EXPORTS, site/app.js -->
   </div>
   <!-- Recently viewed button: a chalk clock, centred over the right rail -->
   <div class="topbar-rail right">
@@ -93,15 +88,7 @@
 <!-- Main footer: persistent on every page, links to the site's own pages; it grows with its contents -->
 <footer class="main-footer" aria-label="Main footer">
   <nav aria-label="Main">
-    <ul>
-      <li><a class="main-footer-btn" href="#" data-page="">Home</a></li>
-      <li><a class="main-footer-btn" href="#backlog" data-page="backlog">Backlog</a></li>
-      <li><a class="main-footer-btn" href="#complete" data-page="complete">Complete Tasks</a></li>
-      <li><a class="main-footer-btn" href="#contact" data-page="contact">Contact</a></li>
-      <li><a class="main-footer-btn" href="https://github.com/alphanatic/chalk-book" target="_blank" rel="noopener">GitHub</a></li>
-      <li><a class="main-footer-btn" href="https://claude.ai/new#settings/usage" target="_blank" rel="noopener">claude.ai</a></li>
-      <li><a class="main-footer-btn" href="https://eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#" target="_blank" rel="noopener">aws or</a></li>
-    </ul>
+    <ul id="footer-links"></ul>  <!-- one link per entry in FOOTER, site/app.js -->
   </nav>
 </footer>
 <div class="scrim" id="scrim"></div>

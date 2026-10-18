@@ -27,6 +27,22 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     complete: { title: "Complete Tasks", file: ".progress/complete-tasks.html" },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
+  // The bottom bar, in order: a site page by its PAGES key ("" is Home), or an outside link
+  const FOOTER = [
+    { page: "", label: "Home" },
+    { page: "backlog" },
+    { page: "complete" },
+    { page: "contact" },
+    { label: "GitHub", href: "https://github.com/alphanatic/chalk-book" },
+    { label: "claude.ai", href: "https://claude.ai/new#settings/usage" },
+    { label: "benchlm.ai", href: "https://benchlm.ai/" },
+    { label: "aws or", href: "https://eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#" },
+  ];
+  // The Export menu, in order: label, palette colour, glyph (SVG paths) and what choosing it does
+  const EXPORTS = [
+    { label: "Save as PDF", color: "mint", run: () => save(),
+      icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
+  ];
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
   // Side panels on wide screens: "closed" once closed there, open otherwise
   const MENU_KEY = "chalk.menu", RECENT_KEY = "chalk.recent-panel";
@@ -263,6 +279,25 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     catch { frame.contentWindow.postMessage("chalk:print", "*"); }
   }
 
+  // ── Bottom bar and Export menu: one button per entry ──────
+  $("footer-links").replaceChildren(...FOOTER.map(f => {
+    const a = el("a", "main-footer-btn", f.label ?? PAGES[f.page].title);
+    if (f.href) Object.assign(a, { href: f.href, target: "_blank", rel: "noopener" });
+    else { a.href = `#${f.page}`; a.dataset.page = f.page; }
+    const li = el("li");
+    li.append(a);
+    return li;
+  }));
+  exportMenu.replaceChildren(...EXPORTS.map(x => {
+    const b = el("button", `export-item ${x.color}`);
+    b.type = "button";
+    b.setAttribute("role", "menuitem");
+    b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${x.icon}</svg>`;
+    b.append(x.label);
+    b.addEventListener("click", () => { setExport(false); x.run(); });
+    return b;
+  }));
+
   // ── Wiring ───────────────────────────────────────────────
   menuBtn.addEventListener("click", () => {
     const open = !menuOpen();
@@ -279,7 +314,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   $("scrim").addEventListener("click", () => setMenu(false));
   frame.addEventListener("load", sendHighlight);
   exportBtn.addEventListener("click", e => { e.stopPropagation(); setExport(exportMenu.hidden); });
-  $("save-pdf").addEventListener("click", () => { setExport(false); save(); });
   document.addEventListener("click", e => { if (!exportMenu.hidden && !e.target.closest(".export")) setExport(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !exportMenu.hidden) { setExport(false); exportBtn.focus(); } });
 
