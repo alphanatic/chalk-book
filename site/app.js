@@ -133,11 +133,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       const group = el("section", "group");
       paint(group, p.color);
       group.append(heading(p.name, items.length));
-      if (p.modules) {
-        const done = p.modules.filter(m => m.status === "done").length;
-        const prog = el("div", "progress", `${done} of ${p.modules.length} modules done`);
+      if (items.length) {
+        // Notes carrying the GitHub mark, out of every note in the project
+        const shared = items.filter(n => !local.has(n.id)).length;
+        const prog = el("div", "progress", `${shared} of ${items.length} notes on GitHub`);
         const bar = el("div", "bar"), fill = el("i");
-        fill.style.width = `${(done / p.modules.length) * 100}%`;
+        fill.style.width = `${(shared / items.length) * 100}%`;
         bar.append(fill); prog.append(bar); group.append(prog);
       }
       for (const n of items) {
