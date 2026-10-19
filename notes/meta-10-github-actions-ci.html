@@ -1,0 +1,120 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A GitHub Actions workflow that runs check.sh again after each push
+Added `.github/workflows/check.yml`: on every push, GitHub runs `check.sh` on a fresh machine and fails if the committed search index is stale. The first run on `main` was green.
+
+It is a second net behind the pre-commit hook, not a replacement: the hook still runs more checks, and earlier.
+
+## What we covered
+- CI (Continuous Integration): GitHub runs your checks on a clean machine after each push
+- Workflows must live in `.github/workflows/`; only the file name is yours to choose
+- CI runs the same `check.sh` as the hook, with three checks skipped: block list, skill descriptions, render
+- Hook versus CI: the hook can stop a commit; CI only reports, after the commit is on GitHub
+- Actions pinned to a commit, looked up with `gh api`, so nothing updates by itself
+- `pdftotext` has to be installed on GitHub's machine; Node, git and grep are already there
+- A dry run in a clean clone with an empty home folder, before pushing
+- First run watched with `gh run`; public repos run Actions for free
+
+## Full command sequence
+
+### Local · Find a pinned version for each action
+```local
+gh api repos/actions/checkout/releases \
+  --jq '.[0:4][] | "\(.tag_name) \(.published_at)"'  # newest tags with their dates
+gh api repos/actions/checkout/commits/v7.0.1 --jq '.sha'  # the commit behind a tag
+gh api repos/actions/setup-node/commits/v7.0.0 --jq '.sha'  # same for setup-node
+```
+```output
+v7.0.1 2026-07-20T15:10:05Z
+3d3c42e5aac5ba805825da76410c181273ba90b1
+```
+> Concept · A tag like `v7` can be moved to new code at any time; a commit hash can't. Pinning to the hash means the workflow runs exactly the code that was checked.
+
+### Local · Write the workflow
+```config wide: .github/workflows/check.yml
+name: Check  »  the name shown on GitHub
+on:  »  when it runs
+  push:  »  every push, any branch
+permissions:  »  what the job may touch
+  contents: read  »  read the repo, nothing else
+jobs:
+  check:
+    runs-on: ubuntu-latest  »  a fresh Ubuntu machine
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  »  v7.0.1: copy the repo
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  »  v7.0.0
+        with:
+          node-version: 26  »  same major as local
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils  »  pdftotext
+      - run: .claude/skills/memory-dump/check.sh  »  no --render: no browser
+      - run: git diff --exit-code site/search-index.js  »  fails on a stale index
+```
+
+### Local · Dry run, as GitHub would see it
+```local
+git clone -q ~/Projects/chalk-book <scratchpad>/ci-clone  # a fresh copy
+cd <scratchpad>/ci-clone
+HOME=<scratchpad>/ci-home XDG_CONFIG_HOME=<scratchpad>/ci-home/.config \
+  .claude/skills/memory-dump/check.sh  # empty home, as on GitHub
+git diff --exit-code site/search-index.js  # exit 1 if the index changed
+```
+```output
+7. Private block list
+  skipped (no <scratchpad>/ci-home/.config/chalk-book/blocklist)
+10. Skill descriptions
+  skipped (no pointer skill)
+✓ all checks passed
+```
+
+### Local · Push and watch the first run
+```local
+git push origin main  # starts the workflow
+gh run list --limit 3 --json databaseId,status,conclusion  # the newest runs
+gh run watch <run-id> --exit-status  # follow it; non-zero exit if it fails
+gh run view <run-id> --json conclusion --jq .conclusion  # success or failure
+```
+```output
+success
+```
+
+{keep}
+## Hook versus CI
+| | Pre-commit hook | CI on GitHub
+| Runs | before each commit, on your machine | after each push, on GitHub's
+| Stops the mistake | yes: the commit never happens | no: it reports, the commit is already public
+| Can be skipped | yes: `--no-verify`, or a clone without the hook on | no
+| Private block list | runs | skipped: the list never goes to GitHub
+| Skill descriptions | runs | skipped: the pointer skill isn't in the repo
+| Render | with `--render` | skipped: no browser
+| Result | text in the terminal | green tick or red cross on the commit, plus an email
+
+> Key rule · Nothing private is caught by CI in time: it runs after the push. The local hook stays the real privacy guard.
+
+## Bugs hit & fixed
+
+#### Bug · No run found right after the push
+cause: `gh run list --commit <hash>` ran before GitHub had registered the run, so the run id came back empty and the next call failed with `HTTP 404: Not Found (…/actions/runs/?exclude_pull_requests=true)`.
+fix: Wait a few seconds, then list the runs again. The run was there, already green.
+
+#### Bug · The block list check was skipped locally too
+cause: The commit's own hook run printed `skipped (no ~/.config/chalk-book/blocklist)`. The file doesn't exist on this machine, so step 7 runs nowhere.
+fix: Not fixed yet. Creating the file turns the check on; one word per line.
+
+{keep}
+## Where things live
+| What | Path
+| The workflow | `.github/workflows/check.yml`
+| The checks it runs | `.claude/skills/memory-dump/check.sh`
+| The local hook | `.githooks/pre-commit`
+| Runs and results | the repo's Actions tab on GitHub, or `gh run list`
+
+{keep}
+## Best practices
+- **Pin actions to a commit** Tags move; a hash runs exactly the code you checked. Pick a release a few weeks old.
+- **Least permission** `contents: read` is all a check needs.
+- **Dry-run in a clean clone** An empty `HOME` shows what GitHub's machine lacks before you push.
+- **Keep the hook on** CI only reports after the push; the hook stops mistakes before they leave.
+
+Part of Chalk Book · the checks themselves are in [[meta-02-privacy-checks]]; the licence and alias work from the same session is [[meta-11-licence-alias-rule]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

@@ -1,0 +1,108 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Sharing the public repo: a dual licence, and an alias for whoever clones next
+Kept the repo public and added a two-part `LICENSE`: CC BY-NC 4.0 for the notes, archive and palette, MIT for the code. Then made `critonite` and `kiwi` the original author's alone, with a paired For humans / For AI rule that has each new person pick their own alias.
+
+## What we covered
+- `gh repo view` confirmed the repo is public; it stays public, to be shared
+- No licence means all rights reserved: people can view, but not reuse
+- A licence only adds permissions, and can't be withdrawn for copies already taken
+- `LICENSE` splits by path: CC BY-NC 4.0 content, MIT for everything else, fonts keep their own
+- Commercial requests go through GitHub Issues, so no email is published
+- The Contact page no longer calls the repo private
+- Nothing runs on clone, so the alias rule sits where readers look first: `CLAUDE.md` and the README
+- The rule is a For humans / For AI pair, kept together in the README, `CLAUDE.md` and the guide note
+- The alias lives in `~/.config/chalk-book/alias`; admin accounts become `adm-<alias>`
+- `check.sh` step 6 reads the alias, and points to the README when none is set
+
+## Full command sequence
+
+### Local · Check the repo's visibility
+```local
+gh repo view --json visibility --jq '.visibility'  # PUBLIC or PRIVATE, from GitHub itself
+```
+```output
+PUBLIC
+```
+
+{keep}
+## Licence choices
+| Choice | Others may | Used for
+| No licence | view and link only | nothing now
+| MIT | reuse anything, even commercially, keeping the copyright line | site, scripts, skills, layout
+| CC BY 4.0 | reuse and adapt, with credit | not chosen
+| CC BY-NC 4.0 | reuse and adapt, with credit, non-commercial only | notes, `archive/`, `chalk-pastel.css`
+
+> Concept · Copyright stays with you under any licence. The licence only says what others may do with the work, not who may see it.
+
+### Local · The split, at the top of LICENSE
+```config wide: LICENSE
+Chalk Book is under two licences. Copyright (c) 2026 alphanatic.
+
+Content: CC BY-NC 4.0
+  notes/*.html, archive/, chalk-pastel.css
+
+Everything else: MIT
+  site/, index.html, notes/note.js, notes/note-layout.css, .claude/skills/, .githooks/, .github/ and all other files
+
+Not covered: notes/fonts/ keeps its own licence, notes/fonts/LICENSE-Inter.txt.
+
+For commercial use of the content, ask through GitHub Issues: https://github.com/alphanatic/chalk-book/issues
+```
+The full CC BY-NC summary and the MIT text follow in the same file. The README gained a one-line Licence section.
+
+### Local · Set your alias
+```local
+mkdir -p ~/.config/chalk-book  # -p: no error if it exists
+echo kiwi > ~/.config/chalk-book/alias  # one word; never committed
+.claude/skills/memory-dump/check.sh  # step 6 now accepts adm-kiwi
+```
+```output
+6. Admin accounts
+  no alias set in ~/.config/chalk-book/alias: see "Before your first note" in README.md
+```
+The output above is what a clone without the file sees. It's a pointer, not a failure, so CI still passes.
+
+> Concept · Git never runs anything on clone: that would let any repo run code on your machine. So the rule lives where each reader looks first: an AI reads `CLAUDE.md`, a person reads the README.
+
+{keep}
+## The alias rule
+| Part | Says
+| For humans | Pick a nickname for privacy, or use your real name if you prefer
+| For AI | At the first session in a clone, if the alias file is missing, look in the user's own instructions; if none, ask, then save it. Never give anyone `critonite` or `kiwi`
+| Admin accounts | Written `adm-<alias>`; the original author's notes keep `adm-kiwi`
+| Where it appears | README "Before your first note", `CLAUDE.md` §4 "Your alias", the guide note's Writing style
+
+## Bugs hit & fixed
+
+#### Bug · The new comment in check.sh tripped step 6
+cause: The comment above step 6 gave an `adm-` example with a placeholder, and `check.sh` scans itself: `admin account must be written adm-kiwi`.
+fix: Reworded the comment so it describes the rule without an example shaped like an admin account.
+
+#### Bug · A warning when the alias file is missing
+cause: In `tr … < "$aliasfile" 2>/dev/null`, the shell opens the file before `2>/dev/null` applies, so `No such file or directory` still printed.
+fix: Group the command, so the redirect covers opening the file too.
+```local
+alias=$( { tr -cd 'a-z0-9-' < "$aliasfile"; } 2>/dev/null || true)  # {…}: one redirect
+```
+
+{keep}
+## Where things live
+| What | Path
+| The licence | `LICENSE`
+| Your alias (private, per machine) | `~/.config/chalk-book/alias`
+| The rule for AI | `CLAUDE.md` §4, "Your alias"
+| The rule for humans | `README.md`, "Before your first note"
+| Commercial requests and questions | GitHub Issues, linked from the Contact page
+
+{keep}
+## Best practices
+- **Licence before sharing** Without one, nobody may legally reuse what you share.
+- **Split by kind** Permissive for code, non-commercial for writing, keeps both useful and yours.
+- **Contact without an email** Issues give a public way in, and no address to scrape.
+- **Pair the rules** A For humans part and a For AI part, side by side, so neither drifts.
+- **Private settings stay outside the repo** Like the block list, the alias lives in `~/.config/chalk-book/`.
+
+Part of Chalk Book · CI from the same session is [[meta-10-github-actions-ci]]; the privacy rules are in [[meta-02-privacy-checks]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

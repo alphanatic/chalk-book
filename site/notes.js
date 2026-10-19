@@ -175,6 +175,18 @@ window.CHALK_NOTES = [
     skills: ["git status", "git diff", "git restore", "git push", "find", "bfs", "stat", "getfattr", "setsid", "dolphin", "brave", "codex", "check.sh", "pre-commit", "auto-memory", "zsh"],
   },
   {
+    id: "meta-10-github-actions-ci", project: "meta", n: 10, context: "GitHub", date: "2026-10-19",
+    title: "GitHub Actions CI",
+    summary: "A workflow reruns check.sh on GitHub after each push, actions pinned to commits; how it differs from the pre-commit hook.",
+    skills: ["github actions", "ci", "continuous integration", "workflow", "yaml", "check.yml", "actions/checkout", "actions/setup-node", "gh api", "gh run", "pdftotext", "poppler-utils", "pre-commit", "check.sh", "git clone"],
+  },
+  {
+    id: "meta-11-licence-alias-rule", project: "meta", n: 11, context: "Sharing", date: "2026-10-19",
+    title: "Licence & Alias Rule",
+    summary: "Public repo kept, dual LICENSE (CC BY-NC 4.0 notes, MIT code), and a For humans / For AI rule giving each new clone its own alias.",
+    skills: ["license", "licence", "mit", "cc by-nc 4.0", "creative commons", "copyright", "gh repo view", "alias", "adm-kiwi", "privacy", "check.sh", "readme", "tr", "bash redirect"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
