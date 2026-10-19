@@ -5,7 +5,7 @@
 const CHIPS = {
   critical: ["chip", "Critical"], important: ["chip", "Important"], less: ["chip", "Less critical"], token: ["chip", "Token"],
   open: ["chip", "Open"], decision: ["chip", "Needs your decision"], draft: ["chip", "Draft"], done: ["chip", "Done"],
-  parked: ["chip", "Parked"],
+  parked: ["chip", "Parked"], suggested: ["chip", "AI suggestion"],
   desktop: ["plat", "Desktop"], mobile: ["plat", "Mobile"], everywhere: ["plat", "Everywhere"],
   change: ["kind", "Change"], test: ["kind", "Test"], design: ["kind", "Design"],
 };

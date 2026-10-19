@@ -19,12 +19,14 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const notes = window.CHALK_NOTES.map(n => ({ ...n, file: `notes/${n.id}.html` }));
   const narrow = matchMedia("(max-width: 760px)");
   const text = window.CHALK_TEXT || {};     // plain text of each note, from site/build-index.mjs
+  const local = new Set(window.CHALK_LOCAL || []);   // notes git ignores: no Git watermark
   const MIN_QUERY = 2;
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
     // The private progress pages (.progress/ is gitignored), shown in the viewer
     backlog: { title: "Backlog", file: ".progress/backlog.html" },
     complete: { title: "Complete Tasks", file: ".progress/complete-tasks.html" },
+    linux: { title: "Linux", file: ".progress/linux.html" },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
   // The bottom bar, in order: a site page by its PAGES key ("" is Home), or an outside link
@@ -32,6 +34,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { page: "", label: "Home" },
     { page: "backlog" },
     { page: "complete" },
+    { page: "linux" },
     { page: "contact" },
     { label: "GitHub", href: "https://github.com/alphanatic/chalk-book" },
     { label: "claude.ai", href: "https://claude.ai/new#settings/usage" },
@@ -101,6 +104,17 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     });
     return b;
   }
+  // The GitHub mark as a watermark on the right of a menu tile; the title slides under it.
+  // Drawn as a cat-coloured disc, the mark's ring-coloured shape on top, then a ring stroke so the circle closes
+  // under the cat's body too.
+  const GITHUB_PATH = "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1 -5.45 7.59c-.4 .08 -.55 -.17 -.55 -.38 0 -.27 .01 -1.13 .01 -2.2 0 -.75 -.25 -1.23 -.54 -1.48 1.78 -.2 3.65 -.88 3.65 -3.95 0 -.88 -.31 -1.59 -.82 -2.15 .08 -.2 .36 -1.02 -.08 -2.12 0 0 -.67 -.22 -2.2 .82 -.64 -.18 -1.32 -.27 -2 -.27 -.68 0 -1.36 .09 -2 .27 -1.53 -1.03 -2.2 -.82 -2.2 -.82 -.44 1.1 -.16 1.92 -.08 2.12 -.51 .56 -.82 1.28 -.82 2.15 0 3.06 1.86 3.75 3.64 3.95 -.23 .2 -.44 .55 -.51 1.07 -.46 .21 -1.61 .55 -2.33 -.66 -.15 -.24 -.6 -.83 -1.23 -.82 -.67 .01 -.27 .38 .01 .53 .34 .19 .73 .9 .82 1.13 .16 .45 .68 1.31 2.69 .94 0 .67 .01 1.3 .01 1.49 0 .21 -.15 .45 -.55 .37A7.995 7.995 0 0 1 0 8c0 -4.42 3.58 -8 8 -8Z";
+  function gitMark() {
+    const mark = el("span", "git");
+    mark.setAttribute("aria-hidden", "true");
+    mark.innerHTML = `<svg viewBox="0 0 16 16"><circle class="cat" cx="8" cy="8" r="7.5"/>` +
+      `<path class="ring" d="${GITHUB_PATH}"/><circle class="edge" cx="8" cy="8" r="7.45"/></svg>`;
+    return mark;
+  }
   function plannedRow(m) {
     const row = el("div", `file planned${m.status === "in progress" ? " active" : ""}`);
     row.title = `Module ${m.n} · ${m.title} · ${m.status}`;
@@ -126,7 +140,11 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
         fill.style.width = `${(done / p.modules.length) * 100}%`;
         bar.append(fill); prog.append(bar); group.append(prog);
       }
-      for (const n of items) group.append(noteButton(n, false));
+      for (const n of items) {
+        const b = noteButton(n, false);
+        if (!local.has(n.id)) b.append(gitMark());
+        group.append(b);
+      }
       for (const m of todo) group.append(plannedRow(m));
       menuList.append(group);
     }

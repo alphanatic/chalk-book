@@ -10,4 +10,6 @@
   --shell-text:        #faf9f5;   /* main text */
   --shell-text-soft:   #c2c0b6;   /* secondary text */
   --shell-text-muted:  #8d8b84;   /* counts, hints, planned items */
+  --git-mark:          var(--mint-chip);  /* the GitHub cat on menu notes kept in git, from chalk-pastel.css */
+  --git-ring:          var(--mint);       /* the circle around it */
 }

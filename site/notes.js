@@ -187,6 +187,12 @@ window.CHALK_NOTES = [
     skills: ["license", "licence", "mit", "cc by-nc 4.0", "creative commons", "copyright", "gh repo view", "alias", "adm-kiwi", "privacy", "check.sh", "readme", "tr", "bash redirect"],
   },
   {
+    id: "meta-12-github-mark-watermark", project: "meta", n: 12, context: "Site", date: "2026-10-19",
+    title: "GitHub Mark Watermark",
+    summary: "The menu's Git diamond became the GitHub mark in a closed ring, coloured from the palette; grey-on-grey planned for unpushed notes.",
+    skills: ["svg", "github", "octicons", "mark-github", "css", "site-theme.css", "chalk-pastel.css", "palette", "opacity", "rsvg-convert", "brave --headless", "screenshot", "magick", "zsh", "bash", "build-index.mjs", "git check-ignore", "origin/main"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
@@ -217,22 +223,16 @@ window.CHALK_NOTES = [
     skills: ["claude code", "skills", "obsidian", "vault", "bucket", "inbox", "runbook", "naming", "perl", "find", "xargs", "grep", "mv", "cp -a", "rm", "zsh"],
   },
   {
+    id: "claude-code-06-print-screen-skill", project: "claude-code", n: 6, context: "Skills", date: "2026-10-19",
+    title: "Print Screen Skill",
+    summary: "\"print screen\" captures a monitor to the clipboard for Claude to read; numbering monitors; handing sudo prompts to the user.",
+    skills: ["claude code", "skills", "SKILL.md", "screenshot", "print screen", "grim", "wl-copy", "wl-paste", "hyprctl monitors", "jq", "kitty", "hyprland", "hl.dsp.exec_cmd", "monitor", "clipboard", "sudo -n"],
+  },
+  {
     id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13",
     title: "Footer Links & Tabs",
     summary: "Same .map() pattern, different job: tabs set state with onClick, the footer navigates via the URL hash.",
     skills: ["javascript", "react", "map", "keys", "useeffect", "hashchange", "aria-current", "jsx", "eslint", "npm", "npx"],
-  },
-  {
-    id: "arch-linux-01-laptop-install", project: "arch-linux", n: 1, date: "2026-10-18",
-    title: "Laptop Install with archinstall",
-    summary: "ASUS ROG GL702VT: Arch on the SSD with archinstall, every choice copied from the desktop; HyDE on top; UKI and USB catches; replay with --config-url.",
-    skills: ["arch linux", "archinstall", "user_configuration.json", "--config-url", "uefi", "secure boot", "boot menu", "asus", "ext4", "separate /home", "zram", "zstd", "grub", "uki", "pipewire", "networkmanager", "hyde", "hyprland", "chaotic-aur", "yay", "zsh", "oh-my-zsh", "sddm", "lsblk", "bootctl", "pacman -Qqe", "systemctl list-unit-files", "loadkeys", "iwctl", "nomodeset", "nvidia", "nvidia-580xx-dkms", "fastfetch", "hostnamectl", "git clone", "passphrase"],
-  },
-  {
-    id: "arch-linux-02-device-hostnames", project: "arch-linux", n: 2, date: "2026-10-18",
-    title: "Device Hostnames",
-    summary: "Reference: <type>-<owner>-<site>-<nn> for personal machines, e.g. ltp-crit-agi-01; mapped from the cloud pattern.",
-    skills: ["naming", "conventions", "reference", "hostname", "ltp", "dsk", "srv", "cloud adoption framework"],
   },
   {
     id: "anthropic-01-cloud-local-skills", project: "anthropic", n: 1, date: "2026-10-18",

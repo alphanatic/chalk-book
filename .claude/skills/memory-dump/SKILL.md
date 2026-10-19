@@ -88,6 +88,9 @@ Add one entry per note to `CHALK_NOTES` in `site/notes.js`: `id` (file name with
 and `skills` (tools, topics and every distinctive command in the note: what people would search for). If the note may finish a roadmap module,
 ask before setting that module's `status` to `"done"`.
 
+An **Arch Linux** note is private: its entry goes in `site/notes-local.js` instead, and the note loads
+`../site/notes-local.js` after `../site/notes.js` (see `CLAUDE.md` §2).
+
 Then rebuild the search index so the new text is searchable: `node site/build-index.mjs`.
 
 ## 6. Check

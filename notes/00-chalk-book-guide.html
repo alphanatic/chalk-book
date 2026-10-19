@@ -54,7 +54,7 @@ chalk-book/
 │   └── backlog-workflow/         # the old backlog design (private)
 ├── .githooks/pre-commit          # runs check.sh before each commit
 ├── .github/workflows/check.yml   # runs check.sh on GitHub after each push
-├── .progress/, .research/        # private and gitignored: backlog, research
+├── .progress/, .research/        # private and gitignored: backlog, Linux backlog, research
 └── .claude/skills/memory-dump/   # the note-making workflow
 ```
 
@@ -82,6 +82,8 @@ chalk-book/
 ```html
 <p class="muted">A new project gets a row here and in <code>CHALK_PROJECTS</code> in <code>site/notes.js</code>, which can also hold its roadmap of modules.</p>
 ```
+
+>{paths} Key rule · Arch Linux is private: its notes, their catalogue entries (`site/notes-local.js`) and their search text (`site/search-local.js`) are gitignored and never committed. `check.sh` fails if one lands in `site/notes.js`.
 
 ### Note types
 ```html
@@ -173,7 +175,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - Sets of buttons or labels in order (footer links, Export options, legend chips, table columns) are one list in the script, which makes one element per entry.
 - A new site page goes in `site/pages/`, then into `PAGES` and `FOOTER` in `site/app.js`. New Export options are entries in `EXPORTS`.
-- Backlog and Complete Tasks are private pages in `.progress/`, gitignored, about Chalk Book itself only.
+- Backlog and Complete Tasks are private pages in `.progress/`, gitignored, about Chalk Book itself only. The exception is Linux, the user's backlog for their Linux machines, private the same way.
 
 >{concept} Naming note · The private folder was <span class="old">.prog/</span> until 2026-10-18. Older notes keep the old name, as it was then.
 

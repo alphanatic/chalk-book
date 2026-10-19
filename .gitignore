@@ -12,3 +12,8 @@ archive/backlog-workflow/
 
 # Personal editor settings (shows every dot-folder in the VS Code Explorer) — never committed
 .vscode/
+
+# Arch Linux project notes (personal machine setup) and everything made from them — never committed
+notes/arch-linux-*
+site/notes-local.js
+site/search-local.js

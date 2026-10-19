@@ -39,7 +39,7 @@ echo "4. Access"
 grep -nHoE 'BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}' "${scan[@]}" | unmap | report "secret (key or token)" || true
 
 echo "5. Location"
-grep -nHoE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' "${scan[@]}" | unmap \
+grep -nHoP '(?<![0-9.])([0-9]{1,3}\.){3}[0-9]{1,3}(?!\.?[0-9])' "${scan[@]}" | unmap \
   | grep -vE ':(0\.0\.0\.0|10\.[0-9.]+|127\.[0-9.]+|192\.168\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+)$' \
   | report "public IP: use <instance-ip> or <my-ip>" || true
 grep -nHoE '(^|[^0-9a-fA-F-])[0-9]{12}([^0-9a-fA-F-]|$)' "${scan[@]}" | unmap | sed -E 's/:[^0-9]?([0-9]{12})[^0-9]?$/:\1/' | report "12-digit number: account ID?" || true
@@ -68,6 +68,12 @@ node - <<'EOF' | report "catalogue" || true
 const fs = require("fs");
 global.window = {};
 require(process.cwd() + "/site/notes.js");
+// Notes git ignores (Arch Linux) must stay out of the committed catalogue: their entries go in site/notes-local.js
+const { spawnSync } = require("child_process");
+const ignored = spawnSync("git", ["check-ignore", "--no-index", "--stdin"],
+  { encoding: "utf8", input: window.CHALK_NOTES.map(n => `notes/${n.id}.html`).join("\n") }).stdout;
+for (const f of ignored.split("\n").filter(Boolean)) console.log(`site/notes.js: ${f.slice(6, -5)} is a private note: move its entry to site/notes-local.js`);
+if (fs.existsSync("site/notes-local.js")) require(process.cwd() + "/site/notes-local.js");
 const ids = window.CHALK_NOTES.map(n => n.id);
 const files = fs.readdirSync("notes").filter(f => f.endsWith(".html")).map(f => f.slice(0, -5));
 for (const f of files) if (!ids.includes(f)) console.log(`notes/${f}.html: no entry in CHALK_NOTES`);

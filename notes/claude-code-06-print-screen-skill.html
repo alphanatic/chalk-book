@@ -1,0 +1,106 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A skill that screenshots a monitor so Claude can see it
+Built a `print-screen` skill: "print screen" captures monitor 1, "print screen 2" the second, puts the image on the clipboard and lets Claude read it.
+
+Also how Claude puts a number on each monitor, and how it hands a password prompt to the user in a terminal window.
+
+## What we covered
+- A skill is a folder with `SKILL.md`; a helper script sits next to it
+- `grim -o <output>` captures one monitor; `wl-copy` puts the PNG on the clipboard
+- Monitor numbers are Hyprland IDs plus one, resolved live with `hyprctl monitors -j`
+- The image is saved to a fixed path so Claude can read it with its Read tool
+- A missing monitor exits non-zero and lists the ones that exist
+- Big numbers on each monitor: a floating kitty window per monitor, closed after 8 s
+- Claude can't type sudo passwords: it opens a terminal running the command for the user
+
+## Full command sequence
+
+### Check the tools and monitors {local}
+```local
+which grim wl-copy hyprshot  # screenshot and clipboard tools
+hyprctl monitors | grep -E '^Monitor|description'  # names and IDs: DP-1 is ID 0
+```
+
+### The skill file {local}
+| Part | What it says
+| `description` | Use when the user says "print screen"; a number picks the monitor, none means 1
+| 1 · Pick | "print screen" → 1, "print screen 2" → 2
+| 2 · Capture | run the script with that number
+| 3 · Look | Read `~/.cache/print-screen/latest.png`, answer in one line
+| Privacy | describe only what the task needs; never copy the image elsewhere
+
+### The script {local}
+```config wide: ~/.claude/skills/print-screen/print-screen.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+n="${1:-1}"
+if ! [[ "$n" =~ ^[1-9][0-9]*$ ]]; then
+	echo "Monitor number must be 1 or higher, got: $n" >&2; exit 2
+fi
+
+mons() { hyprctl monitors -j; }
+name="$(mons | jq -r --argjson id "$((n - 1))" '.[] | select(.id == $id) | .name')"
+if [[ -z "$name" ]]; then
+	echo "No monitor $n. Monitors:" >&2
+	mons | jq -r '.[] | "  \(.id + 1): \(.name) \(.width)x\(.height)"' >&2
+	exit 1
+fi
+
+out="${XDG_CACHE_HOME:-$HOME/.cache}/print-screen/latest.png"
+mkdir -p "$(dirname "$out")"
+grim -o "$name" "$out"
+wl-copy --type image/png < "$out"
+echo "Monitor $n ($name) -> clipboard and $out"
+```
+Shortened for the page; it behaves the same as the installed script.
+
+| Line | Why
+| `set -euo pipefail` | stop on any error or unset variable
+| `id == n - 1` | Hyprland counts from 0; people count from 1
+| `grim -o` | one output only, by its name
+| `latest.png` | one fixed path, overwritten each time
+
+```local
+S=~/.claude/skills/print-screen/print-screen.sh  # shorter to type
+chmod +x $S  # make it runnable
+$S 1  # test monitor 1
+wl-paste --list-types | head -1  # image/png: the clipboard holds the picture
+$S 3  # test the error: lists monitors 1 and 2
+```
+
+### Number each monitor {local}
+```local
+K='kitty --class label -o font_size=160 sh -c "printf 1; sleep 8"'  # a big "1", 8 s
+R='{monitor = "DP-1", float = true, size = "420 420", center = true}'  # rules
+hyprctl dispatch "hl.dsp.exec_cmd('$K', $R)"  # again with "2" and DP-3
+hyprctl clients -j | jq -r '.[] | select(.class=="label") | .monitor'  # one on each
+```
+> Concept · Hyprland's own notifications can't pick a monitor. A small floating window with a rule `monitor = "<name>"` can.
+
+### Hand a sudo prompt to the user {local}
+```local
+sudo -n tailscale set --ssh  # -n: never prompt; fails: "a password is required"
+K='kitty --class sudo-step sh -c "sudo <command>; read _"'  # runs, then waits
+hyprctl dispatch "hl.dsp.exec_cmd('$K', {float = true, center = true})"  # user types it
+```
+The window stays open on failure, so the user can read the error.
+
+{keep}
+## Where things live
+| What | Path
+| The skill | `~/.claude/skills/print-screen/SKILL.md`
+| The script | `~/.claude/skills/print-screen/print-screen.sh`
+| Last screenshot | `~/.cache/print-screen/latest.png`
+
+{keep}
+## Best practices
+- **Resolve names live** Monitor names can change; the script maps numbers to names at run time.
+- **Fail with the answer** A wrong number lists the monitors that exist.
+- **One fixed output path** Claude knows where to look, and old shots don't pile up.
+- **Screens are private** Describe only what the task needs.
+
+Part of Claude Code · see [[claude-code-05-vault-bucket]] for another one-line skill
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

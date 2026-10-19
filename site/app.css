@@ -156,10 +156,19 @@ body:not(.recent-open) .panel.right { display: none; }
 .file .hits { flex: none; font-size: 10px; font-weight: 600; color: var(--shell-text-muted); }
 .file[aria-current] .hits { color: var(--c-chip); }
 
+/* GitHub watermark on a menu note kept in git: the mark fills its circle, laid over the right end of the tile */
+.file { position: relative; }
+.file .git { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px;
+  opacity: .75; pointer-events: none; }
+.file .git svg { display: block; width: 100%; height: 100%; }
+.file .git .cat { fill: var(--git-mark); }
+.file .git .ring { fill: var(--git-ring); }
+.file .git .edge { fill: none; stroke: var(--git-ring); stroke-width: 1.1; }
+
 /* ── Collapsed menu: a rail showing only each number and its colour bar ── */
 .rail .panel.left .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
 .rail .panel.left .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
-.rail .panel.left :is(.file .t, .file .state, .file .hits, .progress, .panel-foot, .group h2 .count, .search) { display: none; }
+.rail .panel.left :is(.file .t, .file .state, .file .hits, .file .git, .progress, .panel-foot, .group h2 .count, .search) { display: none; }
 .rail .panel.left .search-rail { display: flex; margin-bottom: 14px; }
 .rail .panel.left .group h2 { justify-content: center; font-size: 0; margin-bottom: 6px; }
 .rail .panel.left .group + .group { margin-top: 12px; }

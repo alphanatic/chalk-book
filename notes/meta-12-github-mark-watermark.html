@@ -1,0 +1,86 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+The menu's git watermark becomes the GitHub mark, in palette colours
+Replaced the faint Git diamond on menu tiles with the GitHub mark: a closed ring with the cat as large as fits inside, coloured from `chalk-pastel.css`.
+
+A suggestion followed for later: a grey-on-grey mark for notes not yet on GitHub.
+
+## What we covered
+- The watermark marks notes git doesn't ignore; `build-index.mjs` writes the ignored list
+- The GitHub mark path from Octicons: a circle with the cat cut out
+- Three SVG layers: cat-coloured disc, ring-coloured mark, ring stroke to close the bottom
+- The SVG fills the whole 20 px circle; the old border and 11 px glyph are gone
+- Colours come from the palette through `site-theme.css`: now `--mint` and `--mint-chip`
+- Checked large with `rsvg-convert`, and on the site with a headless Brave screenshot
+- Planned, not built: grey on grey for notes not pushed yet
+
+## Full command sequence
+
+### Find the watermark {local}
+```local
+grep -nE 'GIT_PATH|gitMark' site/app.js  # the logo path and where tiles get it
+grep -n 'git' site/app.css site/site-theme.css  # its size, ring and colours
+```
+
+### The new mark {local}
+```config: site/app.js
+const GITHUB_PATH = "M8 0c4.42 0 8 3.58 8 8a8.013 …Z";  »  Octicons mark-github, 16 × 16
+mark.innerHTML = `<svg viewBox="0 0 16 16">` +
+  `<circle class="cat" cx="8" cy="8" r="7.5"/>` +  »  1 · the cat's colour
+  `<path class="ring" d="${GITHUB_PATH}"/>` +  »  2 · the ring colour, cat cut out
+  `<circle class="edge" cx="8" cy="8" r="7.45"/></svg>`;  »  3 · closes the ring under the cat
+```
+
+### Its size and colours {local}
+```config: site/app.css
+.file .git { position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; opacity: .75; pointer-events: none; }
+.file .git svg { display: block; width: 100%; height: 100%; }
+.file .git .cat { fill: var(--git-mark); }
+.file .git .ring { fill: var(--git-ring); }
+.file .git .edge { fill: none; stroke: var(--git-ring); stroke-width: 1.1; }
+```
+```config: site/site-theme.css
+--git-mark: var(--mint-chip);
+--git-ring: var(--mint);
+```
+> Concept · On its own, the mark's cat body reaches the circle's edge, so the ring is open at the bottom. The `edge` stroke closes it.
+
+### Check it {local}
+```local
+rsvg-convert t.svg -o t.png  # render a test SVG large, to see the shape
+U="file://$PWD/index.html"  # the site, opened from disk
+brave --headless=new --window-size=1400,900 --screenshot=site.png "$U"  # the real menu
+magick site.png -crop 420x900+0+0 menu.png  # cut out the left menu
+```
+
+{keep}
+| Pair | Ring | Cat
+| Butter | `--butter` | `--sky-chip`
+| Mint (in use) | `--mint` | `--mint-chip`
+| Peach, pink, lav, coral | `--<colour>` | `--<colour>-chip`
+
+## Bugs hit & fixed
+
+#### Bug · Only one colour option rendered
+cause: `for pr in $pairs` ran once in zsh: zsh doesn't split an unquoted variable into words.
+fix: Put the loop in a script and run it with `bash`, or loop over a literal list.
+
+{keep}
+## Next: grey for notes not on GitHub
+| State | Detected by | Mark
+| Ignored | `git check-ignore` | none
+| On GitHub, unchanged | same as `origin/main` | mint
+| Not pushed yet | untracked, edited or unpushed | grey ring `--shell-text-muted`, cat `--shell-raise`
+
+> Gotcha · Write this list to its own gitignored file, not `search-index.js`. That file is committed, and CI rebuilds it and fails on any difference.
+
+{keep}
+## Best practices
+- **Palette, not hex** Site colours point at `chalk-pastel.css` variables, so a palette change follows.
+- **Render before judging** A large test render shows shape problems a 20 px icon hides.
+- **Opacity is a trade-off** Brighter marks hide long titles that slide under them.
+
+Part of Chalk Book · see [[meta-01-site-build]] for how the site is built
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
