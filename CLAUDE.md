@@ -36,6 +36,7 @@ When in doubt, write for the forgetful future self: assume nothing is remembered
 ```
 chalk-book/
 ├── README.md                     ← what this is; points here
+├── LICENSE                       ← CC BY-NC 4.0 for notes and palette, MIT for the rest
 ├── CLAUDE.md                     ← this guide (source of truth)
 ├── chalk-pastel.css              ← the note colour palette (user-owned)
 ├── index.html                    ← the site: open it in a browser to browse the notes
@@ -56,6 +57,7 @@ chalk-book/
 ├── archive/                      ← old PDFs: from before the HTML rebuild, and the last guide PDF
 │   └── backlog-workflow/         ← the old backlog design (private, gitignored)
 ├── .githooks/pre-commit          ← runs check.sh before each commit (turn on: see README)
+├── .github/workflows/check.yml   ← runs check.sh on GitHub after each push
 ├── .progress/, .research/        ← private and gitignored: backlog, complete tasks, research
 └── .claude/skills/memory-dump/   ← the note-making workflow
     ├── SKILL.md

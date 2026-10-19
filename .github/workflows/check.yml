@@ -1,0 +1,29 @@
+# Runs check.sh on every push: a second net for commits where the pre-commit hook was skipped.
+# Skipped here: the private block list and the pointer skill (not in the repo), and rendering (no browser).
+name: Check
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout v7.0.1, pinned to its commit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      # actions/setup-node v7.0.0, pinned to its commit
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 26
+
+      # pdftotext, for the text of the archived PDFs
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      - run: .claude/skills/memory-dump/check.sh
+
+      # check.sh rebuilds the search index; a change means the committed copy was out of date
+      - run: git diff --exit-code site/search-index.js

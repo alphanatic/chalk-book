@@ -21,3 +21,7 @@ How notes are named, written, styled and checked is all in [CLAUDE.md](CLAUDE.md
 Turn on the pre-commit checks once per clone: `git config core.hooksPath .githooks`.
 To see whether a change moved anything on the printed page: `.claude/skills/memory-dump/compare.sh`.
 A readable copy is the guide note, `notes/00-chalk-book-guide.html`.
+
+## Licence
+
+Notes and palette: CC BY-NC 4.0. Code: MIT. Details in [LICENSE](LICENSE).
