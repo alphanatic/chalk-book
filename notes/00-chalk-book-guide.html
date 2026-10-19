@@ -134,11 +134,14 @@ chalk-book/
 - **Short.** Sentences under ~20 words. No intro paragraphs, no filler.
 - **Every command gets a comment** explaining what it does and what each flag means.
 - **Config files stay clean.** Annotations sit beside the file or in a field table, never inside it.
-- **Real by default, except access, location and private life.** Actual commands, paths and error messages, but: no keys, passwords or tokens; placeholders such as `<instance-ip>` for public IPs, account IDs and emails; nothing about the user's private life. `critonite` and `kiwi` are the owner's known aliases (`crit` in hostnames) and may appear; any other name of a person becomes a made-up cartoony or fruity one, like `mango`, never `kiwi`. Anything that looks like an admin account is always `adm-kiwi`: never a name, never a placeholder, live or test.
+- **Real by default, except access, location and private life.** Actual commands, paths and error messages, but: no keys, passwords or tokens; placeholders such as `<instance-ip>` for public IPs, account IDs and emails; nothing about the user's private life. `critonite` and `kiwi` are the original author's aliases (`crit` in hostnames) and belong to no one else; any other name of a person becomes a made-up cartoony or fruity one, like `mango`, never `kiwi`. Anything that looks like an admin account is always `adm-<alias>`, with your own alias: never a name, never a placeholder, live or test. The original author's notes use `adm-kiwi`.
 - **Keep the mistakes.** Errors and their fixes are often the most valuable part.
 - **Trim output.** Keep the few lines of output or log that matter, never the whole dump.
 - **Respect history.** When a convention changes, mark old names as legacy instead of rewriting earlier notes.
 - **Calm tone.** Plain, friendly and factual. No hype, no emoji.
+
+>{best} Your alias · For humans · Pick a nickname for privacy, or use your real name if you prefer. It lives in `~/.config/chalk-book/alias`, never in the repo.
+>{concept} Your alias · For AI · At the first session in a clone, if that file is missing, look for an alias in the user's own instructions; if there is none, ask for a nickname, or their real name if their preferences say so, and save it there. Never give anyone `critonite` or `kiwi`.
 
 ```remote
 sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists

@@ -153,14 +153,21 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
     where one fits: `<instance-ip>`, `<my-ip>`, `<vpc-id>`. Private ranges (`10.0.0.0/16`) and `0.0.0.0/0` are fine.
   - **Private life:** nothing about the user's life outside the work: home address, job search, health, other people.
     When in doubt, leave it out and ask.
-  - **Names:** `critonite` and `kiwi` are the owner's known aliases (`crit`, short for `critonite`, in hostnames).
-    They may appear in notes and commits (from 2026-10-18). Any other name of a person (real name, initials, another
-    username) becomes a made-up cartoony or fruity one, like `mango` or `noodle`, never `kiwi`. One person keeps
-    the same stand-in everywhere.
+  - **Names:** `critonite` and `kiwi` are the original author's aliases (`crit`, short for `critonite`, in hostnames).
+    They may appear in that author's notes and commits (from 2026-10-18), and belong to no one else. Any other name of
+    a person (real name, initials, another username) becomes a made-up cartoony or fruity one, like `mango` or `noodle`,
+    never `kiwi`. One person keeps the same stand-in everywhere.
+  - **Your alias:** each person writes under their own alias, kept in `~/.config/chalk-book/alias` (one word, never
+    committed). It pairs with "Before your first note" in the README:
+    - *For humans:* pick a nickname for privacy, or use your real name if you prefer.
+    - *For AI:* at the first session in a clone, if that file is missing, look for an alias in the user's own
+      instructions (global `CLAUDE.md` or memory). If there is none, ask the user to choose a nickname, or their real
+      name if their preferences say so. Save it to the file. Never give anyone `critonite` or `kiwi`.
   - **Admin accounts:** anything that looks like an admin account (`adm-…`, `admin-…`, `…-admin`) is always written as
-    `adm-kiwi`, never a real name and never a placeholder. This applies to live and test environments,
-    patterns and examples alike. Commands stay exactly as run, with `adm-kiwi` in place of the name. Notes don't explain the
+    `adm-<alias>`, never a real name and never a placeholder. This applies to live and test environments,
+    patterns and examples alike. Commands stay exactly as run, with `adm-<alias>` in place of the name. Notes don't explain the
     substitution. The "Respect history" rule doesn't apply here: old admin names are never shown, not even struck through.
+    The original author's notes use `adm-kiwi`.
 - **Keep the mistakes.** Errors and their fixes are often the most valuable part. Record them as Bug cards.
 - **Trim output.** Keep the few lines of output or log that matter, never the whole dump.
 - **Respect history.** When a convention changes, update the reference note and mark old

@@ -103,7 +103,7 @@ Then rebuild the search index so the new text is searchable: `node site/build-in
   .claude/skills/memory-dump/check.sh
   ```
   It rebuilds the search index and checks placeholders, hex colours, secrets, public IPs, account IDs,
-  emails, admin accounts (only `adm-kiwi`), the private block list and the catalogue, in notes and PDFs.
+  emails, admin accounts (only `adm-<alias>`, or the original author's `adm-kiwi`), the private block list and the catalogue, in notes and PDFs.
 - After changing shared files (`note.js`, `note-layout.css`, `chalk-pastel.css`) or existing notes, run
   `.claude/skills/memory-dump/compare.sh`: every note it reports as different must be one you meant to change.
 - Open `index.html#<name>` and confirm the note appears in the menu and displays.

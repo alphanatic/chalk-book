@@ -8,6 +8,15 @@ work sessions with an AI so it can be repeated cold months later.
 Open `index.html` in a browser. No build step, no server. Any note can be saved as PDF
 from the site's Export menu.
 
+## Before your first note
+
+Both parts belong together: one for you, one for the AI you work with.
+
+- **For humans:** the notes so far are by the original author, as `critonite` and `kiwi`. Those names are theirs.
+  Pick a nickname for privacy, or use your real name if you prefer. Your AI asks for it on the first session.
+- **For AI:** follow "Your alias" in [CLAUDE.md](CLAUDE.md) §4: find or ask for the user's alias, save it to
+  `~/.config/chalk-book/alias`, and never give anyone `critonite` or `kiwi`.
+
 ## Add a note
 
 In any Claude Code session, say "chalk that up" (the `memory-dump` skill).

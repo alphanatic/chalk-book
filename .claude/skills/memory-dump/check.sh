@@ -47,8 +47,12 @@ grep -nHoE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' "${scan[@]}" | unmap
   | grep -vE ':(git@github\.com|noreply@anthropic\.com)$' | report "email address" || true
 
 echo "6. Admin accounts"
+# The original author writes admin accounts with kiwi; anyone else with their own alias
+aliasfile="${XDG_CONFIG_HOME:-$HOME/.config}/chalk-book/alias"
+alias=$( { tr -cd 'a-z0-9-' < "$aliasfile"; } 2>/dev/null || true)
+[ -n "$alias" ] || echo "  no alias set in $aliasfile: see \"Before your first note\" in README.md"
 grep -nHoiE '\badm(in)?[-_.](&lt;|<)?[a-z0-9]+(&gt;|>)?|\b[a-z0-9]+[-_]admin\b' "${scan[@]}" | unmap \
-  | grep -vE ':adm-kiwi$' | report "admin account must be written adm-kiwi" || true
+  | grep -vE ":adm-(kiwi|&lt;alias&gt;|<alias>${alias:+|$alias})\$" | report "admin account must be written adm-${alias:-<alias>}" || true
 
 echo "7. Private block list"
 blocklist="${XDG_CONFIG_HOME:-$HOME/.config}/chalk-book/blocklist"
