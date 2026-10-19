@@ -84,12 +84,9 @@ body:not(.rail) .panel.left .panel-body { min-width: var(--panel); }     /* no r
 /* Open: the recently viewed button pins it beside the note, like the menu */
 body.recent-open { --right-w: var(--panel); }
 .recent-open .panel.right { width: var(--panel); }
-/* Hidden on pages that don't need it (the backlog): its column closes */
-body.no-recent { --right-w: 0px; }
-body.no-recent .panel.right { display: none; }
-/* Recently viewed: a rail that slides open over the note (leftwards) while hovered, and straight back when left */
-.recent-peek .panel.right { width: var(--panel); z-index: 3; box-shadow: -12px 0 28px var(--shell-side); }
-body:not(.recent-rail) .panel.right .panel-body { min-width: var(--panel); }
+/* Closed, or away from Home: hidden, and its column closes */
+body:not(.recent-open) { --right-w: 0px; }
+body:not(.recent-open) .panel.right { display: none; }
 .panel-body { flex: 1; overflow: hidden auto; overscroll-behavior: contain; padding: 14px;
   scrollbar-color: var(--shell-line) transparent; }
 
@@ -167,11 +164,6 @@ body:not(.recent-rail) .panel.right .panel-body { min-width: var(--panel); }
 .rail .panel.left .group h2 { justify-content: center; font-size: 0; margin-bottom: 6px; }
 .rail .panel.left .group + .group { margin-top: 12px; }
 
-/* ── Recently viewed as a rail: the same, mirrored ── */
-.recent-rail .panel.right .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
-.recent-rail .panel.right .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
-.recent-rail .panel.right :is(.file .t, .file .hits, .panel-foot, .group h2 .count) { display: none; }
-.recent-rail .panel.right .group h2 { justify-content: center; font-size: 0; margin-bottom: 6px; }
 .scrim { display: none; }
 
 /* ── View ────────────────────────────────────────────────── */

@@ -45,7 +45,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   ];
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
   // Side panels on wide screens: "closed" once closed there, open otherwise
-  const MENU_KEY = "chalk.menu", RECENT_KEY = "chalk.recent-panel";
+  const MENU_KEY = "chalk.menu";
   const wanted = key => { try { return localStorage.getItem(key) !== "closed"; } catch { return true; } };
   const keep = (key, open) => { if (!narrow.matches) try { localStorage.setItem(key, open ? "open" : "closed"); } catch {} };
 
@@ -201,29 +201,20 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     search.focus();
   }
 
-  // ── Recently viewed. Its button pins it open beside the note, like the menu. Closed, it is a rail;
-  //    hovering slides it open over the note, leaving slides it straight back ──
+  // ── Recently viewed. Hidden until its button opens it, and only on Home ──
   const recentBtn = $("recent-btn");
   const recentOpen = () => body.classList.contains("recent-open");
-  function syncRecent() {
-    if (recentOpen() || body.classList.contains("recent-peek")) body.classList.remove("recent-rail");
-    else if (recentEl.getBoundingClientRect().width <= 60) body.classList.add("recent-rail");
-  }
   function setRecent(open) {
     body.classList.toggle("recent-open", open);
     recentBtn.setAttribute("aria-expanded", open);
-    syncRecent();
   }
-  const resetRecent = () => setRecent(!narrow.matches && wanted(RECENT_KEY));
-  recentEl.addEventListener("mouseenter", () => { if (!recentOpen()) body.classList.add("recent-peek"); syncRecent(); });
-  recentEl.addEventListener("mouseleave", () => { body.classList.remove("recent-peek"); syncRecent(); });
-  recentEl.addEventListener("transitionend", e => { if (e.target === recentEl) syncRecent(); });
 
   // ── Viewer ───────────────────────────────────────────────
   function show(id) {
     const page = PAGES[id];
     const n = page ? null : notes.find(x => x.id === id && x.file);
-    body.classList.toggle("no-recent", !!page);   // Recently viewed belongs to Home and the notes, not the site's pages
+    body.classList.toggle("no-recent", !!(page || n));   // Recently viewed belongs to Home only
+    if (page || n) setRecent(false);
     currentId = n ? n.id : null;
     for (const a of document.querySelectorAll(".main-footer-btn"))
       a.toggleAttribute("aria-current", a.dataset.page === (page ? id : n ? "-" : ""));
@@ -304,12 +295,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     setMenu(open);
     keep(MENU_KEY, open);
   });
-  recentBtn.addEventListener("click", () => {
-    const open = !recentOpen();
-    body.classList.remove("recent-peek");
-    setRecent(open);
-    keep(RECENT_KEY, open);
-  });
+  recentBtn.addEventListener("click", () => setRecent(!recentOpen()));
   $("search-rail").addEventListener("click", openSearch);
   $("scrim").addEventListener("click", () => setMenu(false));
   frame.addEventListener("load", sendHighlight);
@@ -317,7 +303,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   document.addEventListener("click", e => { if (!exportMenu.hidden && !e.target.closest(".export")) setExport(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !exportMenu.hidden) { setExport(false); exportBtn.focus(); } });
 
-  narrow.addEventListener("change", () => { resetMenu(); resetRecent(); });
+  narrow.addEventListener("change", resetMenu);
 
   search.addEventListener("input", renderSearch);
   search.addEventListener("keydown", e => {
@@ -341,7 +327,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 
   resetMenu();
-  resetRecent();
+  setRecent(false);
   renderMenu();
   renderSearch();
   show(decodeURIComponent(location.hash.slice(1)));
