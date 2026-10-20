@@ -109,6 +109,12 @@ window.CHALK_NOTES = [
     skills: ["svc-deploy", "deploy user", "useradd", "install -d", "/dev/stdin", "authorized_keys", "ssh-keygen", "HostKeyAlias", "rsync", "--delete", "Vite", "base", "npm run build", "dist", "React", "nginx location", "return 301", "trailing slash", "curl", "pacman"],
   },
   {
+    id: "pokedex-00-pokeggdex-at-a-glance", project: "pokedex", n: 0, context: "Cover", date: "2026-10-20",
+    title: "Pokéggdex at a Glance",
+    summary: "The project's cover: the anime pokeggdex in a pixel-art S.S. Anne cabin, how to run and ship it, its parts, its story, and pastel Pokéball marks.",
+    skills: ["pokeggdex", "pokédex", "react", "vite", "pokéapi", "sprites", "crystal", "s.s. anne", "pixel art", "easter eggs", "rsync", "npm run dev", "npm run build", "pokéball", "svg", "use href", "bulbasaur", "charmander", "squirtle", "staryu", "exeggcute"],
+  },
+  {
     id: "pokedex-01-git-manual-push", project: "pokedex", n: 1, context: "Git", date: "2026-10-11",
     title: "Git: Manual Commit & Push",
     summary: "Manual commit 44e0d5c in pokedex, git status, commit messages and trailers, .git/index with xxd.",
