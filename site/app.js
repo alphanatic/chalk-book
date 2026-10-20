@@ -24,10 +24,11 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const MIN_QUERY = 2;
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
-    // The private progress pages (.progress/ is gitignored), shown in the viewer
-    backlog: { title: "Backlog", file: ".progress/backlog.html" },
-    complete: { title: "Complete Tasks", file: ".progress/complete-tasks.html" },
-    linux: { title: "Linux", file: ".progress/linux.html" },
+    // The private progress pages (.progress/ is gitignored), shown in the viewer. Their footer
+    // buttons show only where the page exists, so a hosted copy has none
+    backlog: { title: "Backlog", file: ".progress/backlog.html", private: true },
+    complete: { title: "Complete Tasks", file: ".progress/complete-tasks.html", private: true },
+    linux: { title: "Linux", file: ".progress/linux.html", private: true },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
   // The bottom bar, in order: a site page by its PAGES key ("" is Home), or an outside link
@@ -65,6 +66,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const SORT_KEY = "chalk.sort";
   let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS[0];
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
+  // Every note opened in this browser, newest first: the rail shows the last few of each project
+  const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3;
   // Menu projects opened with their dot; the rest start folded
   const FOLD_KEY = "chalk.open-projects";
   // Side panels on wide screens: "closed" once closed there, open otherwise
@@ -154,9 +157,10 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       b.title = open ? "Fold" : "Unfold";
     };
     set(readOpen().has(key));
-    // On the rail, a plus also opens the menu and centres the project in it; a minus only folds
+    // On the rail the dot is a plain ball: it opens the menu with the project unfolded and centred.
+    // In the open menu it folds and unfolds
     b.addEventListener("click", () => {
-      const open = readOpen(), now = !open.has(key);
+      const open = readOpen(), now = !menuOpen() || !open.has(key);
       if (now) open.add(key); else open.delete(key);
       try { localStorage.setItem(FOLD_KEY, JSON.stringify([...open])); } catch {}
       set(now);
@@ -205,6 +209,19 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       for (const m of todo) group.append(plannedRow(m));
       menuList.append(group);
     }
+    markRailRecent();
+  }
+
+  // On the rail, each project shows only its notes opened last in this browser, at most RAIL_RECENT
+  // Until a note is opened with this list in place, start from Recently viewed
+  const readOpened = () => { try { return JSON.parse(localStorage.getItem(OPENED_KEY) ?? localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } };
+  function markRailRecent() {
+    const opened = readOpened();
+    for (const b of menuList.querySelectorAll("button.file[data-id]")) {
+      const p = projectOf(b.dataset.id);
+      const rank = opened.filter(id => projectOf(id) === p).indexOf(b.dataset.id);
+      b.classList.toggle("rail-recent", rank >= 0 && rank < RAIL_RECENT);
+    }
   }
 
   // ── Left, while typing: search inside every note. Results replace the menu;
@@ -246,7 +263,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   }
   function remember(id) {
     const ids = [id, ...readHistory().filter(x => projectOf(x) !== projectOf(id))].slice(0, HISTORY_MAX);
-    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(ids)); } catch {}
+    const opened = [id, ...readOpened().filter(x => x !== id)].slice(0, OPENED_MAX);
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(ids));
+      localStorage.setItem(OPENED_KEY, JSON.stringify(opened));
+    } catch {}
+    markRailRecent();
   }
   function renderRecent() {
     const recent = readHistory().map(id => notes.find(n => n.id === id));
@@ -357,6 +379,13 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     catch { frame.contentWindow.postMessage("chalk:print", "*"); }
   }
 
+  // Removes a footer button whose page isn't there. Served over http, ask the server; opened from disk,
+  // the browser can't check files, and the private pages are there anyway, so the button stays
+  function dropIfMissing(li, file) {
+    if (location.protocol === "file:") return;
+    fetch(file, { method: "HEAD" }).then(r => { if (!r.ok) li.remove(); }).catch(() => li.remove());
+  }
+
   // ── Bottom bar, Export menu and menu sort: one button per entry ──────
   menuSort.replaceChildren(...SORTS.map(s => {
     const b = el("button", "sort-btn", s.label);
@@ -378,6 +407,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     else { a.href = `#${f.page}`; a.dataset.page = f.page; }
     const li = el("li");
     li.append(a);
+    if (PAGES[f.page]?.private) dropIfMissing(li, PAGES[f.page].file);
     return li;
   }));
   exportMenu.replaceChildren(...EXPORTS.map(x => {
