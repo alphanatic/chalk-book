@@ -205,6 +205,9 @@ body:not(.recent-open) .panel.right { display: none; }
 .rail .panel.left .fold { width: 20px; height: 20px; margin: 0; -webkit-mask: none; mask: none; }
 .rail .panel.left .group.foldable .file:not(.rail-recent) { display: none; }
 .rail .panel.left .group.foldable .file.rail-recent { display: flex; }
+/* The dots stay hidden on the rail: only the recent notes show, and a project with none takes no space */
+.rail .panel.left .group.foldable h2 { display: none; }
+.rail .panel.left .group.foldable:not(:has(.rail-recent)) { display: none; }
 .rail .panel.left .group + .group { margin-top: 12px; }
 
 .scrim { display: none; }

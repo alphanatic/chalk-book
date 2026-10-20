@@ -48,8 +48,10 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { label: "Save as PDF", color: "mint", run: () => save(),
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
-  // Home's row starts with a Poké Ball that opens the Pokéggdex game, shown only where the game is served
-  const GAME = { href: "/pokeggdex/", title: "Play the Pokéggdex" };
+  // Home's row starts with a Poké Ball that opens the Pokéggdex game, shown only where the game is served.
+  // Served locally, the game is the npm dev server (npm run dev in ~/Projects/pokeggdex)
+  const onLocalhost = ["localhost", "127.0.0.1"].includes(location.hostname);
+  const GAME = { href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex" };
   // Then the row of GitHub marks, left to right, each with its count of notes
   const HOME_MARKS = [
     { kind: "", title: "on GitHub" },
@@ -386,7 +388,9 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   // onDisk: what to do when opened from disk, where nothing can be checked (true keeps it)
   function dropIfMissing(li, file, onDisk = true) {
     if (location.protocol === "file:") { if (!onDisk) li.remove(); return; }
-    fetch(file, { method: "HEAD" }).then(r => { if (!r.ok) li.remove(); }).catch(() => li.remove());
+    // no-cors so another local server can be checked too: it answers with an opaque response when it's up
+    fetch(file, { method: "HEAD", mode: "no-cors" })
+      .then(r => { if (!r.ok && r.type !== "opaque") li.remove(); }).catch(() => li.remove());
   }
 
   // ── Bottom bar, Export menu and menu sort: one button per entry ──────
