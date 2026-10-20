@@ -88,8 +88,14 @@ Add one entry per note to `CHALK_NOTES` in `site/notes.js`: `id` (file name with
 and `skills` (tools, topics and every distinctive command in the note: what people would search for). If the note may finish a roadmap module,
 ask before setting that module's `status` to `"done"`.
 
-An **Arch Linux** note is private: its entry goes in `site/notes-local.js` instead, and the note loads
-`../site/notes-local.js` after `../site/notes.js` (see `CLAUDE.md` §2).
+**Every new note starts pending**: public or private is not decided yet. Its entry goes in `site/notes-local.js`
+(gitignored) with `pending: true`, the note loads `../site/notes-local.js` after `../site/notes.js`, and the site
+shows it with a yellow Git mark. `check.sh` fails if a pending note is staged or committed. When the user decides:
+
+- **Public:** move the entry to `site/notes.js` without `pending`. The note can then be committed.
+- **Private:** drop `pending`, keep the entry in `site/notes-local.js`, and add the note to `.gitignore`.
+
+An **Arch Linux** or `lkgexp` note is private from the start: no `pending`, and it is already gitignored (see `CLAUDE.md` §2).
 
 Then rebuild the search index so the new text is searchable: `node site/build-index.mjs`.
 
