@@ -1,0 +1,81 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Five design decisions, private footer links, and the web sync
+Cleared every open question about the site's new design: the user decided from screenshots. Personal footer links became private, `CLAUDE.md` and the guide caught up with pending notes, and the web server was synced from the commit.
+
+The sort chip colours are settled: they are the user's choice, not a Git status.
+
+## What we covered
+- Five question marks shown as screenshots side by side, each with options
+- Sort chips keep yellow · green · red; the rail and both recent lists stay as they are
+- claude.ai, benchlm.ai and AWS show only on the owner's copy; "aws or" renamed "AWS"
+- `CLAUDE.md` + guide: pending notes, Git marks, sort, private links, `notes/img/`, `00` covers
+- Web server synced from `HEAD`, committed files only, checked with a checksum dry run
+- Site screenshots through the DevTools protocol when `brave --screenshot` hangs
+
+## Full command sequence
+
+### Local · Screenshots in set states
+Brave runs headless with a debugging port; a small Node script sets `localStorage`, reloads and saves a PNG.
+```local
+brave --headless=new --remote-debugging-port=9333 --user-data-dir=<profile> &  # own profile
+node shoot.mjs <out-dir>  # per state: set keys, reload, capture
+pkill -f "user-data-dir=<profile>"  # stop that Brave only
+```
+| Step in `shoot.mjs` | DevTools call
+| Connect to the page | `new WebSocket(webSocketDebuggerUrl)`, built into Node 26
+| Set the state | `Runtime.evaluate`: `localStorage.setItem("chalk.sort", "az")`
+| Load it | `Page.reload`: the site reads the keys on load
+| Save it | `Page.captureScreenshot`: a base64 PNG
+> Gotcha · `brave --headless --screenshot=<file> file://…` hung past 60 s. The DevTools protocol route never did.
+
+### Local · Private footer links
+```config: site/app.js
+{ label: "claude.ai", href: "…", private: true },  »  a FOOTER entry
+{ label: "AWS", href: "…", private: true },  »  was "aws or"
+else if (f.private) dropIfMissing(li, PAGES.backlog.file);  »  no Backlog page: no link
+```
+> Concept · "Private" means: shown only where the private Backlog page exists. On the web copy `.progress/` is never uploaded, so the links drop out.
+
+### Local · Commit and push
+```local
+check.sh  # rebuilds the search index, then every check
+git add CLAUDE.md notes/00-chalk-book-guide.html site/  # the changed files
+git commit && git push origin main  # the hook runs check.sh again
+```
+
+### Local · Sync the web server
+```local
+T=<tmp-dir>; rm -rf $T && mkdir -p $T  # an empty folder
+git archive HEAD index.html chalk-pastel.css LICENSE site notes | tar -x -C $T  # committed only
+rsync -az --delete -n -i $T/ web-deploy:/var/www/web/ | grep -v '^\.d'  # -n dry run, -i list
+rsync -az --delete $T/ web-deploy:/var/www/web/  # the real sync
+rsync -az -c --delete -n -i $T/ web-deploy:/var/www/web/ | grep -v '^\.d' | wc -l  # -c checksum: 0
+```
+> Key rule · Deploy from `git archive HEAD`, never the working folder: private notes, `notes-local.js` and `.progress/` can't go up.
+
+{keep}
+## The five decisions
+| # | Question | Decision
+| 1 | Sort chips use the same green · yellow · red as the Git marks | Keep: the colours are a choice, not a meaning
+| 2 | The rail is empty on a first visit | Keep as it is
+| 3 | Rail shows 3 per project, Recently viewed 1 per project | Keep both
+| 4 | `CLAUDE.md` doesn't know pending notes | Update it and the guide note
+| 5 | Personal links in the public footer | Make them private; fix the label
+
+{keep}
+## Where things live
+| What | Path
+| Footer list, private flag | `site/app.js`, `FOOTER`
+| Rules for pending, marks, sort, links | `CLAUDE.md` §2 and §5, guide note pages 3 and 6
+| Web copy | `/var/www/web/` on `web-deploy`
+
+{keep}
+## Best practices
+- **Decide from pictures** Real screenshots next to each option make a decision quick.
+- **Record a settled choice** A comment in the code stops later sessions asking again.
+- **Dry run every deploy** No `*deleting` line should surprise you.
+
+Part of Chalk Book · see [[meta-14-menu-sort-pending-notes]] and [[meta-01-site-build]]
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

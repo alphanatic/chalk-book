@@ -211,6 +211,12 @@ window.CHALK_NOTES = [
     skills: ["sort", "intl.collator", "localeCompare", "swedish", "å ä ö", "localStorage", "aria-pressed", "rail", "fold", "scrollTo", "flex gap", "font-size 0", "github mark", "pending", "notes-local.js", "build-index.mjs", "check.sh", "git ls-files", "pre-commit", "gitignore"],
   },
   {
+    id: "meta-15-private-footer-web-deploy", project: "meta", n: 15, context: "Site", date: "2026-10-20",
+    title: "Private Footer Links & Web Deploy",
+    summary: "Five design questions decided from screenshots; personal footer links shown only on the owner's copy; guide caught up on pending notes; web server synced from HEAD.",
+    skills: ["footer", "private links", "FOOTER", "dropIfMissing", "sort colours", "pending", "CLAUDE.md", "guide", "git archive", "tar", "rsync --delete", "rsync --checksum", "web deploy", "/var/www/web", "headless brave", "devtools protocol", "cdp", "remote-debugging-port", "Page.captureScreenshot", "Runtime.evaluate", "localStorage", "websocket", "node"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
