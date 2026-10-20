@@ -96,15 +96,16 @@ body:not(.recent-open) .panel.right { display: none; }
 .group h2 .count { margin-left: auto; letter-spacing: 0; color: var(--shell-text-muted); }
 .panel.right .group h2::before { background: var(--peri); }
 
-/* A menu project's dot is its fold button, inside a thin ring: a bold plus cut through it while folded, a minus while open.
+/* A menu project's dot is its fold button: a bold plus cut through it while folded, a minus while open, and a thin
+   ring on the dot's edge that keeps the circle whole across the cut.
    Folded, only the heading and the progress bar show. */
 .group.foldable h2::before { content: none; }
 .group.foldable:not(.open) :is(.file, .progress .label) { display: none; }
 .group.foldable:not(.open) .progress .bar { margin-top: 0; }
-.fold { flex: none; width: 15px; height: 15px; margin: 0 -2.5px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
-  background: var(--c); --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 24 24'%3E%3Cmask id='m'%3E%3Ccircle cx='8' cy='8' r='8' fill='white'/%3E%3Cpath d='M6.5 0h3v6.5H16v3H9.5V16h-3V9.5H0v-3h6.5z'/%3E%3C/mask%3E%3Ccircle cx='8' cy='8' r='8' mask='url%28%23m%29'/%3E%3Ccircle cx='8' cy='8' r='11' fill='none' stroke='black' stroke-width='.8'/%3E%3C/svg%3E");
+.fold { flex: none; width: 11px; height: 11px; margin: 0 -1.5px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: var(--c); --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cmask id='m'%3E%3Ccircle cx='8' cy='8' r='8' fill='white'/%3E%3Cpath d='M6.5 0h3v6.5H16v3H9.5V16h-3V9.5H0v-3h6.5z'/%3E%3C/mask%3E%3Ccircle cx='8' cy='8' r='8' mask='url%28%23m%29'/%3E%3Ccircle cx='8' cy='8' r='7.5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
   -webkit-mask: var(--fold-mark) center / 100% no-repeat; mask: var(--fold-mark) center / 100% no-repeat; }
-.group.open .fold { --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 24 24'%3E%3Cmask id='m'%3E%3Ccircle cx='8' cy='8' r='8' fill='white'/%3E%3Cpath d='M0 6.5h16v3H0z'/%3E%3C/mask%3E%3Ccircle cx='8' cy='8' r='8' mask='url%28%23m%29'/%3E%3Ccircle cx='8' cy='8' r='11' fill='none' stroke='black' stroke-width='.8'/%3E%3C/svg%3E"); }
+.group.open .fold { --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cmask id='m'%3E%3Ccircle cx='8' cy='8' r='8' fill='white'/%3E%3Cpath d='M0 6.5h16v3H0z'/%3E%3C/mask%3E%3Ccircle cx='8' cy='8' r='8' mask='url%28%23m%29'/%3E%3Ccircle cx='8' cy='8' r='7.5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E"); }
 .fold:hover { filter: brightness(1.15); }
 
 /* Roadmap progress under a project heading */
@@ -156,6 +157,14 @@ body:not(.recent-open) .panel.right { display: none; }
 .search kbd { background: var(--code-bg); color: var(--ink-soft); }
 
 
+/* Menu sort: a row of small chips under the search field; the chosen one is lit in its colour, dark on light
+   like the GitHub marks: green A–Ö, red Ö–A, yellow 01–99 */
+.sort { display: flex; gap: 4px; margin: -6px 0 14px; }
+.sort-btn { flex: 1; padding: 3px 0; border: 0; border-radius: 6px; cursor: pointer;
+  background: var(--shell-raise); color: var(--shell-text-muted); font-size: 11px; font-weight: 600; }
+.sort-btn:hover { background: var(--shell-raise-hover); color: var(--shell-text); }
+.sort-btn[aria-pressed="true"] { background: var(--c); color: var(--c-chip); }
+
 /* Search tile for the rail: a diagonal chalk stick, the same size as a note tile; hidden while expanded */
 .search-rail { display: none; --c: var(--pink); }
 .chalk-stick { width: 22px; height: 22px; }
@@ -170,18 +179,21 @@ body:not(.recent-open) .panel.right { display: none; }
 .file { position: relative; }
 .file .git { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
   opacity: .5; pointer-events: none; }
-.file .git svg { display: block; width: 100%; height: 100%; }
-.file .git .cat { fill: var(--git-mark); }
-.file .git .ring { fill: var(--git-ring); }
-.file .git .edge { fill: none; stroke: var(--git-ring); stroke-width: 1.1; }
-.file .git.ignored { --git-mark: var(--git-ignored-mark); --git-ring: var(--git-ignored-ring); }
+.git svg { display: block; width: 100%; height: 100%; }
+.git .cat { fill: var(--git-mark); }
+.git .ring { fill: var(--git-ring); }
+.git .edge { fill: none; stroke: var(--git-ring); stroke-width: 1.1; }
+.git.ignored { --git-mark: var(--git-ignored-mark); --git-ring: var(--git-ignored-ring); }
+.git.butter { --git-mark: var(--git-butter-mark); --git-ring: var(--git-butter-ring); }
 
 /* ── Collapsed menu: a rail showing only each number and its colour bar ── */
 .rail .panel.left .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
 .rail .panel.left .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
-.rail .panel.left :is(.file .t, .file .state, .file .hits, .file .git, .progress, .panel-foot, .group h2 .count, .search) { display: none; }
+.rail .panel.left :is(.file .t, .file .state, .file .hits, .file .git, .progress, .panel-foot, .group h2 .count, .search, .sort) { display: none; }
 .rail .panel.left .search-rail { display: flex; margin-bottom: 14px; }
-.rail .panel.left .group h2 { justify-content: center; font-size: 0; margin-bottom: 6px; }
+.rail .panel.left .group h2 { justify-content: center; gap: 0; font-size: 0; margin-bottom: 6px; }
+/* On the rail the fold dot is all that shows of a folded project: larger, and centred */
+.rail .panel.left .fold { width: 20px; height: 20px; margin: 0; }
 .rail .panel.left .group + .group { margin-top: 12px; }
 
 .scrim { display: none; }
@@ -195,6 +207,10 @@ body:not(.recent-open) .panel.right { display: none; }
 .home h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -.01em; }
 .home p { color: var(--shell-text-soft); margin: 6px 0; }
 .home .hint { color: var(--shell-text-muted); }
+/* Three GitHub marks in a row under the stats, full strength, each with its count */
+.home-marks { display: flex; justify-content: center; gap: 22px; margin: 16px 0 !important; }
+.home-mark { display: flex; align-items: center; gap: 7px; font-weight: 600; color: var(--shell-text); }
+.home-mark .git { width: 22px; height: 22px; }
 .home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
 
 /* ── Main footer: the persistent footer on every page. Subtle, centred links that wrap and grow with their contents ── */

@@ -63,6 +63,8 @@
         <rect class="tip" x="9.6" y="2.5" width="4.8" height="4" rx="2.1" transform="rotate(45 12 12)"/>
       </svg>
     </button>
+    <!-- Menu order: one button per entry in SORTS, site/app.js. Hidden on the rail and while searching -->
+    <div class="sort" id="menu-sort" role="group" aria-label="Sort the menu"></div>
     <div id="find-list" hidden></div>
     <div id="menu-list"></div>
     <p class="panel-foot" id="menu-foot"></p>
@@ -73,6 +75,7 @@
   <section class="home" id="home">
     <h1><chalk-wordmark></chalk-wordmark></h1>
     <p id="home-stats"></p>
+    <p class="home-marks" id="home-marks"></p>  <!-- one mark per entry in HOME_MARKS, site/app.js -->
     <p class="hint">Pick a note from the menu, or press <kbd>/</kbd> to search inside every note.</p>
   </section>
   <iframe id="frame" title="Note" hidden></iframe>

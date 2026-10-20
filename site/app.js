@@ -14,12 +14,13 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const menuList = $("menu-list"), menuFoot = $("menu-foot"), findList = $("find-list"),
         recentList = $("recent-list"), recentFoot = $("recent-foot"), search = $("search"),
         frame = $("frame"), home = $("home"), current = $("current"), menuBtn = $("menu-btn"),
-        exportBtn = $("export-btn"), exportMenu = $("export-menu");
+        exportBtn = $("export-btn"), exportMenu = $("export-menu"), menuSort = $("menu-sort");
   const projects = { ...window.CHALK_PROJECTS };
   const notes = window.CHALK_NOTES.map(n => ({ ...n, file: `notes/${n.id}.html` }));
   const narrow = matchMedia("(max-width: 760px)");
   const text = window.CHALK_TEXT || {};     // plain text of each note, from site/build-index.mjs
-  const local = new Set(window.CHALK_LOCAL || []);   // notes git ignores: no Git watermark
+  const local = new Set(window.CHALK_LOCAL || []);   // notes git ignores: a red Git watermark
+  const markOf = n => n.pending ? "butter" : local.has(n.id) ? "ignored" : "";   // "" is green: on GitHub
   const MIN_QUERY = 2;
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
@@ -46,6 +47,23 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { label: "Save as PDF", color: "mint", run: () => save(),
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
+  // The row of GitHub marks on Home, left to right, each with its count of notes
+  const HOME_MARKS = [
+    { kind: "", title: "on GitHub" },
+    { kind: "butter", title: "pending: public or private not decided" },
+    { kind: "ignored", title: "private" },
+  ];
+  // The menu's sort buttons, in order, each lit in its chalk colour when chosen: projects and their notes by name, or by catalogue order and number.
+  // Swedish collation, so å, ä and ö come after z. The first is the default until another is chosen;
+  // the choice is kept in this browser
+  const byName = new Intl.Collator("sv", { numeric: true, sensitivity: "base" }).compare;
+  const SORTS = [
+    { key: "az", label: "A–Ö", color: "mint", title: "A to Ö", projects: (a, b) => byName(a.name, b.name), notes: (a, b) => byName(a.title, b.title) },
+    { key: "za", label: "Ö–A", color: "coral", title: "Ö to A", projects: (a, b) => byName(b.name, a.name), notes: (a, b) => byName(b.title, a.title) },
+    { key: "number", label: "01–99", color: "butter", title: "Catalogue order, notes by number", projects: () => 0, notes: (a, b) => a.n - b.n },
+  ];
+  const SORT_KEY = "chalk.sort";
+  let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS[0];
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
   // Menu projects opened with their dot; the rest start folded
   const FOLD_KEY = "chalk.open-projects";
@@ -107,12 +125,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     return b;
   }
   // The GitHub mark as a watermark on the right of a menu tile; the title slides under it. Green for notes in git,
-  // red on red for notes git ignores (private).
+  // red on red for notes git ignores (private), yellow on yellow for pending notes: public or private not decided yet.
   // Drawn as a cat-coloured disc, the mark's ring-coloured shape on top, then a ring stroke so the circle closes
   // under the cat's body too.
   const GITHUB_PATH = "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1 -5.45 7.59c-.4 .08 -.55 -.17 -.55 -.38 0 -.27 .01 -1.13 .01 -2.2 0 -.75 -.25 -1.23 -.54 -1.48 1.78 -.2 3.65 -.88 3.65 -3.95 0 -.88 -.31 -1.59 -.82 -2.15 .08 -.2 .36 -1.02 -.08 -2.12 0 0 -.67 -.22 -2.2 .82 -.64 -.18 -1.32 -.27 -2 -.27 -.68 0 -1.36 .09 -2 .27 -1.53 -1.03 -2.2 -.82 -2.2 -.82 -.44 1.1 -.16 1.92 -.08 2.12 -.51 .56 -.82 1.28 -.82 2.15 0 3.06 1.86 3.75 3.64 3.95 -.23 .2 -.44 .55 -.51 1.07 -.46 .21 -1.61 .55 -2.33 -.66 -.15 -.24 -.6 -.83 -1.23 -.82 -.67 .01 -.27 .38 .01 .53 .34 .19 .73 .9 .82 1.13 .16 .45 .68 1.31 2.69 .94 0 .67 .01 1.3 .01 1.49 0 .21 -.15 .45 -.55 .37A7.995 7.995 0 0 1 0 8c0 -4.42 3.58 -8 8 -8Z";
-  function gitMark(ignored) {
-    const mark = el("span", ignored ? "git ignored" : "git");
+  function gitMark(kind = "") {
+    const mark = el("span", `git ${kind}`.trim());
     mark.setAttribute("aria-hidden", "true");
     mark.innerHTML = `<svg viewBox="0 0 16 16"><circle class="cat" cx="8" cy="8" r="7.5"/>` +
       `<path class="ring" d="${GITHUB_PATH}"/><circle class="edge" cx="8" cy="8" r="7.45"/></svg>`;
@@ -136,20 +154,32 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       b.title = open ? "Fold" : "Unfold";
     };
     set(readOpen().has(key));
+    // On the rail, a plus also opens the menu and centres the project in it; a minus only folds
     b.addEventListener("click", () => {
       const open = readOpen(), now = !open.has(key);
       if (now) open.add(key); else open.delete(key);
       try { localStorage.setItem(FOLD_KEY, JSON.stringify([...open])); } catch {}
       set(now);
+      if (now && !menuOpen()) {
+        setMenu(true);
+        keep(MENU_KEY, true);
+        centre(group);
+      }
     });
     return b;
   }
 
-  // ── Left: every note, grouped by project, with roadmaps ──
+  // Scroll the menu so a project sits in its middle, or starts at its top when taller than the menu
+  function centre(group) {
+    const pane = group.closest(".panel-body"), p = pane.getBoundingClientRect(), g = group.getBoundingClientRect();
+    pane.scrollTo({ top: pane.scrollTop + g.top - p.top - Math.max(0, (p.height - g.height) / 2), behavior: "smooth" });
+  }
+
+  // ── Left: every note, grouped by project, with roadmaps, in the chosen sort order ──
   function renderMenu() {
     menuList.replaceChildren();
-    for (const [key, p] of Object.entries(projects)) {
-      const items = notes.filter(n => n.project === key).sort((a, b) => a.n - b.n);
+    for (const [key, p] of Object.entries(projects).sort(([, a], [, b]) => sort.projects(a, b))) {
+      const items = notes.filter(n => n.project === key).sort(sort.notes);
       const todo = (p.modules || []).filter(m => m.status !== "done");
       if (!items.length && !todo.length) continue;
 
@@ -160,7 +190,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       group.append(h);
       if (items.length) {
         // Notes carrying the green GitHub mark, out of every note in the project
-        const shared = items.filter(n => !local.has(n.id)).length;
+        const shared = items.filter(n => !markOf(n)).length;
         const prog = el("div", "progress");
         prog.append(el("span", "label", `${shared} of ${items.length} notes on GitHub`));
         const bar = el("div", "bar"), fill = el("i");
@@ -169,7 +199,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       }
       for (const n of items) {
         const b = noteButton(n, false);
-        b.append(gitMark(local.has(n.id)));
+        b.append(gitMark(markOf(n)));
         group.append(b);
       }
       for (const m of todo) group.append(plannedRow(m));
@@ -182,7 +212,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   function renderSearch() {
     const q = search.value.trim().replace(/\s+/g, " ");
     const searching = q.length >= MIN_QUERY;
-    menuList.hidden = searching;
+    menuList.hidden = menuSort.hidden = searching;
     findList.hidden = !searching;
     findList.replaceChildren();
     if (!searching) {
@@ -205,14 +235,21 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       ? `${total} hit${total === 1 ? "" : "s"} in ${found.length} of ${notes.length} notes` : "No notes match.";
   }
 
-  // ── Right: recently viewed notes, newest first, kept in this browser only ──
-  const readHistory = () => { try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } };
+  // ── Right: recently viewed notes, newest first, kept in this browser only.
+  //    One per project: the last note opened in it ──
+  const projectOf = id => notes.find(n => n.id === id)?.project;
+  function readHistory() {
+    let ids;
+    try { ids = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { ids = []; }
+    const seen = new Set();
+    return ids.filter(id => { const p = projectOf(id); return p && !seen.has(p) && seen.add(p); });
+  }
   function remember(id) {
-    const ids = [id, ...readHistory().filter(x => x !== id)].slice(0, HISTORY_MAX);
+    const ids = [id, ...readHistory().filter(x => projectOf(x) !== projectOf(id))].slice(0, HISTORY_MAX);
     try { localStorage.setItem(HISTORY_KEY, JSON.stringify(ids)); } catch {}
   }
   function renderRecent() {
-    const recent = readHistory().map(id => notes.find(n => n.id === id)).filter(Boolean);
+    const recent = readHistory().map(id => notes.find(n => n.id === id));
     recentList.replaceChildren();
     if (recent.length) {
       const group = el("section", "group");
@@ -315,7 +352,21 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     catch { frame.contentWindow.postMessage("chalk:print", "*"); }
   }
 
-  // ── Bottom bar and Export menu: one button per entry ──────
+  // ── Bottom bar, Export menu and menu sort: one button per entry ──────
+  menuSort.replaceChildren(...SORTS.map(s => {
+    const b = el("button", "sort-btn", s.label);
+    b.type = "button";
+    b.title = s.title;
+    paint(b, s.color);
+    b.setAttribute("aria-pressed", s === sort);
+    b.addEventListener("click", () => {
+      sort = s;
+      try { localStorage.setItem(SORT_KEY, s.key); } catch {}
+      for (const x of menuSort.children) x.setAttribute("aria-pressed", x === b);
+      renderMenu();
+    });
+    return b;
+  }));
   $("footer-links").replaceChildren(...FOOTER.map(f => {
     const a = el("a", "main-footer-btn", f.label ?? PAGES[f.page].title);
     if (f.href) Object.assign(a, { href: f.href, target: "_blank", rel: "noopener" });
@@ -373,6 +424,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     const next = p.modules.find(m => m.status !== "done");
     lines.push(`${p.name}: ${done} of ${p.modules.length} modules done${next ? ` · next: ${next.title}` : ""}.`);
   }
+  $("home-marks").replaceChildren(...HOME_MARKS.map(m => {
+    const n = window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, item = el("span", "home-mark", n);
+    item.title = `${n} notes ${m.title}`;
+    item.prepend(gitMark(m.kind));
+    return item;
+  }));
   $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 
   resetMenu();
