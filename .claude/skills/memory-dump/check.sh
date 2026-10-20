@@ -68,7 +68,7 @@ node - <<'EOF' | report "catalogue" || true
 const fs = require("fs");
 global.window = {};
 require(process.cwd() + "/site/notes.js");
-// Notes git ignores (Arch Linux) must stay out of the committed catalogue: their entries go in site/notes-local.js
+// Notes git ignores (Arch Linux, lkgexp) must stay out of the committed catalogue: their entries go in site/notes-local.js
 const { spawnSync } = require("child_process");
 const ignored = spawnSync("git", ["check-ignore", "--no-index", "--stdin"],
   { encoding: "utf8", input: window.CHALK_NOTES.map(n => `notes/${n.id}.html`).join("\n") }).stdout;

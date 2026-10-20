@@ -16,4 +16,7 @@ archive/backlog-workflow/
 # Arch Linux project notes (personal machine setup) and everything made from them — never committed
 notes/arch-linux-*
 site/notes-local.js
+
+# Work course notes (project lkgexp, defined in site/notes-local.js) — never committed
+notes/lkgexp-*
 site/search-local.js

@@ -93,14 +93,16 @@ chalk-book/
 | `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
 | `anthropic` | Anthropic | The claude.ai account: cloud skills, sync, and what reaches the local tools |
 | `meta` | Chalk Book | Notes about the chalk book itself |
+| `lkgexp` | *(private)* | A work course; its name and roadmap live only in `site/notes-local.js` |
 
 Add a row before using a new project, and the same project to `CHALK_PROJECTS` in `site/notes.js`.
 A project can carry a roadmap of modules there; the site shows unfinished modules as planned.
 
-**Arch Linux is private.** Its notes and everything made from them are gitignored, never committed: the notes
-(`notes/arch-linux-*`), their catalogue entries (`site/notes-local.js`, not `site/notes.js`) and their search text
-(`site/search-local.js`, written by `build-index.mjs`). Each Arch note loads `../site/notes-local.js` after
-`../site/notes.js`. `check.sh` fails if a private note's entry lands in `site/notes.js`.
+**Arch Linux and `lkgexp` are private.** Their notes and everything made from them are gitignored, never committed:
+the notes (`notes/arch-linux-*`, `notes/lkgexp-*`), their catalogue entries (`site/notes-local.js`, not
+`site/notes.js`) and their search text (`site/search-local.js`, written by `build-index.mjs`). `lkgexp` is defined
+in `site/notes-local.js` too, roadmap included, so its name never reaches the repo. Each private note loads
+`../site/notes-local.js` after `../site/notes.js`. `check.sh` fails if a private note's entry lands in `site/notes.js`.
 
 ### Note types
 

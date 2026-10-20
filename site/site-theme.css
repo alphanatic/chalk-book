@@ -12,4 +12,6 @@
   --shell-text-muted:  #8d8b84;   /* counts, hints, planned items */
   --git-mark:          var(--mint-chip);  /* the GitHub cat on menu notes kept in git, from chalk-pastel.css */
   --git-ring:          var(--mint);       /* the circle around it */
+  --git-ignored-mark:  var(--coral-chip); /* the same cat on notes git ignores (private), red on red */
+  --git-ignored-ring:  var(--coral);
 }

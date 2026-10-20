@@ -1,0 +1,116 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+The project dot folds its notes; private notes get a red mark
+Turned each menu project's dot into a fold button: a bold plus or minus cut through it, inside a thin ring. Folded, a project shows only its name and progress bar.
+
+Private notes now carry a red GitHub mark, the recently viewed button stays in the header everywhere, and Pokédex took coral.
+
+## What we covered
+- The dot is a `<button class="fold">`; projects start folded, open ones are kept in `chalk.open-projects`
+- Plus and minus are cut out of the dot with a CSS mask, so the panel shows through
+- A thin ring around the dot, drawn in the same mask; dot 10 px, button 15 px
+- Folded: the notes and the "x of y notes on GitHub" line hide; the bar stays
+- Gitignored notes get the GitHub mark in coral, red on red; all marks 14 px at 50 % opacity
+- The recently viewed button always shows; away from Home it goes Home and opens the list
+- Pokédex moved to coral, the same colour as the Backlog's Critical chip
+- Uncommitted work was reset by another session and had to be rebuilt
+
+## Full command sequence
+
+### The fold button {local}
+```config: site/app.js
+const FOLD_KEY = "chalk.open-projects";  »  open projects, per browser
+function foldButton(group, key, name) {  »  one per menu project
+  const b = el("button", "fold");
+  set(readOpen().has(key));  »  folded unless opened before
+  b.addEventListener("click", …);  »  toggles .open and saves the set
+}
+const group = el("section", "group foldable");
+h.prepend(foldButton(group, key, p.name));  »  in place of the h2::before dot
+```
+
+### The mark cut through the dot {local}
+```config: site/app.css
+.group.foldable h2::before { content: none; }
+.foldable:not(.open) :is(.file, .progress .label) { display: none; }
+.fold { width: 15px; height: 15px; border-radius: 50%; }
+.fold { margin: 0 -2.5px; }  »  text moves 2 px only
+.fold { background: var(--c); }  »  dot and ring colour
+.fold { mask: var(--fold-mark) center / 100%; }  »  the plus SVG below
+.group.open .fold { --fold-mark: url(…minus…); }  »  same SVG, minus path
+```
+```config: the plus, before URL-encoding
+<svg viewBox="-4 -4 24 24">  »  room for the ring
+<mask id="m">
+  <circle cx="8" cy="8" r="8" fill="white"/>  »  keep the dot
+  <path d="M6.5 0h3v6.5H16v3H9.5V16h-3V9.5H0v-3h6.5z"/>  »  cut the plus, edge to edge
+</mask>
+<circle cx="8" cy="8" r="8" mask="url(#m)"/>  »  the dot
+<circle cx="8" cy="8" r="11" fill="none"  »  the thin ring
+  stroke="black" stroke-width=".8"/>
+</svg>
+```
+> Concept · A CSS mask keeps only what the SVG paints. The button's colour shows through the dot and ring; the cut-out plus shows the panel behind.
+
+### Red mark for private notes {local}
+```config: site/site-theme.css
+--git-ignored-mark: var(--coral-chip);
+--git-ignored-ring: var(--coral);
+```
+```config: site/app.css
+.file .git { width: 14px; height: 14px; opacity: .5; }  »  was 20 px at .75
+.git.ignored { --git-mark: var(--git-ignored-mark); }  »  red cat
+.git.ignored { --git-ring: var(--git-ignored-ring); }  »  red ring
+```
+
+### Recently viewed button {local}
+```config: site/app.js
+recentBtn.addEventListener("click", () => {
+  if (body.classList.contains("no-recent")) {  »  away from Home
+    location.hash = ""; setRecent(true);  »  go Home, open the list
+  } else setRecent(!recentOpen());  »  on Home: toggle
+});
+```
+The `.no-recent #recent-btn { visibility: hidden; }` rule was removed; the list itself stays Home only.
+
+### Check it {local}
+```local
+P=~/.cache/chalk-book-render  # render.sh profile
+timeout 40 brave --headless --user-data-dir=$P --screenshot=s.png "$U"  # 40 s at most
+.claude/skills/memory-dump/check.sh  # every commit's checks
+```
+> Concept · To screenshot a state kept in `localStorage`, open a small seed page that sets the key and then jumps to `index.html`. Pages opened from disk share one storage.
+
+## Bugs hit & fixed
+
+#### Bug · The finished button vanished
+cause: Another session reset `site/app.js` and `site/app.css` while the work was uncommitted. No stash, no copy.
+fix: Rebuilt from the session, then committed straight away.
+
+#### Bug · Headless Brave never returned
+cause: `--headless=new` with a brand-new `--user-data-dir` hung past two minutes.
+fix: Reuse `render.sh`'s profile and wrap each run in `timeout`.
+
+#### Bug · An edge-to-edge plus pokes out of a ringed button
+cause: An `evenodd` path cuts the plus, but arm ends outside the circle get filled. `border-radius` hid them only while the button was the dot's size.
+fix: Cut the plus with an SVG `<mask>` inside the image, so nothing outside the dot is painted.
+
+{keep}
+## Where things live
+| What | Where
+| Fold logic, recent button | `site/app.js`
+| Fold mark, mark size and opacity | `site/app.css`
+| Red mark colours | `site/site-theme.css`
+| Project colours | `CHALK_PROJECTS` in `site/notes.js`
+
+> Gotcha · The bar under a project counts notes on GitHub, so a private project always reads 0. A better line for private projects is still to choose.
+
+{keep}
+## Best practices
+- **Commit when it works** Uncommitted work in a shared folder can be reset by another session.
+- **Cut, don't paint** A mask shows whatever sits behind, on any panel colour.
+- **Keep the slot** Negative margins let a bigger button grow without shifting the text.
+
+Part of Chalk Book · see [[meta-12-github-mark-watermark]] for the mark and [[meta-01-site-build]] for the site
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
