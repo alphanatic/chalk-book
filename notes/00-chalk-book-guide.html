@@ -49,6 +49,7 @@ chalk-book/
 │   ├── tinker-town-01-aws-ssh-firewall.html …
 │   ├── note.js                   # turns chalk markup into the page
 │   ├── note-layout.css           # shared layout and components
+│   ├── img/<note-id>/            # a note's images, one folder per note
 │   └── fonts/                    # bundled Inter, renders offline
 ├── archive/                      # old PDFs, including the last guide PDF
 │   └── backlog-workflow/         # the old backlog design (private)
@@ -67,8 +68,8 @@ chalk-book/
 | NN | Two digits, counting up within each project. | `03`
 | topic | 2–4 words naming the subject, not the outcome. | `cron-logrotate`
 | scope | One topic per file. A long session becomes several notes. | —
-| date | Only in `site/notes.js`; the note's header is made from it. | `2026-08-30`
-| 00- | Reserved for meta files about the chalk book itself. | `00-chalk-book-guide`
+| date | Only in the catalogue (`site/notes.js`, or `site/notes-local.js` for private and pending notes); the note's header is made from it. | `2026-08-30`
+| 00- | With no project: meta files about the chalk book itself. After a project: its cover note. | `00-chalk-book-guide`, `pokedex-00-…`
 
 ### Projects
 | Slug | Display name | What it is
@@ -85,6 +86,8 @@ chalk-book/
 ```
 
 >{paths} Key rule · Arch Linux and `lkgexp` are private: their notes, their catalogue entries (`site/notes-local.js`) and their search text (`site/search-local.js`) are gitignored and never committed. `lkgexp` is defined in `site/notes-local.js` too, so its name never reaches the repo. `check.sh` fails if a private note lands in `site/notes.js`.
+
+>{gotcha} Key rule · Every new note starts pending: public or private not decided. Its entry goes in `site/notes-local.js` with `pending: true`, it shows a yellow Git mark, and its text stays out of `search-index.js`. `check.sh` fails if a pending note is staged. Public: move the entry to `site/notes.js` without `pending`. Private: drop `pending` and add the note to `.gitignore`. Arch Linux and `lkgexp` notes are private from the start.
 
 ### Note types
 ```html
@@ -176,6 +179,9 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - Sets of buttons or labels in order (footer links, Export options, legend chips, table columns) are one list in the script, which makes one element per entry.
 - A new site page goes in `site/pages/`, then into `PAGES` and `FOOTER` in `site/app.js`. New Export options are entries in `EXPORTS`.
+- Git marks: green on GitHub, yellow pending, red private. Home shows one of each with its count.
+- Menu sort: A–Ö, 01–99, Ö–A, lit yellow, green and red. The user's choice of colours, unrelated to the Git marks. 01–99 is the default.
+- Private footer links (claude.ai, benchlm.ai, AWS) are the owner's shortcuts and show only where `.progress/backlog.html` exists.
 - Backlog and Complete Tasks are private pages in `.progress/`, gitignored, about Chalk Book itself only. The exception is Linux, the user's backlog for their Linux machines, private the same way.
 
 >{concept} Naming note · The private folder was <span class="old">.prog/</span> until 2026-10-18. Older notes keep the old name, as it was then.
@@ -187,7 +193,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 ### Adding a note: the memory-dump skill
 1. Work on something, in any project folder.
 2. While it is fresh, say **“memory-dump”** or **“chalk that up”**. A personal pointer skill makes this work in every folder. An AI may also offer a dump; when is each user's own preference.
-3. The skill plans the notes, fills the template in `notes/`, adds them to `site/notes.js`, rebuilds the search index, runs `check.sh` and checks every page, then hands over following the user's own git preferences.
+3. The skill plans the notes, fills the template in `notes/`, adds them as pending to `site/notes-local.js`, rebuilds the search index, runs `check.sh` and checks every page, then hands over following the user's own git preferences.
 4. Check the note on the site and ask for any changes in the same session.
 
 ### Changing a note or this guide

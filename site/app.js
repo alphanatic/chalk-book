@@ -31,7 +31,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     linux: { title: "Linux", file: ".progress/linux.html", private: true },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
-  // The bottom bar, in order: a site page by its PAGES key ("" is Home), or an outside link
+  // The bottom bar, in order: a site page by its PAGES key ("" is Home), or an outside link.
+  // A private link is the owner's own shortcut: it shows only where the private Backlog page exists
   const FOOTER = [
     { page: "", label: "Home" },
     { page: "backlog" },
@@ -39,9 +40,9 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { page: "linux" },
     { page: "contact" },
     { label: "GitHub", href: "https://github.com/alphanatic/chalk-book" },
-    { label: "claude.ai", href: "https://claude.ai/new#settings/usage" },
-    { label: "benchlm.ai", href: "https://benchlm.ai/" },
-    { label: "aws or", href: "https://eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#" },
+    { label: "claude.ai", href: "https://claude.ai/new#settings/usage", private: true },
+    { label: "benchlm.ai", href: "https://benchlm.ai/", private: true },
+    { label: "AWS", href: "https://eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#", private: true },
   ];
   // The Export menu, in order: label, palette colour, glyph (SVG paths) and what choosing it does
   const EXPORTS = [
@@ -59,6 +60,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { kind: "ignored", title: "private" },
   ];
   // The menu's sort buttons, in order, each lit in its chalk colour when chosen: projects and their notes by name, or by catalogue order and number.
+  // The colours are the user's choice and unrelated to the Git marks' meaning.
   // Swedish collation, so å, ä and ö come after z. 01–99 is the default until another is chosen;
   // the choice is kept in this browser
   const byName = new Intl.Collator("sv", { numeric: true, sensitivity: "base" }).compare;
@@ -415,6 +417,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     const li = el("li");
     li.append(a);
     if (PAGES[f.page]?.private) dropIfMissing(li, PAGES[f.page].file);
+    else if (f.private) dropIfMissing(li, PAGES.backlog.file);
     return li;
   }));
   exportMenu.replaceChildren(...EXPORTS.map(x => {
