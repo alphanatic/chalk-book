@@ -47,6 +47,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
+  // Menu projects opened with their dot; the rest start folded
+  const FOLD_KEY = "chalk.open-projects";
   // Side panels on wide screens: "closed" once closed there, open otherwise
   const MENU_KEY = "chalk.menu";
   const wanted = key => { try { return localStorage.getItem(key) !== "closed"; } catch { return true; } };
@@ -104,12 +106,13 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     });
     return b;
   }
-  // The GitHub mark as a watermark on the right of a menu tile; the title slides under it.
+  // The GitHub mark as a watermark on the right of a menu tile; the title slides under it. Green for notes in git,
+  // red on red for notes git ignores (private).
   // Drawn as a cat-coloured disc, the mark's ring-coloured shape on top, then a ring stroke so the circle closes
   // under the cat's body too.
   const GITHUB_PATH = "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1 -5.45 7.59c-.4 .08 -.55 -.17 -.55 -.38 0 -.27 .01 -1.13 .01 -2.2 0 -.75 -.25 -1.23 -.54 -1.48 1.78 -.2 3.65 -.88 3.65 -3.95 0 -.88 -.31 -1.59 -.82 -2.15 .08 -.2 .36 -1.02 -.08 -2.12 0 0 -.67 -.22 -2.2 .82 -.64 -.18 -1.32 -.27 -2 -.27 -.68 0 -1.36 .09 -2 .27 -1.53 -1.03 -2.2 -.82 -2.2 -.82 -.44 1.1 -.16 1.92 -.08 2.12 -.51 .56 -.82 1.28 -.82 2.15 0 3.06 1.86 3.75 3.64 3.95 -.23 .2 -.44 .55 -.51 1.07 -.46 .21 -1.61 .55 -2.33 -.66 -.15 -.24 -.6 -.83 -1.23 -.82 -.67 .01 -.27 .38 .01 .53 .34 .19 .73 .9 .82 1.13 .16 .45 .68 1.31 2.69 .94 0 .67 .01 1.3 .01 1.49 0 .21 -.15 .45 -.55 .37A7.995 7.995 0 0 1 0 8c0 -4.42 3.58 -8 8 -8Z";
-  function gitMark() {
-    const mark = el("span", "git");
+  function gitMark(ignored) {
+    const mark = el("span", ignored ? "git ignored" : "git");
     mark.setAttribute("aria-hidden", "true");
     mark.innerHTML = `<svg viewBox="0 0 16 16"><circle class="cat" cx="8" cy="8" r="7.5"/>` +
       `<path class="ring" d="${GITHUB_PATH}"/><circle class="edge" cx="8" cy="8" r="7.45"/></svg>`;
@@ -122,6 +125,26 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     return row;
   }
 
+  const readOpen = () => { try { return new Set(JSON.parse(localStorage.getItem(FOLD_KEY)) || []); } catch { return new Set(); } };
+  // The project's dot as a button: a plus when folded, a minus when open, both cut out of the dot
+  function foldButton(group, key, name) {
+    const b = el("button", "fold");
+    const set = open => {
+      group.classList.toggle("open", open);
+      b.setAttribute("aria-expanded", open);
+      b.setAttribute("aria-label", `${open ? "Hide" : "Show"} ${name} notes`);
+      b.title = open ? "Fold" : "Unfold";
+    };
+    set(readOpen().has(key));
+    b.addEventListener("click", () => {
+      const open = readOpen(), now = !open.has(key);
+      if (now) open.add(key); else open.delete(key);
+      try { localStorage.setItem(FOLD_KEY, JSON.stringify([...open])); } catch {}
+      set(now);
+    });
+    return b;
+  }
+
   // ── Left: every note, grouped by project, with roadmaps ──
   function renderMenu() {
     menuList.replaceChildren();
@@ -130,20 +153,23 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       const todo = (p.modules || []).filter(m => m.status !== "done");
       if (!items.length && !todo.length) continue;
 
-      const group = el("section", "group");
+      const group = el("section", "group foldable");
       paint(group, p.color);
-      group.append(heading(p.name, items.length));
+      const h = heading(p.name, items.length);
+      h.prepend(foldButton(group, key, p.name));
+      group.append(h);
       if (items.length) {
-        // Notes carrying the GitHub mark, out of every note in the project
+        // Notes carrying the green GitHub mark, out of every note in the project
         const shared = items.filter(n => !local.has(n.id)).length;
-        const prog = el("div", "progress", `${shared} of ${items.length} notes on GitHub`);
+        const prog = el("div", "progress");
+        prog.append(el("span", "label", `${shared} of ${items.length} notes on GitHub`));
         const bar = el("div", "bar"), fill = el("i");
         fill.style.width = `${(shared / items.length) * 100}%`;
         bar.append(fill); prog.append(bar); group.append(prog);
       }
       for (const n of items) {
         const b = noteButton(n, false);
-        if (!local.has(n.id)) b.append(gitMark());
+        b.append(gitMark(local.has(n.id)));
         group.append(b);
       }
       for (const m of todo) group.append(plannedRow(m));
@@ -314,7 +340,11 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     setMenu(open);
     keep(MENU_KEY, open);
   });
-  recentBtn.addEventListener("click", () => setRecent(!recentOpen()));
+  // Away from Home, the button goes Home and opens the list there
+  recentBtn.addEventListener("click", () => {
+    if (body.classList.contains("no-recent")) { location.hash = ""; setRecent(true); }
+    else setRecent(!recentOpen());
+  });
   $("search-rail").addEventListener("click", openSearch);
   $("scrim").addEventListener("click", () => setMenu(false));
   frame.addEventListener("load", sendHighlight);

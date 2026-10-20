@@ -21,7 +21,7 @@ window.CHALK_PROJECTS = {
       { n: 7, title: "Troubleshooting drills",  status: "unplanned" },
     ],
   },
-  "pokedex": { name: "Pokédex",    color: "sky" },
+  "pokedex": { name: "Pokédex",    color: "coral" },
   "claude-code": { name: "Claude Code", color: "coral" },
   "javascript": { name: "JavaScript", color: "mint" },
   "arch-linux": { name: "Arch Linux", color: "peri" },
@@ -191,6 +191,12 @@ window.CHALK_NOTES = [
     title: "GitHub Mark Watermark",
     summary: "The menu's Git diamond became the GitHub mark in a closed ring, coloured from the palette; grey-on-grey planned for unpushed notes.",
     skills: ["svg", "github", "octicons", "mark-github", "css", "site-theme.css", "chalk-pastel.css", "palette", "opacity", "rsvg-convert", "brave --headless", "screenshot", "magick", "zsh", "bash", "build-index.mjs", "git check-ignore", "origin/main"],
+  },
+  {
+    id: "meta-13-menu-fold-button", project: "meta", n: 13, context: "Site", date: "2026-10-20",
+    title: "Menu Fold Button & Red Private Mark",
+    summary: "Each project's dot folds its notes, with a plus or minus cut through it; private notes get a red GitHub mark.",
+    skills: ["fold", "collapse", "menu", "button", "css mask", "mask-image", "svg mask", "data uri", "evenodd", "localStorage", "aria-expanded", "github mark", "gitignore", "coral", "opacity", "recently viewed", "location.hash", "brave --headless", "timeout", "user-data-dir"],
   },
   {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
