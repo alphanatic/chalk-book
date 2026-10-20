@@ -55,16 +55,16 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { kind: "ignored", title: "private" },
   ];
   // The menu's sort buttons, in order, each lit in its chalk colour when chosen: projects and their notes by name, or by catalogue order and number.
-  // Swedish collation, so å, ä and ö come after z. The first is the default until another is chosen;
+  // Swedish collation, so å, ä and ö come after z. 01–99 is the default until another is chosen;
   // the choice is kept in this browser
   const byName = new Intl.Collator("sv", { numeric: true, sensitivity: "base" }).compare;
   const SORTS = [
-    { key: "az", label: "A–Ö", color: "mint", title: "A to Ö", projects: (a, b) => byName(a.name, b.name), notes: (a, b) => byName(a.title, b.title) },
-    { key: "number", label: "01–99", color: "butter", title: "Catalogue order, notes by number", projects: () => 0, notes: (a, b) => a.n - b.n },
+    { key: "az", label: "A–Ö", color: "butter", title: "A to Ö", projects: (a, b) => byName(a.name, b.name), notes: (a, b) => byName(a.title, b.title) },
+    { key: "number", label: "01–99", color: "mint", title: "Catalogue order, notes by number", projects: () => 0, notes: (a, b) => a.n - b.n },
     { key: "za", label: "Ö–A", color: "coral", title: "Ö to A", projects: (a, b) => byName(b.name, a.name), notes: (a, b) => byName(b.title, a.title) },
   ];
   const SORT_KEY = "chalk.sort";
-  let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS[0];
+  let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS.find(s => s.key === "number");
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
   // Every note opened in this browser, newest first: the rail shows the last few of each project
   const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3;
