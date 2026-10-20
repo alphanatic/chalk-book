@@ -48,7 +48,9 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { label: "Save as PDF", color: "mint", run: () => save(),
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
-  // The row of GitHub marks on Home, left to right, each with its count of notes
+  // Home's row starts with a Poké Ball that opens the Pokéggdex game, shown only where the game is served
+  const GAME = { href: "/pokeggdex/", title: "Play the Pokéggdex" };
+  // Then the row of GitHub marks, left to right, each with its count of notes
   const HOME_MARKS = [
     { kind: "", title: "on GitHub" },
     { kind: "butter", title: "pending: public or private not decided" },
@@ -381,8 +383,9 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
 
   // Removes a footer button whose page isn't there. Served over http, ask the server; opened from disk,
   // the browser can't check files, and the private pages are there anyway, so the button stays
-  function dropIfMissing(li, file) {
-    if (location.protocol === "file:") return;
+  // onDisk: what to do when opened from disk, where nothing can be checked (true keeps it)
+  function dropIfMissing(li, file, onDisk = true) {
+    if (location.protocol === "file:") { if (!onDisk) li.remove(); return; }
     fetch(file, { method: "HEAD" }).then(r => { if (!r.ok) li.remove(); }).catch(() => li.remove());
   }
 
@@ -465,6 +468,14 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     item.prepend(gitMark(m.kind));
     return item;
   }));
+  const game = el("a", "home-mark game");
+  Object.assign(game, { href: GAME.href, target: "_blank", rel: "noopener", title: GAME.title });
+  game.setAttribute("aria-label", GAME.title);
+  game.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="shell" cx="50" cy="50" r="45"/>' +
+    '<path class="cap" d="M7.5 50a42.5 42.5 0 0 1 85 0z"/><line class="band" x1="5" y1="50" x2="95" y2="50"/>' +
+    '<circle class="knob" cx="50" cy="50" r="13"/></svg>';
+  $("home-marks").prepend(game);
+  dropIfMissing(game, GAME.href, false);
   $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 
   resetMenu();

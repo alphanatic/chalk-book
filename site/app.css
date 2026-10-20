@@ -44,8 +44,8 @@ kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
 .chalk-clock rect { stroke: none; }
 .chalk-clock .butter { fill: var(--butter); }
 .chalk-clock .pink { fill: var(--pink); }
-/* The name hugs the left, next to the menu button. Plain text, not a link */
-.brand { font-weight: 700; font-size: 17px; color: var(--shell-text); white-space: nowrap; cursor: default; }
+/* The name hugs the left, next to the menu button, and links Home */
+.brand { font-weight: 700; font-size: 17px; color: var(--shell-text); white-space: nowrap; text-decoration: none; }
 /* <chalk-wordmark>: the one name used everywhere — Chalk in blue, Book in yellow. Size comes from where it sits */
 chalk-wordmark { white-space: nowrap; }
 chalk-wordmark .chalk { color: var(--sky); }
@@ -222,6 +222,13 @@ body:not(.recent-open) .panel.right { display: none; }
 .home-marks { display: flex; justify-content: center; gap: 22px; margin: 16px 0 !important; }
 .home-mark { display: flex; align-items: center; gap: 7px; font-weight: 600; color: var(--shell-text); }
 .home-mark .git { width: 22px; height: 22px; }
+/* The game link before the marks: a Poké Ball, two-tone in coral like the private mark */
+.home-mark.game svg { width: 24px; height: 24px; transition: transform .2s ease; }
+.home-mark.game:hover svg { transform: rotate(-20deg) scale(1.1); }
+.home-mark.game .shell { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
+.home-mark.game .cap { fill: var(--coral); }
+.home-mark.game .band { stroke: var(--coral-chip); stroke-width: 7; }
+.home-mark.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
 .home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
 
 /* ── Main footer: the persistent footer on every page. Subtle, centred links that wrap and grow with their contents ── */
