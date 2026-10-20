@@ -164,7 +164,7 @@ body:not(.recent-open) .panel.right { display: none; }
 
 
 /* Menu sort: a row of small chips under the search field; the chosen one is lit in its colour, dark on light
-   like the GitHub marks: green A–Ö, red Ö–A, yellow 01–99 */
+   like the GitHub marks: yellow A–Ö, green 01–99, red Ö–A */
 .sort { display: flex; gap: 4px; margin: -6px 0 14px; }
 .sort-btn { flex: 1; padding: 3px 0; border: 0; border-radius: 6px; cursor: pointer;
   background: var(--shell-raise); color: var(--shell-text-muted); font-size: 11px; font-weight: 600; }
