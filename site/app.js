@@ -254,7 +254,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     if (recent.length) {
       const group = el("section", "group");
       group.append(heading("Recently viewed", recent.length));
-      for (const n of recent) group.append(noteButton(n, true));
+      // Each tile carries its project's name in a chip on its top edge
+      for (const n of recent) {
+        const b = noteButton(n, true);
+        b.append(el("span", "proj", projects[n.project]?.name));
+        group.append(b);
+      }
       recentList.append(group);
     }
     recentFoot.textContent = recent.length ? "Newest first" : "Notes you open show up here.";

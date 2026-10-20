@@ -143,6 +143,12 @@ body:not(.recent-open) .panel.right { display: none; }
 .panel.right .group h2 { flex-direction: row-reverse; }
 .panel.right .group h2 .count { margin: 0 auto 0 0; }
 .panel.right .panel-foot { text-align: right; }
+/* Recently viewed: the project's name in a chip centred on the tile's top edge, half over it */
+.panel.right .file { margin-top: 14px; }
+.file .proj { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); max-width: 85%;
+  padding: 1px 7px; border-radius: 4px; box-shadow: 0 0 0 2px var(--shell-side);
+  background: var(--c); color: var(--c-chip); font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  line-height: 1.4; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* The search field is a file button turned inside out: light paper fill, dark text, same 20:3 shape */
 .search { display: flex; align-items: center; gap: 8px; width: 100%; aspect-ratio: 20 / 3; margin-bottom: 16px;
