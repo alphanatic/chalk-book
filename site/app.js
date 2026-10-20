@@ -60,8 +60,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const byName = new Intl.Collator("sv", { numeric: true, sensitivity: "base" }).compare;
   const SORTS = [
     { key: "az", label: "A–Ö", color: "mint", title: "A to Ö", projects: (a, b) => byName(a.name, b.name), notes: (a, b) => byName(a.title, b.title) },
-    { key: "za", label: "Ö–A", color: "coral", title: "Ö to A", projects: (a, b) => byName(b.name, a.name), notes: (a, b) => byName(b.title, a.title) },
     { key: "number", label: "01–99", color: "butter", title: "Catalogue order, notes by number", projects: () => 0, notes: (a, b) => a.n - b.n },
+    { key: "za", label: "Ö–A", color: "coral", title: "Ö to A", projects: (a, b) => byName(b.name, a.name), notes: (a, b) => byName(b.title, a.title) },
   ];
   const SORT_KEY = "chalk.sort";
   let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS[0];
