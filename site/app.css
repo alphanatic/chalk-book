@@ -88,6 +88,9 @@ body:not(.recent-open) { --right-w: 0px; }
 body:not(.recent-open) .panel.right { display: none; }
 .panel-body { flex: 1; overflow: hidden auto; overscroll-behavior: contain; padding: 14px;
   scrollbar-color: var(--shell-line) transparent; }
+/* The menu scrolls with no scrollbar showing, so its tiles keep their width however long the list gets */
+.panel.left .panel-body { scrollbar-width: none; }
+.panel.left .panel-body::-webkit-scrollbar { display: none; }
 
 .group + .group { margin-top: 20px; }
 .group h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--shell-text-soft);
