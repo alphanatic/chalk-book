@@ -199,6 +199,12 @@ window.CHALK_NOTES = [
     skills: ["fold", "collapse", "menu", "button", "css mask", "mask-image", "svg mask", "data uri", "evenodd", "localStorage", "aria-expanded", "github mark", "gitignore", "coral", "opacity", "recently viewed", "location.hash", "brave --headless", "timeout", "user-data-dir"],
   },
   {
+    id: "meta-14-menu-sort-pending-notes", project: "meta", n: 14, context: "Site", date: "2026-10-20",
+    title: "Menu Sort & Pending Notes",
+    summary: "A–Ö, Ö–A and 01–99 sort chips, remembered; bigger rail dots that open and centre; Home Git counts; new notes wait yellow until made public or private.",
+    skills: ["sort", "intl.collator", "localeCompare", "swedish", "å ä ö", "localStorage", "aria-pressed", "rail", "fold", "scrollTo", "flex gap", "font-size 0", "github mark", "pending", "notes-local.js", "build-index.mjs", "check.sh", "git ls-files", "pre-commit", "gitignore"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13",
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",

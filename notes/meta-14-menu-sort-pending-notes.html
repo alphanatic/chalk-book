@@ -1,0 +1,138 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+The menu sorts A–Ö, and new notes wait yellow until decided
+Added a sort row to the menu, remembered per browser, and made the minimized menu's project dots bigger, centred and smarter. A new pending state marks every new note yellow until it is made public or private.
+
+Home now shows the three GitHub marks with their counts. Several design choices are still open; they are listed at the end.
+
+## What we covered
+- Sort row under the search field: A–Ö (default), Ö–A, 01–99; the choice is kept in `chalk.sort`
+- Swedish collation, so å, ä and ö come after z; projects and their notes are both sorted
+- The chosen chip is lit in its mark's colours: green A–Ö, red Ö–A, yellow 01–99
+- The row hides on the rail and while search results show
+- Rail dots: 20 px and centred; the rail's heading gap was pushing them left
+- On the rail, a plus unfolds, opens the menu and centres the project; a minus only folds
+- Home shows green, yellow and red GitHub marks: on GitHub, pending and private, each counted
+- New notes start pending: entry in `site/notes-local.js` with `pending: true`, a yellow mark
+- Pending notes' text stays out of `search-index.js`; `check.sh` fails if one is staged
+
+## Full command sequence
+
+### The sort row {local}
+```config: site/app.js
+const byName = new Intl.Collator("sv",  »  å, ä, ö after z
+  { numeric: true, sensitivity: "base" }).compare;  »  10 after 9, case ignored
+const SORTS = [  »  one chip per entry; the first is the default
+  { key: "az", label: "A–Ö", color: "mint", … },
+  { key: "za", label: "Ö–A", color: "coral", … },
+  { key: "number", label: "01–99", color: "butter", … },
+];
+const SORT_KEY = "chalk.sort";  »  remembered per browser
+Object.entries(projects).sort(…sort.projects)  »  in renderMenu
+notes.filter(…).sort(sort.notes)  »  inside each project
+menuList.hidden = menuSort.hidden = searching;  »  in renderSearch
+```
+```config: site/app.css
+.sort-btn[aria-pressed="true"] { background: var(--c); }
+.sort-btn[aria-pressed="true"] { color: var(--c-chip); }  »  dark on light, like the marks
+.rail .panel.left :is(…, .sort) { display: none; }
+```
+
+### Rail dots {local}
+```config: site/app.css
+.rail .panel.left .group h2 { gap: 0; font-size: 0; }  »  gap: 0 is the fix
+.rail .panel.left .fold { width: 20px; height: 20px; }  »  was 11 px
+.rail .panel.left .fold { margin: 0; }
+```
+```config: site/app.js
+set(now);  »  fold or unfold as before
+if (now && !menuOpen()) {  »  a plus, on the rail
+  setMenu(true); keep(MENU_KEY, true);  »  open the menu, remember it
+  centre(group);  »  scroll the project to the middle
+}
+function centre(group) {  »  or to the top, when taller than the menu
+  pane.scrollTo({ top: …, behavior: "smooth" });
+}
+```
+
+### Home marks {local}
+```config: site/app.js
+const markOf = n => n.pending ? "butter"  »  yellow: pending
+  : local.has(n.id) ? "ignored" : "";  »  red: private · green: on GitHub
+const HOME_MARKS = [  »  left to right
+  { kind: "", title: "on GitHub" },
+  { kind: "butter", title: "pending: public or private not decided" },
+  { kind: "ignored", title: "private" },
+];
+```
+```config: site/site-theme.css
+--git-butter-mark: var(--butter-chip);
+--git-butter-ring: var(--butter);
+```
+
+### Pending notes {local}
+```config: site/notes-local.js
+window.CHALK_NOTES.push({ id: "…", …, pending: true });  »  gitignored file
+```
+1. `memory-dump` puts every new note's entry here, marked pending.
+2. **Public:** move the entry to `site/notes.js` without `pending`, then commit the note.
+3. **Private:** drop `pending`, keep the entry here, add the note to `.gitignore`.
+4. Arch Linux and `lkgexp` notes skip this: they are private from the start.
+
+```local
+node site/build-index.mjs  # pending text goes to search-local.js
+.claude/skills/memory-dump/check.sh  # fails if a pending note is staged
+```
+> Key rule · A pending note's file is not gitignored. Only `check.sh`, run by the pre-commit hook, stops it being committed.
+
+### Test it {local}
+```local
+cp notes/<any-note>.html notes/meta-99-pending-test.html  # throwaway note
+node site/build-index.mjs  # 1 pending
+git add notes/meta-99-pending-test.html  # stage it on purpose
+.claude/skills/memory-dump/check.sh  # ✗ pending note is staged
+git reset -q -- notes/meta-99-pending-test.html  # unstage it
+```
+Then remove the file and its entry, and rebuild the index.
+
+## Bugs hit & fixed
+
+#### Bug · Rail dots sat off centre
+cause: The rail hides heading text with `font-size: 0`. The empty text is still a flex item, so the 8 px gap pushed the dot left.
+fix: `gap: 0` on the rail's headings.
+
+#### Bug · A minus on the rail opened the menu
+cause: Any dot click on the rail opened the menu and forced the project open.
+fix: Only a plus opens the menu; a minus just folds.
+
+{keep}
+## Where things live
+| What | Where
+| Sort list, rail dot clicks, centring, Home marks | `site/app.js`
+| Sort chips, rail dot size, Home marks row | `site/app.css`
+| Yellow mark colours | `site/site-theme.css`
+| Pending entries | `site/notes-local.js` (gitignored)
+| Pending text out of the index | `site/build-index.mjs`
+| Staged-pending check | `.claude/skills/memory-dump/check.sh`
+| New notes start pending | `.claude/skills/memory-dump/SKILL.md`
+
+{keep}
+## Open questions
+| Question | Now
+| Should unfolding with the menu open also centre the project? | Only from the rail
+| Should search results follow the sort? | They sort by hits
+| Should 01–99 also sort projects by name? | Catalogue order
+| What should the bar under a project count, with pending notes? | Notes on GitHub
+| Should pending notes be gitignored too, not only blocked by `check.sh`? | Hook only
+| Is an unpushed mark still wanted? meta-12 planned grey-on-grey | Not built
+| Should `CLAUDE.md` and the guide note describe pending? | Skill only
+
+{keep}
+## Best practices
+- **Private until decided** A new note's entry starts in the gitignored catalogue, so nothing leaks before the choice.
+- **Sets are lists** Sort chips and Home marks are lists in the script, like the footer and Export.
+- **Test the guard** Stage a throwaway note on purpose and watch the check fail.
+
+Part of Chalk Book · see [[meta-13-menu-fold-button]] for the fold button and [[meta-12-github-mark-watermark]] for the marks
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>
