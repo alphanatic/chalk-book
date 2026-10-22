@@ -68,13 +68,17 @@ node - <<'EOF' | report "catalogue" || true
 const fs = require("fs");
 global.window = {};
 require(process.cwd() + "/site/notes.js");
-// Notes git ignores (Arch Linux, lkgexp) must stay out of the committed catalogue: their entries go in site/notes-local.js
+// Notes git ignores (Arch Linux, the work course) must stay out of the committed catalogue: their entries go in site/notes-local.js
 const { spawnSync } = require("child_process");
 const ignored = spawnSync("git", ["check-ignore", "--no-index", "--stdin"],
   { encoding: "utf8", input: window.CHALK_NOTES.map(n => `notes/${n.id}.html`).join("\n") }).stdout;
 for (const f of ignored.split("\n").filter(Boolean)) console.log(`site/notes.js: ${f.slice(6, -5)} is a private note: move its entry to site/notes-local.js`);
 for (const n of window.CHALK_NOTES) if (n.pending) console.log(`site/notes.js: ${n.id} is pending: its entry belongs in site/notes-local.js until decided`);
+const publicIds = new Set(window.CHALK_NOTES.map(n => n.id));
 if (fs.existsSync("site/notes-local.js")) require(process.cwd() + "/site/notes-local.js");
+// A note listed only in site/notes-local.js is private or pending: it must not be staged or committed, ignored or not
+for (const n of window.CHALK_NOTES) if (!n.pending && !publicIds.has(n.id) && spawnSync("git", ["ls-files", "--", `notes/${n.id}.html`], { encoding: "utf8" }).stdout.trim())
+  console.log(`notes/${n.id}.html: private note is staged or committed: unstage it (git rm --cached)`);
 // Pending notes (public or private not decided yet) must not be staged or committed
 for (const n of window.CHALK_NOTES) if (n.pending && spawnSync("git", ["ls-files", "--", `notes/${n.id}.html`], { encoding: "utf8" }).stdout.trim())
   console.log(`notes/${n.id}.html: pending note is staged or committed: decide public or private first`);

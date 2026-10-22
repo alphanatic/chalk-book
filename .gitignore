@@ -17,6 +17,5 @@ archive/backlog-workflow/
 notes/arch-linux-*
 site/notes-local.js
 
-# Work course notes (project lkgexp, defined in site/notes-local.js) — never committed
-notes/lkgexp-*
+# The work course's notes are ignored in .git/info/exclude, so its slug stays out of the repo
 site/search-local.js

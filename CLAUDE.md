@@ -96,16 +96,18 @@ chalk-book/
 | `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
 | `anthropic` | Anthropic | The claude.ai account: cloud skills, sync, and what reaches the local tools |
 | `meta` | Chalk Book | Notes about the chalk book itself |
-| `lkgexp` | *(private)* | A work course; its name and roadmap live only in `site/notes-local.js` |
+| *(private)* | *(private)* | A work course; its slug, name and roadmap live only in `site/notes-local.js` |
 
 Add a row before using a new project, and the same project to `CHALK_PROJECTS` in `site/notes.js`.
 A project can carry a roadmap of modules there; the site shows unfinished modules as planned.
 
-**Arch Linux and `lkgexp` are private.** Their notes and everything made from them are gitignored, never committed:
-the notes (`notes/arch-linux-*`, `notes/lkgexp-*`), their catalogue entries (`site/notes-local.js`, not
-`site/notes.js`) and their search text (`site/search-local.js`, written by `build-index.mjs`). `lkgexp` is defined
-in `site/notes-local.js` too, roadmap included, so its name never reaches the repo. Each private note loads
-`../site/notes-local.js` after `../site/notes.js`. `check.sh` fails if a private note's entry lands in `site/notes.js`.
+**Arch Linux and the work course are private.** Their notes and everything made from them are never committed:
+the notes (`notes/arch-linux-*` in `.gitignore`; the work course's in each clone's `.git/info/exclude`, so its slug
+stays out of the repo), their catalogue entries (`site/notes-local.js`, not `site/notes.js`) and their search text
+(`site/search-local.js`, written by `build-index.mjs`). The work course is defined in `site/notes-local.js` too,
+roadmap included, so neither its name nor its slug reaches the repo. Each private note loads
+`../site/notes-local.js` after `../site/notes.js`. `check.sh` fails if a private note's entry lands in `site/notes.js`,
+or if a note whose entry lives only in `site/notes-local.js` is staged or committed.
 
 **Every new note starts pending:** public or private is not decided yet. Its entry goes in `site/notes-local.js` with
 `pending: true`, and the site shows it with a yellow Git mark. Its text stays out of `search-index.js`. `check.sh`
@@ -114,7 +116,7 @@ fails if a pending entry is in `site/notes.js` or a pending note is staged. When
 - **Public:** move the entry to `site/notes.js` without `pending`; the note can then be committed.
 - **Private:** drop `pending`, keep the entry in `site/notes-local.js`, and add the note to `.gitignore`.
 
-Arch Linux and `lkgexp` notes are private from the start, never pending.
+Arch Linux and work-course notes are private from the start, never pending.
 
 ### Note types
 
@@ -178,6 +180,12 @@ Inline callouts use a bold label and a dot: **Gotcha ·**, **Concept ·**, **Key
     They may appear in that author's notes and commits (from 2026-10-18), and belong to no one else. Any other name of
     a person (real name, initials, another username) becomes a made-up cartoony or fruity one, like `mango` or `noodle`,
     never `kiwi`. One person keeps the same stand-in everywhere.
+  - **Censored paths:** a private project's name or slug, a company name, and anyone else's username never appear,
+    not even inside a path or URL. Keep the path up to its last public part, then a placeholder marks where the
+    censoring starts: `~/Projects/<private-project>/`, `github.com/<plugin-author>/obsidian-claude-ide`. A username
+    in prose gets the same placeholder when it belongs to a path or URL elsewhere in the note. Each such word also
+    goes on the private block list, `~/.config/chalk-book/blocklist` (one per line, `#` for comments, never
+    committed), which `check.sh` check 7 scans every committed file for.
   - **Your alias:** each person writes under their own alias, kept in `~/.config/chalk-book/alias` (one word, never
     committed). It pairs with "Before your first note" in the README:
     - *For humans:* pick a nickname for privacy, or use your real name if you prefer.

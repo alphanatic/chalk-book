@@ -95,7 +95,7 @@ shows it with a yellow Git mark. `check.sh` fails if a pending note is staged or
 - **Public:** move the entry to `site/notes.js` without `pending`. The note can then be committed.
 - **Private:** drop `pending`, keep the entry in `site/notes-local.js`, and add the note to `.gitignore`.
 
-An **Arch Linux** or `lkgexp` note is private from the start: no `pending`, and it is already gitignored (see `CLAUDE.md` §2).
+An **Arch Linux** or work-course note is private from the start: no `pending`, and it is already gitignored (see `CLAUDE.md` §2).
 
 Then rebuild the search index so the new text is searchable: `node site/build-index.mjs`.
 
