@@ -1,0 +1,115 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Obsidian as an IDE for Claude Code, through /ide
+
+Connected Claude Code in the terminal to Obsidian with the Claude Code IDE plugin, so a session sees the open note and selection. On the way the CLI was installed on Arch, a PATH line landed in an unused zsh file, and a second npm copy was removed again.
+
+A recipe for redoing the connection on another machine, and for finding why `/ide` lists nothing.
+
+## What we covered
+
+- Obsidian plugins can't run in VS Code; Claude Code reaches the vault as plain files or over MCP
+- Picked **Claude Code IDE** by `<plugin-author>`: shares the open note and selection, nothing more
+- The plugin has no settings page (no cogwheel); "zero config: install, enable, `/ide`"
+- Claude Code needs no plugin of its own; `/ide` is built in
+- Installed the CLI with the native installer: `~/.local/bin/claude`, version 2.1.307
+- A pinned npm install also ran; its PATH line went into `~/.zshrc`, which zsh never reads here
+- Real zsh config: `~/.config/zsh/.zshrc` (`ZDOTDIR`); the npm copy, its PATH line and prefix were removed
+- `/ide` listed nothing until Obsidian was reloaded and wrote its lock file
+- Connected: the prompt shows `[In seed.md]`, the note open in Obsidian
+
+{keep}
+## How /ide finds an editor {concept}
+```output
+~/.claude/ide/
+├── 1. 11413.lock  # Code - OSS · ~/Projects/<private-project>
+├── 2. 17205.lock  # Code - OSS · ~/Projects/chalk-book
+├── 3. 33579.lock  # Obsidian · ~/Documents/<other-vault>
+└── 4. 35181.lock  # Obsidian · ~/Documents/priv-kiwi-brain  ← matches the session folder
+```
+> Concept · Each editor plugin writes a lock file named after its port, holding the editor name, its folders and a token. `/ide` reads them all and offers only those whose folder matches the folder Claude was started in. The rest show under "Found N other running IDE(s)".
+
+## Full command sequence
+
+### Obsidian · Install the plugin {console}
+1. Settings → Community plugins → Browse, search `Claude Code IDE` (by `<plugin-author>`).
+2. Install, then Enable. It appears under Installed plugins with only ⋮ and the switch.
+3. Ctrl+P → **Reload app without saving**, so the plugin starts its server.
+
+> Gotcha · Every plugin in that search says "not manually reviewed by Obsidian staff". This one is a single `main.js` with no dependencies, which keeps its reach small.
+
+### Local · Install the Claude Code CLI
+```local
+command -v claude  # prints the path if claude is on PATH
+curl -fsSL https://claude.ai/install.sh | bash  # native install to ~/.local/bin, no sudo
+claude --version  # 2.1.307 (Claude Code)
+```
+> Concept · The VS Code extension carries its own copy of Claude Code. A terminal needs the CLI installed separately.
+
+### Local · Find the real zsh config
+```local
+zsh -ic 'echo $ZDOTDIR'  # -i: interactive, so it loads the config; prints ~/.config/zsh
+zsh -ic 'whence -a claude'  # -a: every claude on PATH, in order
+```
+> Gotcha · With `ZDOTDIR` set, zsh reads `$ZDOTDIR/.zshrc` and ignores `~/.zshrc`. Lines added to `~/.zshrc` only apply where it is sourced by hand, and sourcing it there also loads its old prompt.
+
+### Local · Remove the extra npm copy
+```local
+npm uninstall -g @anthropic-ai/claude-code  # -g: from the global prefix, ~/.npm-global
+sed -i '105{/npm-global/d}' ~/.zshrc  # drop line 105 if it holds the PATH line
+npm config delete prefix  # back to the default, /usr
+find ~/.npm-global -depth -type d -empty -delete  # remove the empty folders left behind
+```
+
+### Local · Check the lock file and connect
+```local
+ls ~/.claude/ide/  # a new .lock once the plugin runs
+jq -c '{ideName, workspaceFolders, pid}' ~/.claude/ide/*.lock  # name and folder only, no token
+cd ~/Documents/priv-kiwi-brain && claude  # start in the vault so folders match
+```
+1. In the session, run `/ide` and pick **Obsidian**.
+2. Select text in Obsidian and ask "what's selected in Obsidian?" to test it.
+
+> Best practice · Run `/ide` from a separate terminal. Inside the VS Code extension it connects to VS Code itself.
+
+## Bugs hit & fixed
+
+#### Bug · `zsh: parse error near '\n'`
+cause: The npm command was pasted with `<version>` left in. zsh reads `<` as input redirection.
+fix: Looked up the real version and pinned it: `npm view @anthropic-ai/claude-code version` gave `2.1.307`.
+
+#### Bug · `npm error config is not a valid npm option`
+cause: Two pastes ran into one line, `npm config set prefix ~/.npm-globalnpm config set …`.
+fix: Paste one command per line and run each on its own.
+
+#### Bug · PATH line had no effect in new shells
+cause: The npm PATH line was appended to `~/.zshrc`, but `ZDOTDIR=~/.config/zsh`, so zsh never reads that file.
+fix: Kept the native copy, which is already on PATH, and removed the npm copy and the line.
+
+#### Bug · npm blocked the postinstall script
+cause: `npm warn install-scripts … not covered by allowScripts`. The package's `install.cjs` didn't run, so that copy was likely incomplete.
+fix: No fix needed; the npm copy was uninstalled.
+
+#### Bug · `/ide`: "No available IDEs detected"
+cause: Obsidian had written no lock file to `~/.claude/ide/`; only the two VS Code windows were there.
+fix: Reloaded Obsidian (Ctrl+P → Reload app without saving). Its lock file appeared and `/ide` listed Obsidian.
+
+{keep}
+## Where things live
+| What | Path
+| Claude Code CLI | `~/.local/bin/claude` → `~/.local/share/claude/versions/2.1.307`
+| Editor lock files | `~/.claude/ide/<port>.lock`
+| zsh config in use | `~/.config/zsh/.zshrc`
+| Unused old config | `~/.zshrc`
+| Plugin source | `github.com/<plugin-author>/obsidian-claude-ide`
+
+{keep}
+## Best practices
+- **One install method** Two copies both update themselves; keep the native one.
+- **Check ZDOTDIR first** Before adding to `~/.zshrc`, run `zsh -ic 'echo $ZDOTDIR'`.
+- **Read lock files by field** `jq` the name and folders; never print the token.
+- **Obsidian first** Open Obsidian, then `claude` in the vault, then `/ide` (or `claude --ide`).
+
+Part of Claude Code · see [[claude-code-05-vault-bucket]] for the vault's layout
+</script>
+<body><script src=../site/notes.js></script><script src=note.js></script>

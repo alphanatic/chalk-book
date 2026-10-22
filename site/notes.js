@@ -253,6 +253,12 @@ window.CHALK_NOTES = [
     skills: ["claude code", "skills", "SKILL.md", "screenshot", "print screen", "grim", "wl-copy", "wl-paste", "hyprctl monitors", "jq", "kitty", "hyprland", "hl.dsp.exec_cmd", "monitor", "clipboard", "sudo -n"],
   },
   {
+    id: "claude-code-07-obsidian-ide-connection", project: "claude-code", n: 7, context: "Obsidian", date: "2026-10-22",
+    title: "Obsidian IDE Connection",
+    summary: "Claude Code IDE plugin + /ide connects the CLI to Obsidian; native install on Arch; ZDOTDIR hid ~/.zshrc; the npm copy removed.",
+    skills: ["claude code", "obsidian", "plugin", "claude code ide", "/ide", "claude --ide", "mcp", "websocket", "lock file", "~/.claude/ide", "jq", "install.sh", "curl", "npm", "npm view", "npm config", "npm uninstall", "allowScripts", "postinstall", "zsh", "ZDOTDIR", "whence", "sed -i", "find -empty", "parse error", "arch linux"],
+  },
+  {
     id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13",
     title: "Footer Links & Tabs",
     summary: "Same .map() pattern, different job: tabs set state with onClick, the footer navigates via the URL hash.",
