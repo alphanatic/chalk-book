@@ -49,10 +49,20 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { label: "Save as PDF", color: "mint", run: () => save(),
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
-  // Home's row starts with a Poké Ball that opens the Pokéggdex game, shown only where the game is served.
-  // Served locally, the game is the npm dev server (npm run dev in ~/Projects/pokeggdex)
+  // Home's row starts with the apps served next to the chalk book, left to right, each shown only where it is served:
+  // a water droplet that opens the lkgexp style board, then a Poké Ball that opens the Pokéggdex game.
+  // Served locally, each is its npm dev server (npm run dev in ~/Projects/work-lkgexp/lkgexp-web or ~/Projects/pokeggdex)
   const onLocalhost = ["localhost", "127.0.0.1"].includes(location.hostname);
-  const GAME = { href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex" };
+  const APPS = [
+    { kind: "drop", href: onLocalhost ? "http://localhost:5173/styleboard.html" : "/lkgexp/styleboard.html",
+      title: "Open the lkgexp style board",
+      icon: '<svg viewBox="0 0 20 26" aria-hidden="true"><path class="body" d="M10 1C10 1 2 11 2 17a8 8 0 0 0 16 0C18 11 10 1 10 1Z"/>' +
+        '<path class="shine" d="M6 17a4 4 0 0 0 4 4"/></svg>' },
+    { kind: "game", href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex",
+      icon: '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="shell" cx="50" cy="50" r="45"/>' +
+        '<path class="cap" d="M7.5 50a42.5 42.5 0 0 1 85 0z"/><line class="band" x1="5" y1="50" x2="95" y2="50"/>' +
+        '<circle class="knob" cx="50" cy="50" r="13"/></svg>' },
+  ];
   // Then the row of GitHub marks, left to right, each with its count of notes
   const HOME_MARKS = [
     { kind: "", title: "on GitHub" },
@@ -475,14 +485,15 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     item.prepend(gitMark(m.kind));
     return item;
   }));
-  const game = el("a", "home-mark game");
-  Object.assign(game, { href: GAME.href, target: "_blank", rel: "noopener", title: GAME.title });
-  game.setAttribute("aria-label", GAME.title);
-  game.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="shell" cx="50" cy="50" r="45"/>' +
-    '<path class="cap" d="M7.5 50a42.5 42.5 0 0 1 85 0z"/><line class="band" x1="5" y1="50" x2="95" y2="50"/>' +
-    '<circle class="knob" cx="50" cy="50" r="13"/></svg>';
-  $("home-marks").prepend(game);
-  dropIfMissing(game, GAME.href, false);
+  const apps = APPS.map(a => {
+    const link = el("a", `home-mark ${a.kind}`);
+    Object.assign(link, { href: a.href, target: "_blank", rel: "noopener", title: a.title });
+    link.setAttribute("aria-label", a.title);
+    link.innerHTML = a.icon;
+    return link;
+  });
+  $("home-marks").prepend(...apps);
+  apps.forEach((link, i) => dropIfMissing(link, APPS[i].href, false));
   $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 
   resetMenu();

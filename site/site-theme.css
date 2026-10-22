@@ -16,4 +16,5 @@
   --git-ignored-ring:  var(--coral);
   --git-butter-mark:   var(--butter-chip); /* yellow on yellow: pending notes, public or private not decided */
   --git-butter-ring:   var(--butter);
+  --lkgexp-green:      #10A437;   /* the lkgexp droplet on Home: that site's logo green, never recoloured */
 }

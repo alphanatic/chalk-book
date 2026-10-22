@@ -225,6 +225,11 @@ body:not(.recent-open) .panel.right { display: none; }
 .home-marks { display: flex; justify-content: center; gap: 22px; margin: 16px 0 !important; }
 .home-mark { display: flex; align-items: center; gap: 7px; font-weight: 600; color: var(--shell-text); }
 .home-mark .git { width: 22px; height: 22px; }
+/* The lkgexp link first: the site's water droplet, always in its own logo green */
+.home-mark.drop svg { width: 19px; height: 24px; transition: transform .2s ease; }
+.home-mark.drop:hover svg { transform: rotate(-12deg) scale(1.1); }
+.home-mark.drop .body { fill: var(--lkgexp-green); }
+.home-mark.drop .shine { fill: none; stroke: var(--shell-text); stroke-width: 1.6; stroke-linecap: round; }
 /* The game link before the marks: a Poké Ball, two-tone in coral like the private mark */
 .home-mark.game svg { width: 24px; height: 24px; transition: transform .2s ease; }
 .home-mark.game:hover svg { transform: rotate(-20deg) scale(1.1); }
