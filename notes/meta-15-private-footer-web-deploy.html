@@ -54,6 +54,8 @@ rsync -az -c --delete -n -i $T/ web-deploy:/var/www/web/ | grep -v '^\.d' | wc -
 ```
 > Key rule · Deploy from `git archive HEAD`, never the working folder: private notes, `notes-local.js` and `.progress/` can't go up.
 
+> Updated rule · From 2026-10-22 the sync is one script: `.claude/skills/memory-dump/deploy.sh` (`-n` dry run, `--check` live checks only). It adds `--chmod=D755,F644` and ends with a `curl` of the live site.
+
 {keep}
 ## The five decisions
 | # | Question | Decision
@@ -62,6 +64,13 @@ rsync -az -c --delete -n -i $T/ web-deploy:/var/www/web/ | grep -v '^\.d' | wc -
 | 3 | Rail shows 3 per project, Recently viewed 1 per project | Keep both
 | 4 | `CLAUDE.md` doesn't know pending notes | Update it and the guide note
 | 5 | Personal links in the public footer | Make them private; fix the label
+
+{keep}
+## Bugs hit & fixed
+
+#### Bug · 403 Forbidden on the whole site (2026-10-22)
+cause: A later deploy made `$T` with `mktemp -d`, which is always `700`. `rsync -a` copied that mode onto `/var/www/web/`, so nginx (`www-data`) couldn't enter it. `grep -v '^\.d'` hid the folder's mode change, and no one opened the site after the sync.
+fix: `ssh web-deploy 'chmod 755 /var/www/web'`. Then `deploy.sh`: `--chmod=D755,F644` sets the modes whatever the temp folder is, and it checks the modes and a `200` from outside.
 
 {keep}
 ## Where things live

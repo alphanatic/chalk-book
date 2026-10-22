@@ -177,6 +177,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 - `index.html` opens straight from disk, no build step. How it looks and behaves is in the code and in `meta-01-site-build`.
 - Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
+- Deploy only with `deploy.sh`, never hand-written steps: it sends only what is committed, sets folders `755` and files `644`, and fails unless the live site answers `200`.
 - Sets of buttons or labels in order (footer links, Export options, legend chips, table columns) are one list in the script, which makes one element per entry.
 - A new site page goes in `site/pages/`, then into `PAGES` and `FOOTER` in `site/app.js`. New Export options are entries in `EXPORTS`.
 - Git marks: green on GitHub, yellow pending, red private. Home shows one of each with its count.
@@ -204,6 +205,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 ```local
 .claude/skills/memory-dump/render.sh notes/<name>.html [out-dir]   # → <name>.pdf
 .claude/skills/memory-dump/check.sh [--render]                      # must pass before every commit
+.claude/skills/memory-dump/deploy.sh [-n | --check]                 # -n dry run, --check live checks only
 ```
 
 ## Rules for AI assistants
