@@ -67,7 +67,8 @@ chalk-book/
     ├── template.html
     ├── render.sh
     ├── check.sh                  ← the checks every commit must pass (run by .githooks/pre-commit)
-    └── compare.sh                ← renders notes at HEAD and now, and compares every page
+    ├── compare.sh                ← renders notes at HEAD and now, and compares every page
+    └── deploy.sh                 ← publishes the committed site to the web server, then checks it is live
 ```
 
 ### File naming
@@ -235,6 +236,9 @@ in the code and in `meta-01-site-build`.
 - Site colours live in `site/site-theme.css`, never in `chalk-pastel.css`.
 - The name is always the shared `<chalk-wordmark>` element.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
+- **Deploy only with `.claude/skills/memory-dump/deploy.sh`** (`-n` dry run, `--check` live checks only), never with
+  hand-written steps. It sends only what is committed, sets folders `755` and files `644` on the server, and fails
+  unless the live site answers `200`. On 2026-10-22 a hand-made `700` temp folder took the site down with a 403.
 - **Sets are lists.** Any set of buttons or labels in order (footer links, Export options, legend chips, table columns)
   is one ordered list in the script, which makes one element per entry. The page holds only an empty container.
 - Add a site page: create it in `site/pages/`, then add it to `PAGES` and `FOOTER` in `site/app.js`.
