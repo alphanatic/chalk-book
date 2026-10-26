@@ -19,6 +19,7 @@ window.CHALK_PROJECTS = {
       { n: 5, title: "Ansible automation",      status: "unplanned" },
       { n: 6, title: "Terraform + CloudWatch",  status: "unplanned" },
       { n: 7, title: "Troubleshooting drills",  status: "unplanned" },
+      { n: 8, title: "Static site (S3 + CloudFront)", status: "in progress" },
     ],
   },
   "pokedex": { name: "Pokédex",    color: "coral" },
