@@ -19,3 +19,6 @@ site/notes-local.js
 
 # The work course's notes are ignored in .git/info/exclude, so its slug stays out of the repo
 site/search-local.js
+
+# Domains project notes (own domains and servers) — never committed
+notes/domains-*

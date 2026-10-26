@@ -1,11 +1,13 @@
 /* Chalk Book site — search + notes menu (left), recently viewed (right), roadmap, viewer and Save as PDF.
    No build step, no libraries. */
 
-// <chalk-wordmark></chalk-wordmark>: the site's name, written once and used wherever it appears
+// <chalk-wordmark></chalk-wordmark>: the site's name, written once and used wherever it appears.
+// Home's heading is the one exception: <chalk-wordmark second="Board"> reads Chalk Board, the portfolio's name
 customElements.define("chalk-wordmark", class extends HTMLElement {
   connectedCallback() {
-    if (!this.childElementCount) this.innerHTML = '<span class="chalk">Chalk</span> <span class="book">Book</span>';
-    this.setAttribute("aria-label", "Chalk Book");
+    const second = this.getAttribute("second") || "Book";
+    if (!this.childElementCount) this.innerHTML = `<span class="chalk">Chalk</span> <span class="book">${second}</span>`;
+    this.setAttribute("aria-label", `Chalk ${second}`);
   }
 });
 
@@ -49,21 +51,21 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { label: "Save as PDF", color: "mint", run: () => save(),
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
-  // Home's row starts with the apps served next to the chalk book, left to right, each shown only where it is served:
-  // a water droplet that opens the lkgexp style board, then a Poké Ball that opens the Pokéggdex game.
-  // Served locally, each is its npm dev server (npm run dev in ~/Projects/work-lkgexp/lkgexp-web or ~/Projects/pokeggdex)
+  // The portfolio under Home's name: the sites served next to the chalk book, left to right, each a tile with its icon
+  // and name, shown only where it is served: a water droplet for the lkgexp menu, a Poké Ball for the Pokéggdex.
+  // Served locally, each is its npm dev server (npm run dev in its own project folder; the Pokéggdex's is ~/Projects/pokeggdex)
   const onLocalhost = ["localhost", "127.0.0.1"].includes(location.hostname);
   const APPS = [
-    { kind: "drop", href: onLocalhost ? "http://localhost:5173/styleboard.html" : "/lkgexp/styleboard.html",
-      title: "Open the lkgexp style board",
+    { kind: "drop", label: "lkgexp", href: onLocalhost ? "http://localhost:5173/menu.html" : "/lkgexp/menu.html",
+      title: "Open the lkgexp menu",
       icon: '<svg viewBox="0 0 20 26" aria-hidden="true"><path class="body" d="M10 1C10 1 2 11 2 17a8 8 0 0 0 16 0C18 11 10 1 10 1Z"/>' +
         '<path class="shine" d="M6 17a4 4 0 0 0 4 4"/></svg>' },
-    { kind: "game", href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex",
+    { kind: "game", label: "Pokéggdex", href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex",
       icon: '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="shell" cx="50" cy="50" r="45"/>' +
         '<path class="cap" d="M7.5 50a42.5 42.5 0 0 1 85 0z"/><line class="band" x1="5" y1="50" x2="95" y2="50"/>' +
         '<circle class="knob" cx="50" cy="50" r="13"/></svg>' },
   ];
-  // Then the row of GitHub marks, left to right, each with its count of notes
+  // The GitHub marks at the left end of the bottom bar, left to right, each with its count of notes
   const HOME_MARKS = [
     { kind: "", title: "on GitHub" },
     { kind: "butter", title: "pending: public or private not decided" },
@@ -457,6 +459,16 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   exportBtn.addEventListener("click", e => { e.stopPropagation(); setExport(exportMenu.hidden); });
   document.addEventListener("click", e => { if (!exportMenu.hidden && !e.target.closest(".export")) setExport(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !exportMenu.hidden) { setExport(false); exportBtn.focus(); } });
+  // The CloudM badge opens and closes its credit card, the same way
+  const cloudm = $("cloudm"), cloudmBtn = $("cloudm-btn"), cloudmCard = $("cloudm-card");
+  const setCloudm = open => {
+    cloudmCard.hidden = !open;
+    cloudmBtn.setAttribute("aria-expanded", open);
+    cloudm.classList.toggle("open", open);
+  };
+  cloudmBtn.addEventListener("click", () => setCloudm(cloudmCard.hidden));
+  document.addEventListener("click", e => { if (!cloudmCard.hidden && !cloudm.contains(e.target)) setCloudm(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !cloudmCard.hidden) { setCloudm(false); cloudmBtn.focus(); } });
 
   narrow.addEventListener("change", resetMenu);
 
@@ -479,20 +491,20 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     const next = p.modules.find(m => m.status !== "done");
     lines.push(`${p.name}: ${done} of ${p.modules.length} modules done${next ? ` · next: ${next.title}` : ""}.`);
   }
-  $("home-marks").replaceChildren(...HOME_MARKS.map(m => {
-    const n = window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, item = el("span", "home-mark", n);
+  $("footer-marks").replaceChildren(...HOME_MARKS.map(m => {
+    const n = window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, item = el("span", "footer-mark", n);
     item.title = `${n} notes ${m.title}`;
     item.prepend(gitMark(m.kind));
     return item;
   }));
   const apps = APPS.map(a => {
-    const link = el("a", `home-mark ${a.kind}`);
+    const link = el("a", `home-app ${a.kind}`);
     Object.assign(link, { href: a.href, target: "_blank", rel: "noopener", title: a.title });
-    link.setAttribute("aria-label", a.title);
     link.innerHTML = a.icon;
+    link.append(el("span", "name", a.label));
     return link;
   });
-  $("home-marks").prepend(...apps);
+  $("home-apps").replaceChildren(...apps);
   apps.forEach((link, i) => dropIfMissing(link, APPS[i].href, false));
   $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 

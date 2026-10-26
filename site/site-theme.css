@@ -17,4 +17,13 @@
   --git-butter-mark:   var(--butter-chip); /* yellow on yellow: pending notes, public or private not decided */
   --git-butter-ring:   var(--butter);
   --lkgexp-green:      #10A437;   /* the lkgexp droplet on Home: that site's logo green, never recoloured */
+  /* The CloudM holo badge, bottom right: CloudM's own colours from cloudm.one, never recoloured */
+  --cloudm-disc-core:  #13306a;   /* the disc's glowing middle */
+  --cloudm-disc:       #0b1a3d;   /* the disc */
+  --cloudm-disc-edge:  #070a18;   /* the disc's rim */
+  --cloudm-glow:       #22bbff;   /* glow around the disc and the cloud, and the rings */
+  --cloudm-cyan:       #00e5ff;   /* the outer ring's arc */
+  --cloudm-blue:       #2f6bff;   /* the inner ring's right side, the cloud's outer glow */
+  --cloudm-violet:     #8a5cff;   /* the inner ring's left side */
+  --cloudm-credit:     #7d8db0;   /* the "powered by" line */
 }

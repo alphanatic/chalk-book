@@ -221,27 +221,33 @@ body:not(.recent-open) .panel.right { display: none; }
 .home h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -.01em; }
 .home p { color: var(--shell-text-soft); margin: 6px 0; }
 .home .hint { color: var(--shell-text-muted); }
-/* Three GitHub marks in a row under the stats, full strength, each with its count */
-.home-marks { display: flex; justify-content: center; gap: 22px; margin: 16px 0 !important; }
-.home-mark { display: flex; align-items: center; gap: 7px; font-weight: 600; color: var(--shell-text); }
-.home-mark .git { width: 22px; height: 22px; }
-/* The lkgexp link first: the site's water droplet, always in its own logo green */
-.home-mark.drop svg { width: 19px; height: 24px; transition: transform .2s ease; }
-.home-mark.drop:hover svg { transform: rotate(-12deg) scale(1.1); }
-.home-mark.drop .body { fill: var(--lkgexp-green); }
-.home-mark.drop .shine { fill: none; stroke: var(--shell-text); stroke-width: 1.6; stroke-linecap: round; }
-/* The game link before the marks: a Poké Ball, two-tone in coral like the private mark */
-.home-mark.game svg { width: 24px; height: 24px; transition: transform .2s ease; }
-.home-mark.game:hover svg { transform: rotate(-20deg) scale(1.1); }
-.home-mark.game .shell { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
-.home-mark.game .cap { fill: var(--coral); }
-.home-mark.game .band { stroke: var(--coral-chip); stroke-width: 7; }
-.home-mark.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
+/* The portfolio under the name: one tile per site, its icon over its name */
+.home-apps { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 18px 0 20px; }
+.home-app { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  min-width: 96px; padding: 14px 12px 10px; border-radius: 10px; background: var(--shell-raise);
+  color: var(--shell-text); font-size: 13px; font-weight: 600; text-decoration: none; }
+.home-app svg { height: 32px; transition: transform .2s ease; }
+/* The lkgexp tile: the site's water droplet, always in its own logo green */
+.home-app.drop svg { width: 25px; }
+.home-app.drop:hover svg { transform: rotate(-12deg) scale(1.1); }
+.home-app.drop .body { fill: var(--lkgexp-green); }
+.home-app.drop .shine { fill: none; stroke: var(--shell-text); stroke-width: 1.6; stroke-linecap: round; }
+/* The Pokéggdex tile: a Poké Ball, two-tone in coral like the private mark */
+.home-app.game svg { width: 32px; }
+.home-app.game:hover svg { transform: rotate(-20deg) scale(1.1); }
+.home-app.game .shell { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
+.home-app.game .cap { fill: var(--coral); }
+.home-app.game .band { stroke: var(--coral-chip); stroke-width: 7; }
+.home-app.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
 .home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
 
 /* ── Main footer: the persistent footer on every page. Subtle, centred links that wrap and grow with their contents ── */
-.main-footer { grid-area: foot; display: flex; justify-content: center; padding: 4px 16px;
-  background: var(--shell-side); border-top: 1px solid var(--shell-line); }
+/* Three columns: the GitHub marks at the far left, the links centred on the window, an empty right column */
+.main-footer { grid-area: foot; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
+  padding: 4px 16px; background: var(--shell-side); border-top: 1px solid var(--shell-line); }
+.footer-marks { display: flex; gap: 14px; margin: 0; }
+.footer-mark { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--shell-text); }
+.footer-mark .git { width: 15px; height: 15px; }
 .main-footer ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 6px; margin: 0; padding: 0; list-style: none; }
 /* Links are bold and coloured like note titles, in turn: blue, pink, green, yellow (new links continue it) */
 .main-footer-btn { display: inline-block; padding: 3px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;
@@ -252,6 +258,42 @@ body:not(.recent-open) .panel.right { display: none; }
 .main-footer li:nth-child(4n+4) { --c: var(--butter); }
 .main-footer-btn:hover { background: var(--shell-raise); }
 .main-footer-btn[aria-current] { background: var(--shell-raise); box-shadow: inset 0 -2px 0 var(--c); }   /* the page you're on */
+
+/* ── CloudM badge: CloudM's holo disc from cloudm.one, hovering bottom right just above the footer.
+      Three rings turn slowly around the glowing cloud; a click opens a card above it with only the credit ── */
+.cloudm { position: fixed; right: 12px; bottom: 44px; z-index: 5; display: flex; flex-direction: column;
+  align-items: flex-end; gap: 8px; }
+.cloudm-toggle { position: relative; display: grid; place-items: center; width: 48px; height: 48px; padding: 0;
+  border: 0; border-radius: 50%; cursor: pointer; transition: box-shadow .3s;
+  background: radial-gradient(circle at 50% 45%, var(--cloudm-disc-core) 0%, var(--cloudm-disc) 55%, var(--cloudm-disc-edge) 100%);
+  box-shadow: 0 6px 18px -6px var(--cloudm-disc-edge), 0 0 14px color-mix(in srgb, var(--cloudm-glow) 25%, transparent); }
+.cloudm-toggle:hover, .cloudm.open .cloudm-toggle {
+  box-shadow: 0 6px 18px -6px var(--cloudm-disc-edge), 0 0 22px color-mix(in srgb, var(--cloudm-glow) 55%, transparent); }
+.cloudm-toggle:focus-visible { outline: 2px solid var(--cloudm-glow); outline-offset: 3px; }
+.cloudm .ring { position: absolute; border: 1px solid color-mix(in srgb, var(--cloudm-glow) 35%, transparent);
+  border-radius: 50%; pointer-events: none; }
+.cloudm .r1 { inset: 2px; border-width: 1.5px; border-top-color: var(--cloudm-cyan); animation: cloudm-spin 8s linear infinite; }
+.cloudm .r2 { inset: 6px; border-style: dashed; border-color: color-mix(in srgb, var(--cloudm-glow) 30%, transparent);
+  animation: cloudm-spin 18s linear infinite reverse; }
+.cloudm .r3 { inset: 10px; border-width: 1.5px; border-color: color-mix(in srgb, var(--cloudm-glow) 20%, transparent);
+  border-left-color: var(--cloudm-violet); border-right-color: var(--cloudm-blue); animation: cloudm-spin 5s linear infinite; }
+@keyframes cloudm-spin { to { transform: rotate(360deg); } }
+/* The cloud glows like the holo logo and lifts a little on hover and while the card is open */
+.cloudm .cloud { position: relative; display: block; width: 33px; height: auto; translate: 0 -2px;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--cloudm-glow) 80%, transparent))
+          drop-shadow(0 0 10px color-mix(in srgb, var(--cloudm-blue) 50%, transparent));
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.cloudm-toggle:hover .cloud, .cloudm.open .cloud { transform: translateY(-1px) scale(1.08); }
+.cloudm-card { margin: 0; padding: 10px 14px; border: 1px solid var(--shell-line); border-radius: 12px;
+  background: var(--shell-side); color: var(--cloudm-credit); font-size: 12px; letter-spacing: .04em;
+  white-space: nowrap; animation: cloudm-rise .2s cubic-bezier(.2, .8, .2, 1); }
+.cloudm-card[hidden] { display: none; }
+.cloudm-card b { font-weight: 600; color: var(--shell-text); }
+@keyframes cloudm-rise { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .cloudm-toggle, .cloudm .cloud { transition: none; }
+  .cloudm .ring, .cloudm-card { animation: none; }
+}
 
 /* ── Top bar on smaller windows: the name goes first, then the note title;
       the menu button and Export stay to the end ── */
@@ -268,6 +310,7 @@ body:not(.recent-open) .panel.right { display: none; }
   body.left-collapsed .scrim { display: none; }
   .topbar { gap: 8px; padding: 0 8px 0 0; }
   .home { left: 0; }
+  .main-footer { grid-template-columns: auto 1fr; }
   .topbar .btn { width: auto; aspect-ratio: auto; height: 38px; padding: 0 14px; }
   .export { margin-left: auto; }
   .topbar-rail.right { display: none; }
