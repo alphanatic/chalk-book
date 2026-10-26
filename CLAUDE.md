@@ -61,7 +61,7 @@ chalk-book/
 │   └── backlog-workflow/         ← the old backlog design (private, gitignored)
 ├── .githooks/pre-commit          ← runs check.sh before each commit (turn on: see README)
 ├── .github/workflows/check.yml   ← runs check.sh on GitHub after each push
-├── .progress/, .research/        ← private and gitignored: backlog, complete tasks, Linux backlog, research
+├── .handoffs/, .research/        ← private and gitignored: handoffs, backlog, complete tasks, Linux backlog, research
 └── .claude/skills/chalk-up/   ← the note-making workflow
     ├── SKILL.md
     ├── template.html
@@ -251,14 +251,15 @@ in the code and in `meta-01-site-build`.
 - **Menu sort** (`SORTS`): A–Ö, 01–99, Ö–A, lit yellow, green and red. Those colours are the user's choice and have
   nothing to do with the Git marks. 01–99 is the default.
 - **Private footer links** (`private: true` in `FOOTER`) are the owner's own shortcuts: claude.ai, benchlm.ai, AWS.
-  Like the private pages below, they show only where `.progress/backlog.html` exists.
+  Like the private pages below, they show only where `.handoffs/backlog.html` exists.
 - New Export options are entries in `EXPORTS` in `site/app.js`.
-- **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.progress/backlog.html` and
-  `.progress/complete-tasks.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
+- **Backlog** (`#backlog`) and **Complete Tasks** (`#complete`) are private: `.handoffs/backlog.html` and
+  `.handoffs/complete-tasks.html`, gitignored, never on GitHub or a hosted copy. They cover Chalk Book itself only;
   work inside a menu project belongs in its roadmap in `site/notes.js`. One exception: **Linux** (`#linux`),
-  `.progress/linux.html`, is the user's own backlog for their Linux machines, private the same way, with its done
-  items kept at its bottom. The folder was `.prog/` until 2026-10-18;
-  older notes keep that name.
+  `.handoffs/linux.html`, is the user's own backlog for their Linux machines, private the same way, with its done
+  items kept at its bottom.
+- **Handoffs** live in `.handoffs/` too: the 3 newest, older ones moved unchanged into `.handoffs/handoff-archive/`.
+  The folder has had this name since 2026-10-26, in every note; older handoffs and commits keep the names they had.
 
 ---
 

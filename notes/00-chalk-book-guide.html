@@ -55,7 +55,7 @@ chalk-book/
 │   └── backlog-workflow/         # the old backlog design (private)
 ├── .githooks/pre-commit          # runs check.sh before each commit
 ├── .github/workflows/check.yml   # runs check.sh on GitHub after each push
-├── .progress/, .research/        # private and gitignored: backlog, Linux backlog, research
+├── .handoffs/, .research/        # private and gitignored: handoffs, backlog, Linux backlog, research
 └── .claude/skills/chalk-up/   # the note-making workflow
 ```
 
@@ -183,10 +183,10 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 - A new site page goes in `site/pages/`, then into `PAGES` and `FOOTER` in `site/app.js`. New Export options are entries in `EXPORTS`.
 - Git marks: green on GitHub, yellow pending, red private. The footer's left end shows one of each with its count.
 - Menu sort: A–Ö, 01–99, Ö–A, lit yellow, green and red. The user's choice of colours, unrelated to the Git marks. 01–99 is the default.
-- Private footer links (claude.ai, benchlm.ai, AWS) are the owner's shortcuts and show only where `.progress/backlog.html` exists.
-- Backlog and Complete Tasks are private pages in `.progress/`, gitignored, about Chalk Book itself only. The exception is Linux, the user's backlog for their Linux machines, private the same way.
+- Private footer links (claude.ai, benchlm.ai, AWS) are the owner's shortcuts and show only where `.handoffs/backlog.html` exists.
+- Backlog and Complete Tasks are private pages in `.handoffs/`, gitignored, about Chalk Book itself only. The exception is Linux, the user's backlog for their Linux machines, private the same way.
 
->{concept} Naming note · The private folder was <span class="old">.prog/</span> until 2026-10-18. Older notes keep the old name, as it was then.
+>{concept} Naming note · The private folder has been `.handoffs/` since 2026-10-26, in every note. It holds the 3 newest handoffs; older ones move unchanged into `.handoffs/handoff-archive/`. Older handoffs and commits keep the names they had.
 
 ## How notes are made & changed {gotcha}
 

@@ -1,4 +1,4 @@
-/* Backlog and Complete Tasks: shared layout for the private pages in .progress/. Colours come from chalk-pastel.css */
+/* Backlog and Complete Tasks: shared layout for the private pages in .handoffs/. Colours come from chalk-pastel.css */
 @font-face { font-family: Inter; font-weight: 400; src: url(../notes/fonts/inter-latin-400-normal.woff2) format("woff2"); }
 @font-face { font-family: Inter; font-weight: 600; src: url(../notes/fonts/inter-latin-600-normal.woff2) format("woff2"); }
 @font-face { font-family: Inter; font-weight: 700; src: url(../notes/fonts/inter-latin-700-normal.woff2) format("woff2"); }

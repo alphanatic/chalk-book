@@ -140,13 +140,13 @@ fix: Quote it, `echo "===REAL"`, or use another marker.
 | Private block list | `~/.config/chalk-book/blocklist`
 | Claude Code transcripts (deleted after 30 days by default) | `~/.claude/projects/<project-path>/*.jsonl`
 | Keep transcripts longer | `"cleanupPeriodDays": 365` in `~/.claude/settings.json`
-| Backlog and Complete Tasks (private) | `.prog/index.html`, `.prog/complete.html`
+| Backlog and Complete Tasks (private) | `.handoffs/index.html`, `.handoffs/complete.html`
 
 {keep}
 ## Open decisions {paths}
 | Item | Question | Suggested
 | 3 · Going online | GitHub Pages (public), stay local, or a private host? | Cloudflare Pages + Access: private, free, works on a phone
-| Private pages | Footer links appear only when a `.prog/` page exists? | A generated `.prog/pages.js`, from a tag in each page
+| Private pages | Footer links appear only when a `.handoffs/` page exists? | A generated `.handoffs/pages.js`, from a tag in each page
 | 25 · Legends | Drop or relabel the legend in a note without blocks? | Waiting
 | Guide PDF | Keep `00-chalk-book-guide.pdf`, now mostly redundant? | Waiting
 
