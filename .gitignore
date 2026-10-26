@@ -22,3 +22,6 @@ site/search-local.js
 
 # Domains project notes (own domains and servers) — never committed
 notes/domains-*
+
+# Skeleton project notes (the company's own customer setup) — never committed
+notes/skeleton-*
