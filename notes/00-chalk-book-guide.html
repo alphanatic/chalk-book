@@ -175,12 +175,13 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 
 ### The site
 - `index.html` opens straight from disk, no build step. How it looks and behaves is in the code and in `meta-01-site-build`.
-- Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`.
+- Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`; on Home it reads Chalk Board, the portfolio's name.
+- Home tiles (`APPS`) are the sites served next to the chalk book. Each shows only where it answers: a relative path on the server, its dev server on localhost. Never a server's address: the site code is public.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - Deploy only with `deploy.sh`, never hand-written steps: it sends only what is committed, sets folders `755` and files `644`, and fails unless the live site answers `200`.
 - Sets of buttons or labels in order (footer links, Export options, legend chips, table columns) are one list in the script, which makes one element per entry.
 - A new site page goes in `site/pages/`, then into `PAGES` and `FOOTER` in `site/app.js`. New Export options are entries in `EXPORTS`.
-- Git marks: green on GitHub, yellow pending, red private. Home shows one of each with its count.
+- Git marks: green on GitHub, yellow pending, red private. The footer's left end shows one of each with its count.
 - Menu sort: A–Ö, 01–99, Ö–A, lit yellow, green and red. The user's choice of colours, unrelated to the Git marks. 01–99 is the default.
 - Private footer links (claude.ai, benchlm.ai, AWS) are the owner's shortcuts and show only where `.progress/backlog.html` exists.
 - Backlog and Complete Tasks are private pages in `.progress/`, gitignored, about Chalk Book itself only. The exception is Linux, the user's backlog for their Linux machines, private the same way.

@@ -234,7 +234,11 @@ monospace). Blocks and callouts use their colour's `-bg` tint.
 in the code and in `meta-01-site-build`.
 
 - Site colours live in `site/site-theme.css`, never in `chalk-pastel.css`.
-- The name is always the shared `<chalk-wordmark>` element.
+- The name is always the shared `<chalk-wordmark>` element. Home's heading is the one exception: `second="Board"`
+  makes it read Chalk Board, the portfolio's name.
+- **Home tiles** (`APPS`) are the sites served next to the chalk book, one tile each under the name. Each shows only
+  where it answers: a relative path on the server, its dev server on localhost, never from disk. Never a server's
+  address: the site code is public.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
 - **Deploy only with `.claude/skills/chalk-up/deploy.sh`** (`-n` dry run, `--check` live checks only), never with
   hand-written steps. It sends only what is committed, sets folders `755` and files `644` on the server, and fails
@@ -242,8 +246,8 @@ in the code and in `meta-01-site-build`.
 - **Sets are lists.** Any set of buttons or labels in order (footer links, Export options, legend chips, table columns)
   is one ordered list in the script, which makes one element per entry. The page holds only an empty container.
 - Add a site page: create it in `site/pages/`, then add it to `PAGES` and `FOOTER` in `site/app.js`.
-- **Git marks** use three colours, everywhere: green = on GitHub, yellow = pending, red = private. Home shows one
-  mark of each with its count (`HOME_MARKS`).
+- **Git marks** use three colours, everywhere: green = on GitHub, yellow = pending, red = private. The footer's left
+  end shows one mark of each with its count (`HOME_MARKS`).
 - **Menu sort** (`SORTS`): A–Ö, 01–99, Ö–A, lit yellow, green and red. Those colours are the user's choice and have
   nothing to do with the Git marks. 01–99 is the default.
 - **Private footer links** (`private: true` in `FOOTER`) are the owner's own shortcuts: claude.ai, benchlm.ai, AWS.

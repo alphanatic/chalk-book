@@ -73,9 +73,9 @@
 
 <main class="view">
   <section class="home" id="home">
-    <h1><chalk-wordmark></chalk-wordmark></h1>
+    <h1><chalk-wordmark second="Board"></chalk-wordmark></h1>
+    <nav class="home-apps" id="home-apps" aria-label="Portfolio"></nav>  <!-- one tile per entry in APPS, site/app.js -->
     <p id="home-stats"></p>
-    <p class="home-marks" id="home-marks"></p>  <!-- one mark per entry in HOME_MARKS, site/app.js -->
     <p class="hint">Pick a note from the menu, or press <kbd>/</kbd> to search inside every note.</p>
   </section>
   <iframe id="frame" title="Note" hidden></iframe>
@@ -90,11 +90,23 @@
 </aside>
 <!-- Main footer: persistent on every page, links to the site's own pages; it grows with its contents -->
 <footer class="main-footer" aria-label="Main footer">
+  <p class="footer-marks" id="footer-marks"></p>  <!-- one mark per entry in HOME_MARKS, site/app.js -->
   <nav aria-label="Main">
     <ul id="footer-links"></ul>  <!-- one link per entry in FOOTER, site/app.js -->
   </nav>
 </footer>
 <div class="scrim" id="scrim"></div>
+<!-- CloudM's holo badge, hovering bottom right: opens a card holding only the credit, links nowhere -->
+<div class="cloudm" id="cloudm">
+  <p class="cloudm-card" id="cloudm-card" hidden>powered by <b>CloudM</b></p>
+  <button class="cloudm-toggle" id="cloudm-btn" type="button" aria-expanded="false" aria-controls="cloudm-card"
+    aria-label="Powered by CloudM">
+    <span class="ring r1" aria-hidden="true"></span>
+    <span class="ring r2" aria-hidden="true"></span>
+    <span class="ring r3" aria-hidden="true"></span>
+    <img class="cloud" src="site/cloudm-cloud.svg" width="41" height="17" alt="">
+  </button>
+</div>
 
 <script src="site/notes.js"></script>
 <script src="site/notes-local.js"></script>
