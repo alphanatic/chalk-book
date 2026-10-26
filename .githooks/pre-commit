@@ -5,7 +5,7 @@
 set -euo pipefail
 root=$(git rev-parse --show-toplevel)
 
-"$root/.claude/skills/memory-dump/check.sh"
+"$root/.claude/skills/chalk-up/check.sh"
 
 # check.sh rebuilds the search index; if that changed it, the staged copy was out of date
 if ! git -C "$root" diff --quiet -- site/search-index.js; then

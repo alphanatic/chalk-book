@@ -19,7 +19,7 @@ Both parts belong together: one for you, one for the AI you work with.
 
 ## Add a note
 
-In any Claude Code session, say "chalk that up" (the `memory-dump` skill).
+In any Claude Code session, say "chalk that up" (the `chalk-up` skill).
 
 ## Rules
 
@@ -28,7 +28,7 @@ How notes are named, written, styled and checked is all in [CLAUDE.md](CLAUDE.md
 ## Checks
 
 Turn on the pre-commit checks once per clone: `git config core.hooksPath .githooks`.
-To see whether a change moved anything on the printed page: `.claude/skills/memory-dump/compare.sh`.
+To see whether a change moved anything on the printed page: `.claude/skills/chalk-up/compare.sh`.
 A readable copy is the guide note, `notes/00-chalk-book-guide.html`.
 
 ## Licence
