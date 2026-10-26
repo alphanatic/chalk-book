@@ -23,7 +23,7 @@ jobs:
       # pdftotext, for the text of the archived PDFs
       - run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
-      - run: .claude/skills/memory-dump/check.sh
+      - run: .claude/skills/chalk-up/check.sh
 
       # check.sh rebuilds the search index; a change means the committed copy was out of date
       - run: git diff --exit-code site/search-index.js

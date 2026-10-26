@@ -8,7 +8,7 @@ set -euo pipefail
 
 root=$(cd "$(dirname "$0")/../../.." && pwd)
 cd "$root"
-render="$root/.claude/skills/memory-dump/render.sh"
+render="$root/.claude/skills/chalk-up/render.sh"
 ref=HEAD
 if [ "${1:-}" = "--ref" ]; then ref=$2; shift 2; fi
 command -v compare >/dev/null || { echo "compare (ImageMagick) not found" >&2; exit 1; }

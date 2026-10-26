@@ -62,7 +62,7 @@ chalk-book/
 ├── .githooks/pre-commit          ← runs check.sh before each commit (turn on: see README)
 ├── .github/workflows/check.yml   ← runs check.sh on GitHub after each push
 ├── .progress/, .research/        ← private and gitignored: backlog, complete tasks, Linux backlog, research
-└── .claude/skills/memory-dump/   ← the note-making workflow
+└── .claude/skills/chalk-up/   ← the note-making workflow
     ├── SKILL.md
     ├── template.html
     ├── render.sh
@@ -236,7 +236,7 @@ in the code and in `meta-01-site-build`.
 - Site colours live in `site/site-theme.css`, never in `chalk-pastel.css`.
 - The name is always the shared `<chalk-wordmark>` element.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.
-- **Deploy only with `.claude/skills/memory-dump/deploy.sh`** (`-n` dry run, `--check` live checks only), never with
+- **Deploy only with `.claude/skills/chalk-up/deploy.sh`** (`-n` dry run, `--check` live checks only), never with
   hand-written steps. It sends only what is committed, sets folders `755` and files `644` on the server, and fails
   unless the live site answers `200`. On 2026-10-22 a hand-made `700` temp folder took the site down with a 403.
 - **Sets are lists.** Any set of buttons or labels in order (footer links, Export options, legend chips, table columns)
@@ -263,11 +263,11 @@ in the code and in `meta-01-site-build`.
 The notes are **read-only by design**: nobody edits a note in a viewer. Every change
 goes through an AI session.
 
-**Adding a note: the memory-dump skill**
+**Adding a note: the chalk-up skill**
 
 1. Work on something, in any project folder.
-2. While it is fresh, say **"memory-dump"**, "chalk that up" or similar. A personal pointer skill in
-   `~/.claude/skills/memory-dump/` makes this work in every folder and leads back to this project.
+2. While it is fresh, say **"chalk up"** (`/chalk-up`), "chalk that up" or similar. A personal pointer skill in
+   `~/.claude/skills/chalk-up/` makes this work in every folder and leads back to this project.
    An AI may also offer a dump; when is each user's own preference.
 3. The skill plans the note(s), copies `template.html` into `notes/`, fills it in following this
    guide, adds it as pending to `site/notes-local.js` (§2), rebuilds the search index, checks every page, then hands over
@@ -283,7 +283,7 @@ goes through an AI session.
 Notes are built by `note.js` and printed to A4 by a headless Chromium-based browser (Brave here):
 
 ```
-.claude/skills/memory-dump/render.sh notes/<name>.html [out-dir]   # → <name>.pdf, default: project root
+.claude/skills/chalk-up/render.sh notes/<name>.html [out-dir]   # → <name>.pdf, default: project root
 ```
 
 PDFs are not kept in the project; the site makes them on demand. `archive/` keeps the PDFs from before
@@ -292,7 +292,7 @@ the HTML rebuild and the last guide PDF (2026-10-13), unchanged and no longer up
 ## 7. Rules for AI assistants
 
 - Read this file before creating or changing anything in the chalk book.
-- Use the `memory-dump` skill to make notes, and `chalk-pastel.css` for every colour.
+- Use the `chalk-up` skill to make notes, and `chalk-pastel.css` for every colour.
 - Match the existing notes' structure and look exactly; open one as a reference if unsure.
 - **Read little first.** To find something, stop at the first step that answers it: the catalogue (`site/notes.js`)
   → hits with context, `grep -o -i -P '.{0,150}<word>.{0,150}' site/search-index.js` → one section,

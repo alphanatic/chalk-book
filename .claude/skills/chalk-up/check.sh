@@ -99,11 +99,11 @@ echo "9. Viewport"
 grep -L 'name="viewport"' notes/*.html | sed 's/$/:1/' | report "no viewport tag: phones show it zoomed out" || true
 
 echo "10. Skill descriptions"
-# The repo skill and the personal pointer skill (~/.claude/skills/memory-dump/) must describe themselves the same way
-pointer="$HOME/.claude/skills/memory-dump/SKILL.md"
+# The repo skill and the personal pointer skill (~/.claude/skills/chalk-up/) must describe themselves the same way
+pointer="$HOME/.claude/skills/chalk-up/SKILL.md"
 if [ -f "$pointer" ]; then
-  [ "$(grep -m1 '^description:' "$pointer")" = "$(grep -m1 '^description:' .claude/skills/memory-dump/SKILL.md)" ] \
-    || fail ".claude/skills/memory-dump/SKILL.md:3  description differs from the pointer skill in ~/.claude/skills/memory-dump/"
+  [ "$(grep -m1 '^description:' "$pointer")" = "$(grep -m1 '^description:' .claude/skills/chalk-up/SKILL.md)" ] \
+    || fail ".claude/skills/chalk-up/SKILL.md:3  description differs from the pointer skill in ~/.claude/skills/chalk-up/"
 else
   echo "  skipped (no pointer skill)"
 fi
@@ -113,7 +113,7 @@ if [ "${1:-}" = "--render" ]; then
   changed=$( { git diff --name-only HEAD -- 'notes/*.html'; git ls-files --others --exclude-standard -- 'notes/*.html'; } | sort -u)
   [ -n "$changed" ] || echo "  no changed notes"
   for f in $changed; do
-    [ -f "$f" ] && "$root/.claude/skills/memory-dump/render.sh" "$f" "$tmp" | sed 's/^/  /'
+    [ -f "$f" ] && "$root/.claude/skills/chalk-up/render.sh" "$f" "$tmp" | sed 's/^/  /'
   done
 fi
 

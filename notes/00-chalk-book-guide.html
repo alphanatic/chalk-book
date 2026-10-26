@@ -56,7 +56,7 @@ chalk-book/
 ├── .githooks/pre-commit          # runs check.sh before each commit
 ├── .github/workflows/check.yml   # runs check.sh on GitHub after each push
 ├── .progress/, .research/        # private and gitignored: backlog, Linux backlog, research
-└── .claude/skills/memory-dump/   # the note-making workflow
+└── .claude/skills/chalk-up/   # the note-making workflow
 ```
 
 ### File naming
@@ -191,9 +191,9 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 
 > Concept · The notes are **read-only by design**. Nobody edits a note in a viewer; every change goes through an AI session.
 
-### Adding a note: the memory-dump skill
+### Adding a note: the chalk-up skill
 1. Work on something, in any project folder.
-2. While it is fresh, say **“memory-dump”** or **“chalk that up”**. A personal pointer skill makes this work in every folder. An AI may also offer a dump; when is each user's own preference.
+2. While it is fresh, say **“chalk up”** (`/chalk-up`) or **“chalk that up”**. A personal pointer skill makes this work in every folder. An AI may also offer a dump; when is each user's own preference.
 3. The skill plans the notes, fills the template in `notes/`, adds them as pending to `site/notes-local.js`, rebuilds the search index, runs `check.sh` and checks every page, then hands over following the user's own git preferences.
 4. Check the note on the site and ask for any changes in the same session.
 
@@ -203,15 +203,15 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 
 ### Local · Rendering and checks
 ```local
-.claude/skills/memory-dump/render.sh notes/<name>.html [out-dir]   # → <name>.pdf
-.claude/skills/memory-dump/check.sh [--render]                      # must pass before every commit
-.claude/skills/memory-dump/deploy.sh [-n | --check]                 # -n dry run, --check live checks only
+.claude/skills/chalk-up/render.sh notes/<name>.html [out-dir]   # → <name>.pdf
+.claude/skills/chalk-up/check.sh [--render]                      # must pass before every commit
+.claude/skills/chalk-up/deploy.sh [-n | --check]                 # -n dry run, --check live checks only
 ```
 
 ## Rules for AI assistants
 
 - Read `CLAUDE.md` before creating or changing anything in the chalk book.
-- Use the `memory-dump` skill to make notes, and `chalk-pastel.css` for every colour.
+- Use the `chalk-up` skill to make notes, and `chalk-pastel.css` for every colour.
 - Match the existing notes' structure and look exactly; open one as a reference if unsure.
 - **Read little first.** To find something, stop at the first step that answers it: the catalogue in `site/notes.js`, then hits with context in `site/search-index.js`, then one section (from `## Bugs` to the next `##`), and the whole note only when the task needs all of it.
 - Never edit, rename or delete an existing note or archived PDF unless the user asks.
