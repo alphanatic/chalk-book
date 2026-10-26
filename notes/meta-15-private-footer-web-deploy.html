@@ -35,7 +35,7 @@ pkill -f "user-data-dir=<profile>"  # stop that Brave only
 { label: "AWS", href: "…", private: true },  »  was "aws or"
 else if (f.private) dropIfMissing(li, PAGES.backlog.file);  »  no Backlog page: no link
 ```
-> Concept · "Private" means: shown only where the private Backlog page exists. On the web copy `.progress/` is never uploaded, so the links drop out.
+> Concept · "Private" means: shown only where the private Backlog page exists. On the web copy `.handoffs/` is never uploaded, so the links drop out.
 
 ### Local · Commit and push
 ```local
@@ -52,7 +52,7 @@ rsync -az --delete -n -i $T/ web-deploy:/var/www/web/ | grep -v '^\.d'  # -n dry
 rsync -az --delete $T/ web-deploy:/var/www/web/  # the real sync
 rsync -az -c --delete -n -i $T/ web-deploy:/var/www/web/ | grep -v '^\.d' | wc -l  # -c checksum: 0
 ```
-> Key rule · Deploy from `git archive HEAD`, never the working folder: private notes, `notes-local.js` and `.progress/` can't go up.
+> Key rule · Deploy from `git archive HEAD`, never the working folder: private notes, `notes-local.js` and `.handoffs/` can't go up.
 
 > Updated rule · From 2026-10-22 the sync is one script: `.claude/skills/memory-dump/deploy.sh` (`-n` dry run, `--check` live checks only). It adds `--chmod=D755,F644` and ends with a `curl` of the live site.
 

@@ -12,7 +12,7 @@ How the site looks now lives in the code and in note 01; `CLAUDE.md` keeps only 
 - Five suspected contradictions checked against the repo: three true, one partly, one false
 - §5 "The site" split into rules (kept) and description (cut, −2,410 bytes)
 - Block colours, layout and the sync rule merged into shorter forms
-- The §2 tree gained `build-index.mjs`, `.prog/`, `.research/` and `backlog-workflow/`
+- The §2 tree gained `build-index.mjs`, `.handoffs/`, `.research/` and `backlog-workflow/`
 - Guide HTML synced; the guide PDF moved to `archive/` and no longer updated
 - Seven site details found that no note records
 
@@ -30,7 +30,7 @@ How the site looks now lives in the code and in note 01; `CLAUDE.md` keeps only 
 ```local
 wc -c CLAUDE.md                      # -c: bytes. 16,933; the result must be below this
 wc -w CLAUDE.md                      # -w: words. 2,737, for the report
-ls site/pages/ .prog/                # where Complete Tasks really lives
+ls site/pages/ .handoffs/            # where Complete Tasks really lives
 ls README.md site/build-index.mjs    # do the files the tree should list exist?
 ls notes/fonts/                      # which fonts are bundled: only Inter
 grep -n -i font notes/note-layout.css   # -n: line no., -i: any case; DejaVu → monospace
@@ -38,10 +38,10 @@ grep -n -i font notes/note-layout.css   # -n: line no., -i: any case; DejaVu →
 
 ### Contradictions checked
 |  | Claim | Verdict | Fix
-| a | Complete Tasks in `site/pages/` and in `.prog/` | True | Only `.prog/complete.html` exists; stale line cut
+| a | Complete Tasks in `site/pages/` and in `.handoffs/` | True | Only `.handoffs/complete.html` exists; stale line cut
 | b | Tree lists README, still on the backlog | False | README exists; the backlog was stale instead
 | c | `build-index.mjs` missing from the tree | True | Added
-| d | Private folders missing from the tree | True | One line for `.prog/` and `.research/`, one for `backlog-workflow/`
+| d | Private folders missing from the tree | True | One line for `.handoffs/` and `.research/`, one for `backlog-workflow/`
 | e | All fonts seem bundled | Partly | Says DejaVu comes from the system
 
 ### Changes and their size
@@ -87,7 +87,7 @@ fix: Spotted from a screenshot of the full brief and reported against each const
 
 #### Bug · Stale git step in the backlog
 cause: The backlog's "how to work this list" still said "One commit per item … Push only when the user says so", after the git rules changed.
-fix: It now says never commit `.prog/`, and any other git step follows the user's own preferences.
+fix: It now says never commit `.handoffs/`, and any other git step follows the user's own preferences.
 
 ## Where things live
 

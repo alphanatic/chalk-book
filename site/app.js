@@ -26,11 +26,11 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const MIN_QUERY = 2;
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
-    // The private progress pages (.progress/ is gitignored), shown in the viewer. Their footer
+    // The private progress pages (.handoffs/ is gitignored), shown in the viewer. Their footer
     // buttons show only where the page exists, so a hosted copy has none
-    backlog: { title: "Backlog", file: ".progress/backlog.html", private: true },
-    complete: { title: "Complete Tasks", file: ".progress/complete-tasks.html", private: true },
-    linux: { title: "Linux", file: ".progress/linux.html", private: true },
+    backlog: { title: "Backlog", file: ".handoffs/backlog.html", private: true },
+    complete: { title: "Complete Tasks", file: ".handoffs/complete-tasks.html", private: true },
+    linux: { title: "Linux", file: ".handoffs/linux.html", private: true },
     contact: { title: "Contact", file: "site/pages/contact.html" },
   };
   // The bottom bar, in order: a site page by its PAGES key ("" is Home), or an outside link.

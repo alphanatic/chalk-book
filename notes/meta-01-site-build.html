@@ -15,7 +15,7 @@ Every later note comes out of this workflow. The rules live in `CLAUDE.md`, and 
 - Rebuilt the original PDFs as HTML notes on `chalk-pastel.css`, and kept the originals in `archive/`
 - A static site in Claude dark-mode greys, with no build step, that opens straight from disk
 - Full-text search with highlighting, a Recently viewed rail, and Export → Save as PDF
-- A persistent main footer with Contact, plus private Backlog and Complete Tasks pages in `.prog/`
+- A persistent main footer with Contact, plus private Backlog and Complete Tasks pages in `.handoffs/`
 - Pushed to the private GitHub repo `alphanatic/chalk-book` over HTTPS, with private folders kept out
 
 ## The workflow
@@ -58,7 +58,7 @@ git push -u origin main                                        # -u: track origi
 ### Config · Private folders kept out of git
 ```config: .gitignore
 .research/  »  market and competitor notes
-.prog/  »  the Backlog and Complete Tasks pages
+.handoffs/  »  the Backlog and Complete Tasks pages
 .claude/settings.local.json  »  personal permission rules
 archive/backlog-workflow/  »  records of the old backlog design
 .vscode/  »  editor settings
@@ -85,8 +85,8 @@ archive/backlog-workflow/  »  records of the old backlog design
 ### Routes · Site pages by address {paths}
 ```config: site/app.js
 const PAGES = {
-  backlog: { title: "Backlog", file: ".prog/index.html", hideRecent: true },
-  complete: { title: "Complete Tasks", file: ".prog/complete.html" },
+  backlog: { title: "Backlog", file: ".handoffs/index.html", hideRecent: true },
+  complete: { title: "Complete Tasks", file: ".handoffs/complete.html" },
   contact: { title: "Contact", file: "site/pages/contact.html" },
 };
 ```
@@ -105,7 +105,7 @@ const PAGES = {
 | Narrow windows | The name is hidden first (820 px), then the note title (600 px)
 
 ### Private · Backlog and Complete Tasks {paths}
-1. Both live in `.prog/`. They're gitignored, so online the footer links lead to empty pages.
+1. Both live in `.handoffs/`. They're gitignored, so online the footer links lead to empty pages.
 2. They cover Chalk Book itself only. Work inside a project goes in that project's roadmap in `site/notes.js`.
 3. An item moves to Complete Tasks **only when asked**: its whole card, with a Done chip and a date added. It keeps its number and `id`, and no details are invented.
 
@@ -133,7 +133,7 @@ fix: Mark text uses `var(--ink)` on screen. In print, highlights are hidden and 
 
 #### Bug · Backlog opened halfway down the page
 cause: The route pointed to an anchor (`#naming-parts`) inside the page.
-fix: Route to the bare file, `.prog/index.html`.
+fix: Route to the bare file, `.handoffs/index.html`.
 
 #### Bug · headless test browser kept the profile locked
 cause: Piping a test into `| head` killed the script with EPIPE, and the headless Brave it started kept running.
@@ -165,7 +165,7 @@ for page in doc:                                     # doc = fitz.open("archive/
 | Shared note layout and script | `notes/note-layout.css`, `notes/note.js`
 | Site logic and styles | `site/app.js`, `site/app.css`
 | Contact page | `site/pages/contact.html`
-| Private progress pages | `.prog/index.html`, `.prog/complete.html`
+| Private progress pages | `.handoffs/index.html`, `.handoffs/complete.html`
 | Original PDFs | `archive/`
 
 ## Best practices

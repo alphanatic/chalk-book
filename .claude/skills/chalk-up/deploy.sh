@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Publish the committed site to the web server, then check that it is live.
-# Only files in HEAD go up (git archive), so private notes, notes-local.js and .progress/ never can.
+# Only files in HEAD go up (git archive), so private notes, notes-local.js and .handoffs/ never can.
 # --chmod sets folders 755 and files 644 on the server, whatever the temp folder's mode: on 2026-10-22 a
 # 700 folder from mktemp -d made /var/www/web/ unreadable for nginx, and the site answered 403.
 # Usage: deploy.sh [-n | --check]    (-n: dry run, list what would change · --check: only the live checks)

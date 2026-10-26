@@ -1,4 +1,4 @@
-// Backlog and Complete Tasks: legends, platform filter and sortable overview, shared by the private pages in .progress/
+// Backlog and Complete Tasks: legends, platform filter and sortable overview, shared by the private pages in .handoffs/
 
 // ── Sets of buttons and labels, in order. The pages hold only empty containers; one element per entry is made here ──
 // Legend chips by key: [kind of chip, label]. Each page's .legend names its keys in data-chips; "|" is a separator

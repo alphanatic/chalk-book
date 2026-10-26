@@ -1,8 +1,8 @@
 # Private research (competition, market notes) — never committed
 .research/
 
-# Private progress: backlog and complete tasks for the chalk book itself — never committed
-.progress/
+# Private: handoffs (3 newest, older in handoff-archive/), backlog, complete tasks and Linux pages for the chalk book itself — never committed
+.handoffs/
 
 # Personal Claude Code settings for this machine — never committed
 .claude/settings.local.json

@@ -4,7 +4,7 @@ The backlog's look, showing only what is done
 
 Rebuilt the private Complete Tasks page from the backlog's own styles and articles, filtered to items marked done. Then refined it step by step: renamed legacy items, a source-sorted overview, and a watermark tried and removed.
 
-Both pages live in `.prog/`, which is gitignored, so none of this is committed.
+Both pages live in `.handoffs/`, which is gitignored, so none of this is committed.
 
 ## What we covered
 
@@ -14,7 +14,7 @@ Both pages live in `.prog/`, which is gitignored, so none of this is committed.
 - Legacy items renamed C12, C13, C16 → `L1`, `L2`, `L3`, with invented rank, platform and kind
 - Overview sorted in the source: 1, 2, 4, 6, L1, L2, L3; no sort script
 - Removed on request: the "For AI" callout, the Done date column, and a corner watermark
-- A handoff file written for the next session: `.prog/handoff-2026-10-13c.md`
+- A handoff file written for the next session: `.handoffs/handoff-2026-10-13c.md`
 
 ## How the page is put together
 
@@ -31,31 +31,31 @@ Both pages live in `.prog/`, which is gitignored, so none of this is committed.
 
 ### Local · Look before building
 ```local
-cat .prog/complete.html                       # the old page: 3 items, struck-through titles
-grep -n 'data-status="done"\|<h2' .prog/index.html  # -n: line numbers. Done items, sections
-sed -n '/<script/,/<\/script>/p' .prog/index.html    # print only the filter script
-cp .prog/complete.html <scratchpad>/complete.backup.html   # backup before overwriting
+cat .handoffs/complete.html                   # the old page: 3 items, struck-through titles
+grep -n 'data-status="done"\|<h2' .handoffs/index.html  # -n: line numbers. Done items, sections
+sed -n '/<script/,/<\/script>/p' .handoffs/index.html    # print only the filter script
+cp .handoffs/complete.html <scratchpad>/complete.backup.html   # backup before overwriting
 ```
 
 ### Local · Build, then check by eye
 ```html
-<div class="block local"><pre>python3 -I &lt;scratchpad&gt;/build.py .prog/index.html .prog/complete.html .prog/complete.html
+<div class="block local"><pre>python3 -I &lt;scratchpad&gt;/build.py .handoffs/index.html .handoffs/complete.html .handoffs/complete.html
                                               <span class="cmt"># -I: isolated mode. Copies the done articles</span>
 brave --headless=new --window-size=1100,2400 \
-  --screenshot=&lt;scratchpad&gt;/c.png "file://$PWD/.prog/complete.html"
+  --screenshot=&lt;scratchpad&gt;/c.png "file://$PWD/.handoffs/complete.html"
                                               <span class="cmt"># render the page to a PNG, no window</span></pre></div>
 ```
 
 ### Local · Rename the legacy items
 ```html
-<div class="block local"><pre>sed -i 's/\bC12\b/L01/g; s/id="c12"/id="l01"/g; s/"#c12"/"#l01"/g' .prog/complete.html
+<div class="block local"><pre>sed -i 's/\bC12\b/L01/g; s/id="c12"/id="l01"/g; s/"#c12"/"#l01"/g' .handoffs/complete.html
                                               <span class="cmt"># -i: in place. \b: whole word. Label, id, link</span>
-grep -ci 'c1[236]' .prog/complete.html        <span class="cmt"># -c: count, -i: any case. 0 = no old names left</span></pre></div>
+grep -ci 'c1[236]' .handoffs/complete.html    <span class="cmt"># -c: count, -i: any case. 0 = no old names left</span></pre></div>
 ```
 
 ### Local · Before any commit
 ```local
-git check-ignore -v .prog/complete.html       # -v: show the rule. .gitignore:5 .prog/
+git check-ignore -v .handoffs/complete.html       # -v: show the rule. .gitignore:5 .handoffs/
 .claude/skills/memory-dump/check.sh           # all checks passed
 ```
 
@@ -96,9 +96,9 @@ fix: Asked instead of guessing: C13 → L02, C16 → L03. Later shortened to L1�
 ## Where things live
 
 | What | Path
-| Backlog (open items, private) | `.prog/index.html` · site `#backlog`
-| Complete Tasks (done items, private) | `.prog/complete.html` · site `#complete`
-| Session handoff | `.prog/handoff-2026-10-13c.md`
+| Backlog (open items, private) | `.handoffs/index.html` · site `#backlog`
+| Complete Tasks (done items, private) | `.handoffs/complete.html` · site `#complete`
+| Session handoff | `.handoffs/handoff-2026-10-13c.md`
 | The rule that no longer matches | `CLAUDE.md` §5 "Moving a finished item"
 
 > Gotcha · Done items now sit on both pages, and `CLAUDE.md` still says to *move* them. Both are open, waiting for the user's call.
