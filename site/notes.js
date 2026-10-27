@@ -1,6 +1,6 @@
 /* The chalk-book catalogue: every project and note the site lists.
    chalk-up adds one note entry per new note. Loaded as a script (not fetched as JSON)
-   so index.html also works when opened straight from disk.
+   so chalk-board.html also works when opened straight from disk.
 
    Projects  name, palette colour, optional status and modules (the planned roadmap)
    Notes     id = file name without .html · project = key into CHALK_PROJECTS · n = number in the project

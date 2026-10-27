@@ -3,115 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chalk Book</title>
+<title>Chalk Board</title>
 <link rel="icon" href="site/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="chalk-pastel.css">
-<link rel="stylesheet" href="site/site-theme.css">
-<link rel="stylesheet" href="site/app.css">
+<!-- Placeholder until the new landing page: forwards to the chalk book, keeping any #note-id -->
+<script>location.replace("chalk-board.html" + location.hash);</script>
+<meta http-equiv="refresh" content="0; url=chalk-board.html">
 </head>
-<body class="left-collapsed rail">
-
-<header class="topbar">
-  <div class="topbar-rail">
-    <!-- Menu button: three chalk sticks lying down -->
-    <button class="icon-btn" id="menu-btn" type="button" aria-label="Collapse or expand the notes menu"
-      aria-controls="nav-menu" aria-expanded="true">
-      <svg class="chalk-sticks" viewBox="0 0 24 24" aria-hidden="true">
-        <rect class="pink" x="3" y="5" width="18" height="3.4" rx="1.7"/>
-        <rect class="butter" x="4.5" y="10.3" width="16" height="3.4" rx="1.7"/>
-        <rect class="sky" x="3.5" y="15.6" width="17" height="3.4" rx="1.7"/>
-      </svg>
-    </button>
-  </div>
-  <a class="brand" href="#" title="Home"><chalk-wordmark></chalk-wordmark></a>
-  <span class="current" id="current"></span>
-  <!-- Export: a small menu of ways to take the open note elsewhere. New options are entries in EXPORTS -->
-  <div class="export">
-    <button class="btn" id="export-btn" type="button" aria-haspopup="menu" aria-expanded="false"
-      aria-controls="export-menu" disabled>
-      Export
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
-    </button>
-    <div class="export-menu" id="export-menu" role="menu" hidden></div>  <!-- one item per entry in EXPORTS, site/app.js -->
-  </div>
-  <!-- Recently viewed button: a chalk clock, centred over the right rail -->
-  <div class="topbar-rail right">
-    <button class="icon-btn" id="recent-btn" type="button" aria-label="Show or hide recently viewed"
-      aria-controls="recent" aria-expanded="false" title="Recently viewed">
-      <svg class="chalk-clock" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="8.6"/>
-        <rect class="butter" x="10.7" y="6" width="2.6" height="7.3" rx="1.3"/>
-        <rect class="pink" x="10.7" y="10.7" width="6" height="2.6" rx="1.3"/>
-      </svg>
-    </button>
-  </div>
-</header>
-
-<!-- Left: search on top, then every note grouped by project. Collapses to a rail of numbers -->
-<nav class="panel left" id="nav-menu" aria-label="Notes">
-  <div class="panel-body">
-    <label class="search">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
-      <input id="search" type="search" placeholder="Search notes" autocomplete="off" spellcheck="false"
-        aria-label="Search inside every note">
-      <kbd>/</kbd>
-    </label>
-    <!-- Shown instead of the field when the menu is a rail: a diagonal chalk stick -->
-    <button class="file search-rail" id="search-rail" type="button" title="Search inside every note" aria-label="Search">
-      <svg class="chalk-stick" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="9.6" y="2.5" width="4.8" height="19" rx="2.1" transform="rotate(45 12 12)"/>
-        <rect class="tip" x="9.6" y="2.5" width="4.8" height="4" rx="2.1" transform="rotate(45 12 12)"/>
-      </svg>
-    </button>
-    <!-- Menu order: one button per entry in SORTS, site/app.js. Hidden on the rail and while searching -->
-    <div class="sort" id="menu-sort" role="group" aria-label="Sort the menu"></div>
-    <div id="find-list" hidden></div>
-    <div id="menu-list"></div>
-    <p class="panel-foot" id="menu-foot"></p>
-  </div>
-</nav>
-
-<main class="view">
-  <section class="home" id="home">
-    <h1><chalk-wordmark second="Board"></chalk-wordmark></h1>
-    <nav class="home-apps" id="home-apps" aria-label="Portfolio"></nav>  <!-- one tile per entry in APPS, site/app.js -->
-    <p id="home-stats"></p>
-    <p class="hint">Pick a note from the menu, or press <kbd>/</kbd> to search inside every note.</p>
-  </section>
-  <iframe id="frame" title="Note" hidden></iframe>
-</main>
-
-<!-- Right: recently viewed notes, styled as the menu's mirror image -->
-<aside class="panel right" id="recent" aria-label="Recently viewed">
-  <div class="panel-body">
-    <div id="recent-list"></div>
-    <p class="panel-foot" id="recent-foot"></p>
-  </div>
-</aside>
-<!-- Main footer: persistent on every page, links to the site's own pages; it grows with its contents -->
-<footer class="main-footer" aria-label="Main footer">
-  <p class="footer-marks" id="footer-marks"></p>  <!-- one mark per entry in HOME_MARKS, site/app.js -->
-  <nav aria-label="Main">
-    <ul id="footer-links"></ul>  <!-- one link per entry in FOOTER, site/app.js -->
-  </nav>
-</footer>
-<div class="scrim" id="scrim"></div>
-<!-- CloudM's holo badge, hovering bottom right: opens a card holding only the credit, links nowhere -->
-<div class="cloudm" id="cloudm">
-  <p class="cloudm-card" id="cloudm-card" hidden>powered by <b>CloudM</b></p>
-  <button class="cloudm-toggle" id="cloudm-btn" type="button" aria-expanded="false" aria-controls="cloudm-card"
-    aria-label="Powered by CloudM">
-    <span class="ring r1" aria-hidden="true"></span>
-    <span class="ring r2" aria-hidden="true"></span>
-    <span class="ring r3" aria-hidden="true"></span>
-    <img class="cloud" src="site/cloudm-cloud.svg" width="41" height="17" alt="">
-  </button>
-</div>
-
-<script src="site/notes.js"></script>
-<script src="site/notes-local.js"></script>
-<script src="site/search-index.js"></script>
-<script src="site/search-local.js"></script>
-<script src="site/app.js"></script>
+<body style="background:#1e1e24">
+<p><a href="chalk-board.html" style="color:#ddd">Open the chalk book</a></p>
 </body>
 </html>
