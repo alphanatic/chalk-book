@@ -43,7 +43,8 @@ chalk-book/
 ├── LICENSE                       # CC BY-NC 4.0 for notes and palette, MIT for the rest
 ├── CLAUDE.md                     # this guide (source of truth)
 ├── chalk-pastel.css              # the note colour palette (user-owned)
-├── index.html                    # the site: open it in a browser
+├── index.html                    # the landing page (for now, forwards to chalk-board.html)
+├── chalk-board.html              # the site: open it in a browser
 ├── site/                         # catalogue, menu, search (build-index.mjs), dark theme, private-page style
 ├── notes/                        # one file per note, chalk markup
 │   ├── tinker-town-01-aws-ssh-firewall.html …
@@ -174,7 +175,7 @@ sudo mkdir -p /mnt/data  # -p: create parents, no error if it exists
 ```
 
 ### The site
-- `index.html` opens straight from disk, no build step. How it looks and behaves is in the code and in `meta-01-site-build`.
+- `chalk-board.html` opens straight from disk, no build step. How it looks and behaves is in the code and in `meta-01-site-build`.
 - Site colours live in `site/site-theme.css`, never in the note palette. The name is always the shared `<chalk-wordmark>`; on Home it reads Chalk Board, the portfolio's name.
 - Home tiles (`APPS`) are the sites served next to the chalk book. Each shows only where it answers: a relative path on the server, its dev server on localhost. Never a server's address: the site code is public.
 - After adding or changing a note, rebuild the search index: `node site/build-index.mjs`.

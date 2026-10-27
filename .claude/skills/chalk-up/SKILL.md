@@ -115,7 +115,7 @@ Then rebuild the search index so the new text is searchable: `node site/build-in
   emails, admin accounts (only `adm-<alias>`, or the original author's `adm-kiwi`), the private block list and the catalogue, in notes and PDFs.
 - After changing shared files (`note.js`, `note-layout.css`, `chalk-pastel.css`) or existing notes, run
   `.claude/skills/chalk-up/compare.sh`: every note it reports as different must be one you meant to change.
-- Open `index.html#<name>` and confirm the note appears in the menu and displays.
+- Open `chalk-board.html#<name>` and confirm the note appears in the menu and displays.
 - Re-render after every fix. PDFs are not kept; the site's Export → Save as PDF makes them on demand.
 
 ## 7. Hand over
