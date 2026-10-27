@@ -5,7 +5,7 @@ work sessions with an AI so it can be repeated cold months later.
 
 ## View
 
-Open `chalk-board.html` in a browser. No build step, no server. Any note can be saved as PDF
+Open `chalkbook.html` in a browser. No build step, no server. Any note can be saved as PDF
 from the site's Export menu.
 
 ## Before your first note

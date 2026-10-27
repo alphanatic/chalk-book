@@ -17,6 +17,11 @@
   --git-butter-mark:   var(--butter-chip); /* yellow on yellow: pending notes, public or private not decided */
   --git-butter-ring:   var(--butter);
   --lkgexp-green:      #10A437;   /* the lkgexp droplet on Home: that site's logo green, never recoloured */
+  /* The review tile's flower on Home: the reviewed concepts' own palette, never recoloured */
+  --review-cream:      #efe6c8;   /* the cream petals */
+  --review-sage:       #a9c48a;   /* the sage petals */
+  --review-moss:       #5f8a4a;   /* the leaves between them */
+  --review-gold:       #b59a62;   /* the heart */
   /* The CloudM holo badge, bottom right: CloudM's own colours from cloudm.one, never recoloured */
   --cloudm-disc-core:  #13306a;   /* the disc's glowing middle */
   --cloudm-disc:       #0b1a3d;   /* the disc */

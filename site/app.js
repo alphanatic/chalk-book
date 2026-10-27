@@ -52,7 +52,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
   // The portfolio under Home's name: the sites served next to the chalk book, left to right, each a tile with its icon
-  // and name, shown only where it is served: a water droplet for the lkgexp menu, a Poké Ball for the Pokéggdex.
+  // and name, shown only where it is served: a water droplet for the lkgexp menu, a Poké Ball for the Pokéggdex,
+  // a flower for the concept review page (no dev server: shown only on the web server).
   // Served locally, each is its npm dev server (npm run dev in its own project folder; the Pokéggdex's is ~/Projects/pokeggdex)
   const onLocalhost = ["localhost", "127.0.0.1"].includes(location.hostname);
   const APPS = [
@@ -64,6 +65,11 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       icon: '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="shell" cx="50" cy="50" r="45"/>' +
         '<path class="cap" d="M7.5 50a42.5 42.5 0 0 1 85 0z"/><line class="band" x1="5" y1="50" x2="95" y2="50"/>' +
         '<circle class="knob" cx="50" cy="50" r="13"/></svg>' },
+    { kind: "flower", label: "Review", href: "/review/concepts/", title: "Open the concept review",
+      icon: '<svg viewBox="-38 -38 76 76" aria-hidden="true"><g class="spin">' +
+        '<ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(30)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(90)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(150)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(210)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(270)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(330)"/>' +
+        '<ellipse class="petal" cy="-17" rx="8" ry="14" transform="rotate(0)"/><ellipse class="petal sage" cy="-17" rx="8" ry="14" transform="rotate(60)"/><ellipse class="petal" cy="-17" rx="8" ry="14" transform="rotate(120)"/><ellipse class="petal sage" cy="-17" rx="8" ry="14" transform="rotate(180)"/><ellipse class="petal" cy="-17" rx="8" ry="14" transform="rotate(240)"/><ellipse class="petal sage" cy="-17" rx="8" ry="14" transform="rotate(300)"/>' +
+        '</g><circle class="heart" r="6.5"/></svg>' },
   ];
   // The GitHub marks at the left end of the bottom bar, left to right, each with its count of notes
   const HOME_MARKS = [
