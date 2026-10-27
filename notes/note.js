@@ -76,7 +76,7 @@ function inline(s, notes) {
     .replace(/(^|[^\w*])\*([^*\s](?:[^*]*[^*\s])?)\*(?![\w*])/g, "$1<i>$2</i>")
     .replace(/\[\[([a-z0-9-]+)(?:\|([^\]]+))?\]\]/g, (m, id, text) => {
       const n = notes.find(x => x.id === id);
-      return `<a href="../chalk-board.html#${id}" target="_top">${text ?? (n ? esc(`${String(n.n).padStart(2, "0")} ${n.title}`) : id)}</a>`;
+      return `<a href="../chalkbook.html#${id}" target="_top">${text ?? (n ? esc(`${String(n.n).padStart(2, "0")} ${n.title}`) : id)}</a>`;
     })
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
   return s.replace(/\u0000(\d+)\u0000/g, (m, k) => `<code>${esc(code[k])}</code>`);

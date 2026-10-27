@@ -18,7 +18,7 @@ check() {
   bad=$(ssh -T "$host" "find $dest \( -type d ! -perm 755 \) -o \( -type f ! -perm 644 \)")
   if [[ -n $bad ]]; then echo "FAIL  wrong mode (want folders 755, files 644):"; echo "$bad" | head; failed=1; fi
   url="http://$(ssh -G "$host" 2>/dev/null | awk '$1 == "hostname" { print $2 }')"
-  for p in / /index.html /chalk-board.html /site/app.js /notes/note.js; do
+  for p in /chalkbook.html /site/app.js /notes/note.js; do
     code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$url$p")
     if [[ $code == 200 ]]; then echo "ok    $code  $p"; else echo "FAIL  $code  $p"; failed=1; fi
   done
@@ -29,12 +29,14 @@ if [[ $mode == --check ]]; then check; exit; fi
 
 [[ -z $(git status --porcelain) ]] || echo "Uncommitted changes stay local: only HEAD $(git rev-parse --short HEAD) goes up."
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
-git archive HEAD index.html chalk-board.html chalk-pastel.css LICENSE site notes | tar -x -C "$tmp"
+git archive HEAD chalkbook.html chalk-pastel.css LICENSE site notes | tar -x -C "$tmp"
 if [[ -e $tmp/site/notes-local.js || -e $tmp/site/search-local.js ]]; then
   echo "FAIL  a private catalogue file is committed; nothing was sent"; exit 1
 fi
 
-opts=(-az --delete --chmod=D755,F644)
+# / belongs to another site, uploaded on its own: P keeps its files out of --delete
+keep=(--filter="P /index.html" --filter="P /index.html.bak-*" --filter="P /_astro/" --filter="P /fonts/" --filter="P /lab/" --filter="P /dev-roadmap/" --filter="P /review/")
+opts=(-az --delete --chmod=D755,F644 "${keep[@]}")
 if [[ $mode == -n ]]; then rsync "${opts[@]}" -n -i "$tmp"/ "$host:$dest/"; exit; fi
 rsync "${opts[@]}" "$tmp"/ "$host:$dest/"
 left=$(rsync "${opts[@]}" -c -n -i "$tmp"/ "$host:$dest/" | wc -l)   # -c checksum: nothing left to send

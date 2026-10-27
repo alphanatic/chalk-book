@@ -239,6 +239,14 @@ body:not(.recent-open) .panel.right { display: none; }
 .home-app.game .cap { fill: var(--coral); }
 .home-app.game .band { stroke: var(--coral-chip); stroke-width: 7; }
 .home-app.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
+/* The review tile: a flower in the reviewed concepts' palette, its petals and leaves turning together */
+.home-app.flower svg { width: 32px; }
+.home-app.flower .spin { transition: transform .4s ease; }
+.home-app.flower:hover .spin { transform: rotate(60deg); }
+.home-app.flower .leaf { fill: var(--review-moss); }
+.home-app.flower .petal { fill: var(--review-cream); }
+.home-app.flower .petal.sage { fill: var(--review-sage); }
+.home-app.flower .heart { fill: var(--review-gold); stroke: var(--shell-raise); stroke-width: 2.5; }
 .home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
 
 /* ── Main footer: the persistent footer on every page. Subtle, centred links that wrap and grow with their contents ── */
