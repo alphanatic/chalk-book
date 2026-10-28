@@ -94,10 +94,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3;
   // Menu projects opened with their dot; the rest start folded
   const FOLD_KEY = "chalk.open-projects";
-  // Side panels on wide screens: "closed" once closed there, open otherwise
-  const MENU_KEY = "chalk.menu";
-  const wanted = key => { try { return localStorage.getItem(key) !== "closed"; } catch { return true; } };
-  const keep = (key, open) => { if (!narrow.matches) try { localStorage.setItem(key, open ? "open" : "closed"); } catch {} };
 
   // ?filler=40 adds placeholder notes, to test how the panels behave when full
   const filler = Number(new URLSearchParams(location.search).get("filler")) || 0;
@@ -190,7 +186,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       set(now);
       if (now && !menuOpen()) {
         setMenu(true);
-        keep(MENU_KEY, true);
         centre(group);
       }
     });
@@ -327,8 +322,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   }
   // Switch to the rail layout only once the slide has closed, so the text clips away instead of jumping
   menuEl.addEventListener("transitionend", e => { if (e.target === menuEl) syncMenu(); });
-  // Wide screens open the menu unless it was last closed there; phones always start closed
-  const resetMenu = () => setMenu(!narrow.matches && wanted(MENU_KEY));
+  // Every page load starts on the rail, on any screen
+  const resetMenu = () => setMenu(false);
   function openSearch() {
     if (!menuOpen()) setMenu(true);
     search.focus();
@@ -409,8 +404,10 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   function dropIfMissing(li, file, onDisk = true) {
     if (location.protocol === "file:") { if (!onDisk) li.remove(); return; }
     // no-cors so another local server can be checked too: it answers with an opaque response when it's up
+    // hidden until the page answers, so a missing one never flashes on load
+    li.hidden = true;
     fetch(file, { method: "HEAD", mode: "no-cors" })
-      .then(r => { if (!r.ok && r.type !== "opaque") li.remove(); }).catch(() => li.remove());
+      .then(r => { if (r.ok || r.type === "opaque") li.hidden = false; else li.remove(); }).catch(() => li.remove());
   }
 
   // ── Bottom bar, Export menu and menu sort: one button per entry ──────
@@ -450,9 +447,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
 
   // ── Wiring ───────────────────────────────────────────────
   menuBtn.addEventListener("click", () => {
-    const open = !menuOpen();
-    setMenu(open);
-    keep(MENU_KEY, open);
+    setMenu(!menuOpen());
   });
   // Away from Home, the button goes Home and opens the list there
   recentBtn.addEventListener("click", () => {
