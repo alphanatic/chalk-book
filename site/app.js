@@ -475,13 +475,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   });
   addEventListener("hashchange", () => show(decodeURIComponent(location.hash.slice(1))));
 
-  const real = window.CHALK_NOTES.length, projCount = Object.keys(window.CHALK_PROJECTS).length;
-  const lines = [`${real} notes across ${projCount} projects.`];
-  for (const p of Object.values(window.CHALK_PROJECTS)) if (p.modules) {
-    const done = p.modules.filter(m => m.status === "done").length;
-    const next = p.modules.find(m => m.status !== "done");
-    lines.push(`${p.name}: ${done} of ${p.modules.length} modules done${next ? ` · next: ${next.title}` : ""}.`);
-  }
   $("footer-marks").replaceChildren(...HOME_MARKS.map(m => {
     const n = window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, item = el("span", "footer-mark", n);
     item.title = `${n} notes ${m.title}`;
@@ -497,7 +490,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   });
   $("home-apps").replaceChildren(...apps);
   apps.forEach((link, i) => dropIfMissing(link, APPS[i].href, false));
-  $("home-stats").replaceChildren(...lines.flatMap((l, i) => i ? [el("br"), l] : [l]));
 
   resetMenu();
   setRecent(false);
