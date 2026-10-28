@@ -86,6 +86,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { title: "gather and share notes with your group", state: "red" },
     { title: "design your own agent", state: "red" },
     { title: "e-mail pay-as-you-go", state: "red" },
+    { title: "chalk-mind", state: "yellow" },
   ];
   const SOON_MARK = { red: "ignored", yellow: "butter", green: "" };
   // The menu's sort buttons, in order, each lit in its chalk colour when chosen: projects and their notes by name, or by catalogue order and number.
