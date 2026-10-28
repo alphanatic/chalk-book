@@ -22,13 +22,4 @@
   --review-sage:       #a9c48a;   /* the sage petals */
   --review-moss:       #5f8a4a;   /* the leaves between them */
   --review-gold:       #b59a62;   /* the heart */
-  /* The CloudM holo badge, bottom right: CloudM's own colours from cloudm.one, never recoloured */
-  --cloudm-disc-core:  #13306a;   /* the disc's glowing middle */
-  --cloudm-disc:       #0b1a3d;   /* the disc */
-  --cloudm-disc-edge:  #070a18;   /* the disc's rim */
-  --cloudm-glow:       #22bbff;   /* glow around the disc and the cloud, and the rings */
-  --cloudm-cyan:       #00e5ff;   /* the outer ring's arc */
-  --cloudm-blue:       #2f6bff;   /* the inner ring's right side, the cloud's outer glow */
-  --cloudm-violet:     #8a5cff;   /* the inner ring's left side */
-  --cloudm-credit:     #7d8db0;   /* the "powered by" line */
 }

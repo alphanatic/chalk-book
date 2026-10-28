@@ -465,16 +465,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   exportBtn.addEventListener("click", e => { e.stopPropagation(); setExport(exportMenu.hidden); });
   document.addEventListener("click", e => { if (!exportMenu.hidden && !e.target.closest(".export")) setExport(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !exportMenu.hidden) { setExport(false); exportBtn.focus(); } });
-  // The CloudM badge opens and closes its credit card, the same way
-  const cloudm = $("cloudm"), cloudmBtn = $("cloudm-btn"), cloudmCard = $("cloudm-card");
-  const setCloudm = open => {
-    cloudmCard.hidden = !open;
-    cloudmBtn.setAttribute("aria-expanded", open);
-    cloudm.classList.toggle("open", open);
-  };
-  cloudmBtn.addEventListener("click", () => setCloudm(cloudmCard.hidden));
-  document.addEventListener("click", e => { if (!cloudmCard.hidden && !cloudm.contains(e.target)) setCloudm(false); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && !cloudmCard.hidden) { setCloudm(false); cloudmBtn.focus(); } });
 
   narrow.addEventListener("change", resetMenu);
 
