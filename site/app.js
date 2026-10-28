@@ -77,6 +77,17 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { kind: "butter", title: "pending: public or private not decided" },
     { kind: "ignored", title: "private" },
   ];
+  // Coming soon on Home: each entry is a future project. state: "red" not in the brain yet, "yellow" the project was
+  // started, "green" done, which moves it to the Complete list below
+  const SOON = [
+    { title: "llm integration", state: "red" },
+    { title: "custom dash board", state: "red" },
+    { title: "build your own IT department", state: "red" },
+    { title: "gather and share notes with your group", state: "red" },
+    { title: "design your own agent", state: "red" },
+    { title: "e-mail pay-as-you-go", state: "red" },
+  ];
+  const SOON_MARK = { red: "ignored", yellow: "butter", green: "" };
   // The menu's sort buttons, in order, each lit in its chalk colour when chosen: projects and their notes by name, or by catalogue order and number.
   // The colours are the user's choice and unrelated to the Git marks' meaning.
   // Swedish collation, so å, ä and ö come after z. 01–99 is the default until another is chosen;
@@ -481,6 +492,13 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     item.prepend(gitMark(m.kind));
     return item;
   }));
+  const soonItem = (s, text) => {
+    const li = el("li", "", text);
+    li.prepend(gitMark(SOON_MARK[s.state]));
+    return li;
+  };
+  $("soon-list").replaceChildren(...SOON.filter(s => s.state !== "green").map(s => soonItem(s, s.title)));
+  $("soon-done").replaceChildren(...SOON.filter(s => s.state === "green").map(s => soonItem(s, `Complete: ${s.title}`)));
   const apps = APPS.map(a => {
     const link = el("a", `home-app ${a.kind}`);
     Object.assign(link, { href: a.href, target: "_blank", rel: "noopener", title: a.title });

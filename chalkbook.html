@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chalk Book</title>
 <link rel="icon" href="site/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Itim&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Itim&display=swap">
 <link rel="stylesheet" href="chalk-pastel.css">
 <link rel="stylesheet" href="site/site-theme.css">
 <link rel="stylesheet" href="site/app.css">
@@ -76,7 +76,11 @@
   <section class="home" id="home">
     <h1><chalk-wordmark second="Board"></chalk-wordmark></h1>
     <nav class="home-apps" id="home-apps" aria-label="Portfolio"></nav>  <!-- one tile per entry in APPS, site/app.js -->
-    <p class="soon">plugin-for-you-fav-llm-coming-soon<br>pending-feature: connect your subscription and create your own dash board</p>
+    <section class="soon" aria-label="Coming soon">  <!-- made from SOON, site/app.js -->
+      <h2>coming soon!</h2>
+      <ul id="soon-list"></ul>
+      <ul id="soon-done"></ul>
+    </section>
   </section>
   <iframe id="frame" title="Note" hidden></iframe>
 </main>
