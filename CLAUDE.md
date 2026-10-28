@@ -96,6 +96,7 @@ chalk-book/
 | `javascript` | JavaScript | Learning JavaScript by reviewing and fixing a React todo app |
 | `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
 | `anthropic` | Anthropic | The claude.ai account: cloud skills, sync, and what reaches the local tools |
+| `web-skeleton` | Web Skeleton | Serverless site hosting on AWS (S3, CloudFront, Terraform), packaged as a hosting offer |
 | `meta` | Chalk Book | Notes about the chalk book itself |
 | *(private)* | *(private)* | A work course; its slug, name and roadmap live only in `site/notes-local.js` |
 
