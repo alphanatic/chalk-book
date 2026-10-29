@@ -498,7 +498,26 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     li.prepend(gitMark(SOON_MARK[s.state]));
     return li;
   };
-  $("soon-list").replaceChildren(...SOON.filter(s => s.state !== "green").map(s => soonItem(s, s.title)));
+  // Open entries show as cipher text: each letter becomes a random glyph, spaces stay, and a few glyphs reshuffle on a tick
+  const CIPHER = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#$%&*+=?@§¤ΔΣΩψλ";
+  const glyph = () => CIPHER[Math.floor(Math.random() * CIPHER.length)];
+  const encrypt = t => [...t].map(c => (c === " " ? " " : glyph())).join("");
+  const sealed = SOON.filter(s => s.state !== "green").map(s => {
+    const li = soonItem(s, encrypt(s.title));
+    li.classList.add("encrypted");
+    li.setAttribute("aria-label", "encrypted project");
+    return li;
+  });
+  $("soon-list").replaceChildren(...sealed);
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    setInterval(() => sealed.forEach(li => {
+      const text = li.lastChild;
+      const chars = [...text.data];
+      const i = Math.floor(Math.random() * chars.length);
+      if (chars[i] !== " ") chars[i] = glyph();
+      text.data = chars.join("");
+    }), 90);
+  }
   $("soon-done").replaceChildren(...SOON.filter(s => s.state === "green").map(s => soonItem(s, `Complete: ${s.title}`)));
   const apps = APPS.map(a => {
     const link = el("a", `home-app ${a.kind}`);
