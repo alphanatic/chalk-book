@@ -245,13 +245,14 @@ body:not(.recent-open) .panel.right { display: none; }
 .home-app.drop:hover svg { transform: rotate(-12deg) scale(1.1); }
 .home-app.drop .body { fill: var(--customer-green); }
 .home-app.drop .shine { fill: none; stroke: var(--shell-text); stroke-width: 1.6; stroke-linecap: round; }
-/* The Pokéggdex tile: a Poké Ball, two-tone in coral like the private mark */
-.home-app.game svg { width: 32px; }
+/* The Pokéggdex tile: a speckled Easter egg Poké Ball, two-tone in coral like the private mark */
+.home-app.game svg { width: 30px; }
 .home-app.game:hover svg { transform: rotate(-20deg) scale(1.1); }
-.home-app.game .shell { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
-.home-app.game .cap { fill: var(--coral); }
-.home-app.game .band { stroke: var(--coral-chip); stroke-width: 7; }
-.home-app.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 6; }
+.home-app.game .shell, .home-app.game .spots-light { fill: var(--coral-bg); }
+.home-app.game .cap, .home-app.game .spots-dark, .home-app.game .pip { fill: var(--coral); }
+.home-app.game .band { stroke: var(--coral-chip); stroke-width: 5; }
+.home-app.game .rim { fill: none; stroke: var(--coral-chip); stroke-width: 4; }
+.home-app.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 4; }
 /* The review tile: a flower in the reviewed concepts' palette, its petals and leaves turning together */
 .home-app.flower svg { width: 32px; }
 .home-app.flower .spin { transition: transform .4s ease; }

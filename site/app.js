@@ -62,9 +62,14 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       icon: '<svg viewBox="0 0 20 26" aria-hidden="true"><path class="body" d="M10 1C10 1 2 11 2 17a8 8 0 0 0 16 0C18 11 10 1 10 1Z"/>' +
         '<path class="shine" d="M6 17a4 4 0 0 0 4 4"/></svg>' },
     { kind: "game", label: "Pokéggdex", href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex",
-      icon: '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="shell" cx="50" cy="50" r="45"/>' +
-        '<path class="cap" d="M7.5 50a42.5 42.5 0 0 1 85 0z"/><line class="band" x1="5" y1="50" x2="95" y2="50"/>' +
-        '<circle class="knob" cx="50" cy="50" r="13"/></svg>' },
+      // The speckled Easter egg: a Poké Ball shaped as an egg, from apps/pokeggdex/public/seasonal/ in company
+      icon: '<svg viewBox="0 0 100 108" aria-hidden="true"><defs><clipPath id="pokegg-clip"><path id="pokegg"' +
+        ' d="M50 7C34 7 14 40 14 65c0 21 15 33 36 33s36-12 36-33C86 40 66 7 50 7Z"/></clipPath></defs>' +
+        '<use class="shell" href="#pokegg"/><g clip-path="url(#pokegg-clip)"><path class="cap" d="M0 0h100v61H0z"/>' +
+        '<g class="spots-light"><circle cx="39" cy="29" r="3.4"/><circle cx="60" cy="32" r="3.4"/><circle cx="29" cy="46" r="3.4"/>' +
+        '<circle cx="49" cy="44" r="3.4"/><circle cx="71" cy="47" r="3.4"/></g><g class="spots-dark"><circle cx="29" cy="77" r="2.6"/>' +
+        '<circle cx="43" cy="88" r="2.6"/><circle cx="65" cy="83" r="2.6"/></g><line class="band" x1="10" y1="61" x2="90" y2="61"/></g>' +
+        '<use class="rim" href="#pokegg"/><circle class="knob" cx="50" cy="61" r="11"/><circle class="pip" cx="50" cy="61" r="4"/></svg>' },
     { kind: "flower", label: "Review", href: "/review/concepts/", title: "Open the concept review",
       icon: '<svg viewBox="-38 -38 76 76" aria-hidden="true"><g class="spin">' +
         '<ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(30)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(90)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(150)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(210)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(270)"/><ellipse class="leaf" cy="-24" rx="5" ry="12" transform="rotate(330)"/>' +
@@ -106,6 +111,21 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3;
   // Menu projects opened with their dot; the rest start folded
   const FOLD_KEY = "chalk.open-projects";
+  // A reload (F5) keeps the menu as it was in this tab. A hard reload (Ctrl+F5, Shift+F5, Ctrl+Shift+F5,
+  // Ctrl+Shift+R) marks a clean start first: menu closed, Home, no history, no unfolded projects; the sort stays
+  const MENU_KEY = "chalk.menu-open", CLEAN_KEY = "chalk.clean-start";
+  const isHardReload = e => (e.key === "F5" && (e.ctrlKey || e.shiftKey))
+    || (e.shiftKey && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r");
+  const markCleanStart = () => { try { sessionStorage.setItem(CLEAN_KEY, "1"); } catch {} };
+  let menuWasOpen = false;
+  try {
+    if (sessionStorage.getItem(CLEAN_KEY)) {
+      for (const k of Object.keys(localStorage)) if (k.startsWith("chalk.") && k !== SORT_KEY) localStorage.removeItem(k);
+      sessionStorage.clear();
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    menuWasOpen = sessionStorage.getItem(MENU_KEY) === "1";
+  } catch {}
 
   // ?filler=40 adds placeholder notes, to test how the panels behave when full
   const filler = Number(new URLSearchParams(location.search).get("filler")) || 0;
@@ -149,7 +169,9 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     const mod = moduleTitle(n);
     b.title = [showProject ? `${projects[n.project]?.name} · ${n.title}` : n.title, n.summary,
       mod && `Module ${n.module} · ${mod}`, n.date].filter(Boolean).join("\n");
-    b.append(el("span", "num", pad(n.n)), el("span", "t", n.title));
+    const t = el("span", "t", n.title);
+    if (n.italic || projects[n.project]?.italic) t.style.fontStyle = "italic";  // italic: true on a note or a whole project
+    b.append(el("span", "num", pad(n.n)), t);
     if (hits) b.append(el("span", "hits", `${hits}×`));
     if (showProject) paint(b, projects[n.project]?.color);
     if (n.id === currentId) b.setAttribute("aria-current", "page");
@@ -330,6 +352,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   function setMenu(open) {
     body.classList.toggle("left-collapsed", !open);
     menuBtn.setAttribute("aria-expanded", open);
+    try { sessionStorage.setItem(MENU_KEY, open ? "1" : ""); } catch {}
     syncMenu();
   }
   // Switch to the rail layout only once the slide has closed, so the text clips away instead of jumping
@@ -475,6 +498,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
 
   narrow.addEventListener("change", resetMenu);
 
+  // The browser's own hard reload follows the key; from inside a note, the note asks us and we reload
+  document.addEventListener("keydown", e => { if (isHardReload(e)) markCleanStart(); });
+  addEventListener("message", e => {
+    if (e.source === frame.contentWindow && e.data === "chalk:hard-reload") { markCleanStart(); location.reload(); }
+  });
+
   search.addEventListener("input", renderSearch);
   search.addEventListener("keydown", e => {
     if (e.key === "Escape") { search.value = ""; renderSearch(); search.blur(); }
@@ -534,4 +563,5 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   renderMenu();
   renderSearch();
   show(decodeURIComponent(location.hash.slice(1)));
+  if (menuWasOpen) setMenu(true);
 })();

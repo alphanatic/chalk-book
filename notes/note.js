@@ -1,6 +1,11 @@
 /* Runs inside every note. Lets the chalk-book site open the print dialog (Save as PDF)
    and highlight search hits. Messages are used because, opened from disk, the site
    isn't allowed to reach into the note directly. */
+// A hard reload pressed inside a note reaches only the note: hand it to the site, which starts clean
+addEventListener("keydown", e => {
+  const hard = (e.key === "F5" && (e.ctrlKey || e.shiftKey)) || (e.shiftKey && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r");
+  if (hard && parent !== window) { e.preventDefault(); parent.postMessage("chalk:hard-reload", "*"); }
+});
 addEventListener("message", e => {
   if (e.data === "chalk:print") print();
   else if (e.data && e.data.type === "chalk:highlight") highlight(e.data.q || "");
@@ -125,7 +130,7 @@ function renderChalk(src) {
   const title = entry ? entry.title : id;
   const eyebrow = entry ? `<span class="eyebrow">${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
     .filter(Boolean).join(" · "))}</span>` : "";
-  let out = `<header class="hero">${own.span ?? eyebrow}${own.h1 ?? `<h1>${esc(title)}</h1>`}`
+  let out = `<header class="hero">${own.span ?? eyebrow}${own.h1 ?? `<h1${project?.italic ? ' style="font-style: italic"' : ""}>${esc(title)}</h1>`}`
     + (intro[0] ? `<p class="sub">${md(intro[0])}</p>` : "") + intro.slice(1).map(p => `<p>${md(p)}</p>`).join("")
     + "</header>";
 
