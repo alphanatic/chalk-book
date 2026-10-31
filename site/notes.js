@@ -5,7 +5,8 @@
    Projects  name, palette colour, optional status and modules (the planned roadmap)
    Notes     id = file name without .html · project = key into CHALK_PROJECTS · n = number in the project
              module = roadmap module it belongs to (optional) · context = a short tag for the eyebrow when there is
-             no module (optional) · date = YYYY-MM-DD */
+             no module (optional) · date = YYYY-MM-DD · risk = 0–6, the riskiest step taken (site/risk.js; required
+             from 2026-11-01, check.sh 8) */
 
 window.CHALK_PROJECTS = {
   "tinker-town": {

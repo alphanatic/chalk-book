@@ -88,6 +88,11 @@ Add one entry per note to `CHALK_NOTES` in `site/notes.js`: `id` (file name with
 and `skills` (tools, topics and every distinctive command in the note: what people would search for). If the note may finish a roadmap module,
 ask before setting that module's `status` to `"done"`.
 
+**Grade it:** `risk`, 0–6, from `site/risk.js` (or `site/risk-local.js` where it exists): the grade of the riskiest
+step the session took, not of how it turned out. Grade the risky steps too, with `· risk N` at the end of their
+`###` title, so a reader sees where the risk sat. Tell the user the grade and the step behind it in one line. From
+grade 3 (orange) up, offer once to review the security around the subject before the note is done.
+
 **Every new note starts pending**: public or private is not decided yet. Its entry goes in `site/notes-local.js`
 (gitignored) with `pending: true`, the note loads `../site/notes-local.js` after `../site/notes.js`, and the site
 shows it with a yellow Git mark. `check.sh` fails if a pending note is staged or committed. When the user decides:
@@ -112,7 +117,8 @@ Then rebuild the search index so the new text is searchable: `node site/build-in
   .claude/skills/chalk-up/check.sh
   ```
   It rebuilds the search index and checks placeholders, hex colours, secrets, public IPs, account IDs,
-  emails, admin accounts (only `adm-<alias>`, or the original author's `adm-kiwi`), the private block list and the catalogue, in notes and PDFs.
+  emails, admin accounts (only `adm-<alias>`, or the original author's `adm-kiwi`), the private block list and the
+  catalogue (risk grades included), in notes and PDFs.
 - After changing shared files (`note.js`, `note-layout.css`, `chalk-pastel.css`) or existing notes, run
   `.claude/skills/chalk-up/compare.sh`: every note it reports as different must be one you meant to change.
 - Open `chalkbook.html#<name>` and confirm the note appears in the menu and displays.
@@ -131,4 +137,4 @@ git preferences (their global `CLAUDE.md` or memory), as `CLAUDE.md` §7 says. I
 
 ## 9. Report
 
-End with a short list: each new note as a link, its page count, and one line on what it covers.
+End with a short list: each new note as a link, its page count, its risk grade, and one line on what it covers.

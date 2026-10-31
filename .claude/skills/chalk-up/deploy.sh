@@ -35,6 +35,8 @@ if [[ -e $tmp/site/notes-local.js || -e $tmp/site/search-local.js ]]; then
 fi
 # The local-only Home tiles and dev menu (gitignored) go up too: the live site shows them, the repo doesn't
 if [[ -f site/site-local.js ]]; then cp site/site-local.js "$tmp/site/"; fi
+# So does your own risk scale, if you have one: the live site grades notes the way you do
+if [[ -f site/risk-local.js ]]; then cp site/risk-local.js "$tmp/site/"; fi
 
 # / belongs to another site, uploaded on its own: P keeps its files out of --delete
 keep=(--filter="P /index.html" --filter="P /index.html.bak-*" --filter="P /_astro/" --filter="P /fonts/" --filter="P /lab/" --filter="P /dev-roadmap/" --filter="P /review/")

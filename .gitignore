@@ -7,6 +7,9 @@
 # Personal Claude Code settings for this machine — never committed
 .claude/settings.local.json
 
+# Your own risk scale, in place of site/risk.js — never committed (deploy.sh uploads it)
+site/risk-local.js
+
 # Private workflow notes (backlog concept, reusable workflow idea) — never committed
 archive/backlog-workflow/
 

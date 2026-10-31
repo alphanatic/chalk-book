@@ -93,6 +93,20 @@ for (const n of window.CHALK_NOTES) {
   if (m && m[1] && m[1] !== n.project) console.log(`site/notes.js: ${n.id} has project: ${n.project}`);
   if (!window.CHALK_PROJECTS[n.project]) console.log(`site/notes.js: ${n.id} uses unknown project ${n.project}`);
 }
+// Risk grades (site/risk.js, or site/risk-local.js in its place): a whole number on the scale, required from
+// 2026-11-01, and never below a step graded inside the note ("### … · risk N")
+require(process.cwd() + "/site/risk.js");
+if (fs.existsSync("site/risk-local.js")) require(process.cwd() + "/site/risk-local.js");
+const top = window.CHALK_RISK.grades.length - 1;
+for (const n of window.CHALK_NOTES) {
+  if (n.risk === undefined) { if (n.date >= "2026-11-01") console.log(`site/notes.js: ${n.id} has no risk grade (0–${top})`); }
+  else if (!Number.isInteger(n.risk) || n.risk < 0 || n.risk > top) console.log(`site/notes.js: ${n.id} has risk: ${n.risk}, not 0–${top}`);
+  if (!files.includes(n.id)) continue;
+  const steps = [...fs.readFileSync(`notes/${n.id}.html`, "utf8").matchAll(/^### .* · risk (\d+)(?: \{\w+\})?$/gm)].map(s => +s[1]);
+  const worst = Math.max(-1, ...steps);
+  if (worst > top) console.log(`notes/${n.id}.html: a step has risk ${worst}, not 0–${top}`);
+  else if (worst >= 0 && !(n.risk >= worst)) console.log(`site/notes.js: ${n.id} has risk: ${n.risk}, but a step in it has risk ${worst}`);
+}
 EOF
 
 echo "9. Viewport"
