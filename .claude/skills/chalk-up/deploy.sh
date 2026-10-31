@@ -33,6 +33,8 @@ git archive HEAD chalkbook.html chalk-pastel.css LICENSE site notes | tar -x -C 
 if [[ -e $tmp/site/notes-local.js || -e $tmp/site/search-local.js ]]; then
   echo "FAIL  a private catalogue file is committed; nothing was sent"; exit 1
 fi
+# The local-only Home tiles and dev menu (gitignored) go up too: the live site shows them, the repo doesn't
+if [[ -f site/site-local.js ]]; then cp site/site-local.js "$tmp/site/"; fi
 
 # / belongs to another site, uploaded on its own: P keeps its files out of --delete
 keep=(--filter="P /index.html" --filter="P /index.html.bak-*" --filter="P /_astro/" --filter="P /fonts/" --filter="P /lab/" --filter="P /dev-roadmap/" --filter="P /review/")

@@ -52,17 +52,14 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       icon: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M12 11v6m-3-3 3 3 3-3"/>' },
   ];
   // The portfolio under Home's name: the sites served next to the chalk book, left to right, each a tile with its icon
-  // and name, shown only where it is served: a water droplet for the customer menu, a Poké Ball for the Pokéggdex,
+  // and name, shown only where it is served: tiles from site/site-local.js (gitignored) first, a Poké Ball for the Pokéggdex,
   // a flower for the concept review page (no dev server: shown only on the web server).
   // Served locally, each is its npm dev server (npm run dev in its own project folder; the Pokéggdex's is ~/Projects/pokeggdex)
   const onLocalhost = ["localhost", "127.0.0.1"].includes(location.hostname);
   const APPS = [
-    { kind: "drop", label: "customer", href: onLocalhost ? "http://localhost:5173/menu.html" : "/customer/menu.html",
-      title: "Open the customer menu",
-      icon: '<svg viewBox="0 0 20 26" aria-hidden="true"><path class="body" d="M10 1C10 1 2 11 2 17a8 8 0 0 0 16 0C18 11 10 1 10 1Z"/>' +
-        '<path class="shine" d="M6 17a4 4 0 0 0 4 4"/></svg>' },
+    ...(window.CHALK_LOCAL_APPS || []),
     { kind: "game", label: "Pokéggdex", href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex",
-      // The speckled Easter egg: a Poké Ball shaped as an egg, from apps/pokeggdex/public/seasonal/ in company
+      // The speckled Easter egg: a Poké Ball shaped as an egg, from apps/pokeggdex/public/seasonal/ in its own project
       icon: '<svg viewBox="0 0 100 108" aria-hidden="true"><defs><clipPath id="pokegg-clip"><path id="pokegg"' +
         ' d="M50 7C34 7 14 40 14 65c0 21 15 33 36 33s36-12 36-33C86 40 66 7 50 7Z"/></clipPath></defs>' +
         '<use class="shell" href="#pokegg"/><g clip-path="url(#pokegg-clip)"><path class="cap" d="M0 0h100v61H0z"/>' +

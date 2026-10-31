@@ -240,10 +240,10 @@ body:not(.recent-open) .panel.right { display: none; }
   min-width: 96px; padding: 14px 12px 10px; border-radius: 10px; background: var(--shell-raise);
   color: var(--shell-text); font-size: 13px; font-weight: 600; text-decoration: none; }
 .home-app svg { height: 32px; transition: transform .2s ease; }
-/* The customer tile: the site's water droplet, always in its own logo green */
+/* The droplet tile: a water droplet, always in its own green */
 .home-app.drop svg { width: 25px; }
 .home-app.drop:hover svg { transform: rotate(-12deg) scale(1.1); }
-.home-app.drop .body { fill: var(--customer-green); }
+.home-app.drop .body { fill: var(--drop-green); }
 .home-app.drop .shine { fill: none; stroke: var(--shell-text); stroke-width: 1.6; stroke-linecap: round; }
 /* The Pokéggdex tile: a speckled Easter egg Poké Ball, two-tone in coral like the private mark */
 .home-app.game svg { width: 30px; }

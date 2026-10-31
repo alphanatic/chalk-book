@@ -16,7 +16,7 @@
   --git-ignored-ring:  var(--coral);
   --git-butter-mark:   var(--butter-chip); /* yellow on yellow: pending notes, public or private not decided */
   --git-butter-ring:   var(--butter);
-  --customer-green:      #10A437;   /* the customer droplet on Home: that site's logo green, never recoloured */
+  --drop-green:        #10A437;   /* the droplet tile on Home: its own green, never recoloured */
   /* The review tile's flower on Home: the reviewed concepts' own palette, never recoloured */
   --review-cream:      #efe6c8;   /* the cream petals */
   --review-sage:       #a9c48a;   /* the sage petals */
