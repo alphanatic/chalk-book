@@ -8,7 +8,7 @@
 
 @page {
   size: A4; margin: 16mm 0 18mm;
-  background: var(--paper);
+  background: var(--band-text);   /* the cream sheet, margins included, on screen and in PDFs */
   /* each note overrides `content` with its own title — see template.html */
   @bottom-center { content: counter(page) " / " counter(pages);
     font: 8pt Inter, sans-serif; color: var(--footer); }
@@ -17,7 +17,7 @@
 
 * { box-sizing: border-box; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { margin: 0; padding: 0 16mm; background: var(--paper); color: var(--ink);
+body { margin: 0; padding: 0 16mm; background: var(--band-text); color: var(--ink);
   font: 9.5pt/1.55 Inter, sans-serif; }
 code, pre { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; }
 code { background: var(--code-bg); border-radius: 3px; padding: 1px 4px; }
@@ -100,7 +100,7 @@ ul.check li::before { content: "✓"; position: absolute; left: 2px; color: var(
 /* ── Tables ──────────────────────────────────────────────── */
 table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 8.5pt; break-inside: avoid; }
 th { text-align: left; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
-  background: var(--pink-bg); color: var(--pink-head); padding: 5px 8px; border-bottom: 1.5px solid var(--pink); }
+  background: var(--asphalt); color: var(--band-text); padding: 5px 8px; border-bottom: 1.5px solid var(--pink); }
 td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 td:first-child { font-weight: 600; }
 .sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px;
@@ -147,6 +147,12 @@ mark.chalk-hit { background: var(--peach); color: var(--ink); border-radius: 2px
   :root { color-scheme: dark; }          /* matches the site, so the frame around the note stays see-through */
   html { background: linear-gradient(transparent, transparent); }   /* see-through, and stops body's paper spreading to the edges */
   body { max-width: 210mm; min-height: calc(100vh - 48px); margin: 24px auto; }
+  /* Every table sorts by a click on its header (note.js); the PDF keeps the written order */
+  th[data-sort] { cursor: pointer; user-select: none; }
+  th[data-sort]:hover, th[data-sort]:focus-visible { color: var(--chalk-white); }
+  th[data-sort]::after { content: " ↕"; opacity: .35; }
+  th[aria-sort="ascending"]::after { content: " ▲"; opacity: 1; }
+  th[aria-sort="descending"]::after { content: " ▼"; opacity: 1; }
 }
 
 /* ── On a phone: one column and 16px sides. Screen only, so PDFs stay exactly as they are ── */

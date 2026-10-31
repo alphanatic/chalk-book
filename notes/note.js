@@ -210,9 +210,17 @@ function renderChalk(src) {
   // Page title, footer on printed pages, stylesheets, then the page itself
   const name = document.title || (entry ? `${(project?.name || "").replace(/^Project /, "")} ${nn} — ${title}` : title);
   document.title = name;
-  // Shared stylesheets first, so a note's own <style> rules still win
-  document.head.prepend(...["../chalk-pastel.css", "note-layout.css"].map(href =>
-    Object.assign(document.createElement("link"), { rel: "stylesheet", href })));
+  // Shared stylesheets first, so a note's own <style> rules still win. Added by script, they don't hold back the
+  // first paint, so the page stays hidden until they and the fonts have loaded (fonts given at most 1s): no flash
+  // of an unstyled note
+  const sheets = ["../chalk-pastel.css", "note-layout.css"].map(href =>
+    Object.assign(document.createElement("link"), { rel: "stylesheet", href }));
+  const root = document.documentElement;
+  root.style.visibility = "hidden";
+  document.head.prepend(...sheets);
+  Promise.all(sheets.map(link => new Promise(done => { link.onload = link.onerror = done; })))
+    .then(() => Promise.race([document.fonts.ready, new Promise(done => setTimeout(done, 1000))]))
+    .then(() => { root.style.visibility = ""; });
   document.head.append(Object.assign(document.createElement("style"), {
     textContent: `@page { @bottom-center { content: "${name.replace(/["\\]/g, "\\$&")} · " counter(page) " / " counter(pages); } }` }));
   const page = document.createElement("template");
@@ -261,3 +269,35 @@ function colourTitle() {
   }));
 }
 colourTitle();
+
+// Every table with a header row sorts by a click on a header, again to reverse; ties keep the written order.
+// A cell's data-sort-key, if set, sorts in place of its text; numbers sort as numbers. Screen only: PDFs print as written.
+function sortableTables() {
+  for (const table of document.querySelectorAll("table")) {
+    const head = table.rows[0], rows = [...table.rows].slice(1);
+    if (!head || rows.length < 2 || [...head.cells].some(c => c.tagName !== "TH")) continue;
+    rows.forEach((r, i) => r.dataset.order = i);
+    const key = (r, c) => {
+      const cell = r.cells[c], k = cell ? (cell.dataset.sortKey ?? cell.textContent.trim()) : "";
+      return k !== "" && !isNaN(k) ? +k : k.toLowerCase();
+    };
+    const sortBy = th => {
+      const dir = th.getAttribute("aria-sort") === "ascending" ? "descending" : "ascending";
+      [...head.cells].forEach(h => h.removeAttribute("aria-sort"));
+      th.setAttribute("aria-sort", dir);
+      const c = th.cellIndex, sign = dir === "ascending" ? 1 : -1;
+      rows.sort((a, b) => {
+        const x = key(a, c), y = key(b, c);
+        const d = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), "sv");
+        return sign * d || a.dataset.order - b.dataset.order;
+      });
+      rows.forEach(r => r.parentNode.append(r));
+    };
+    for (const th of head.cells) {
+      th.dataset.sort = ""; th.tabIndex = 0;
+      th.addEventListener("click", () => sortBy(th));
+      th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sortBy(th); } });
+    }
+  }
+}
+sortableTables();
