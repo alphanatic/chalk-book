@@ -26,6 +26,10 @@
     </button>
   </div>
   <a class="brand" href="#" title="Home"><chalk-wordmark></chalk-wordmark></a>
+  <!-- The site's own pages, next to the name -->
+  <nav class="site-nav" aria-label="Main">
+    <ul id="footer-links"></ul>  <!-- one link per entry in FOOTER, site/app.js -->
+  </nav>
   <span class="current" id="current"></span>
   <!-- Export: a small menu of ways to take the open note elsewhere. New options are entries in EXPORTS -->
   <div class="export">
@@ -96,9 +100,6 @@
 <!-- Main footer: persistent on every page, links to the site's own pages; it grows with its contents -->
 <footer class="main-footer" aria-label="Main footer">
   <p class="footer-marks" id="footer-marks"></p>  <!-- one mark per entry in HOME_MARKS, site/app.js -->
-  <nav aria-label="Main">
-    <ul id="footer-links"></ul>  <!-- one link per entry in FOOTER, site/app.js -->
-  </nav>
 </footer>
 <div class="scrim" id="scrim"></div>
 

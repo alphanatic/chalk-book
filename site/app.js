@@ -59,13 +59,13 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const APPS = [
     ...(window.CHALK_LOCAL_APPS || []),
     { kind: "game", label: "Pokéggdex", href: onLocalhost ? "http://localhost:5173/pokeggdex/" : "/pokeggdex/", title: "Play the Pokéggdex",
-      // The speckled Easter egg: a Poké Ball shaped as an egg, from apps/pokeggdex/public/seasonal/ in its own project
+      // The folk zigzag Easter egg: a Poké Ball shaped as an egg, from apps/pokeggdex/public/seasonal/ in its own project
       icon: '<svg viewBox="0 0 100 108" aria-hidden="true"><defs><clipPath id="pokegg-clip"><path id="pokegg"' +
         ' d="M50 7C34 7 14 40 14 65c0 21 15 33 36 33s36-12 36-33C86 40 66 7 50 7Z"/></clipPath></defs>' +
         '<use class="shell" href="#pokegg"/><g clip-path="url(#pokegg-clip)"><path class="cap" d="M0 0h100v61H0z"/>' +
-        '<g class="spots-light"><circle cx="39" cy="29" r="3.4"/><circle cx="60" cy="32" r="3.4"/><circle cx="29" cy="46" r="3.4"/>' +
-        '<circle cx="49" cy="44" r="3.4"/><circle cx="71" cy="47" r="3.4"/></g><g class="spots-dark"><circle cx="29" cy="77" r="2.6"/>' +
-        '<circle cx="43" cy="88" r="2.6"/><circle cx="65" cy="83" r="2.6"/></g><line class="band" x1="10" y1="61" x2="90" y2="61"/></g>' +
+        '<path class="zig-light" d="M23 41l9-7 9 7 9-7 9 7 9-7 9 7"/>' +
+        '<path class="zig-dark" d="M19 79l10 6 10-6 10 6 10-6 10 6 11-6"/>' +
+        '<line class="band" x1="10" y1="61" x2="90" y2="61"/></g>' +
         '<use class="rim" href="#pokegg"/><circle class="knob" cx="50" cy="61" r="11"/><circle class="pip" cx="50" cy="61" r="4"/></svg>' },
     { kind: "flower", label: "Review", href: "/review/concepts/", title: "Open the concept review",
       icon: '<svg viewBox="-38 -38 76 76" aria-hidden="true"><g class="spin">' +
@@ -73,7 +73,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
         '<ellipse class="petal" cy="-17" rx="8" ry="14" transform="rotate(0)"/><ellipse class="petal sage" cy="-17" rx="8" ry="14" transform="rotate(60)"/><ellipse class="petal" cy="-17" rx="8" ry="14" transform="rotate(120)"/><ellipse class="petal sage" cy="-17" rx="8" ry="14" transform="rotate(180)"/><ellipse class="petal" cy="-17" rx="8" ry="14" transform="rotate(240)"/><ellipse class="petal sage" cy="-17" rx="8" ry="14" transform="rotate(300)"/>' +
         '</g><circle class="heart" r="6.5"/></svg>' },
   ];
-  // The GitHub marks at the left end of the bottom bar, left to right, each with its count of notes
+  // The GitHub marks in the middle of the bottom bar, left to right, each with its count of notes (of pages on the host site)
   const HOME_MARKS = [
     { kind: "", title: "on GitHub" },
     { kind: "butter", title: "pending: public or private not decided" },
@@ -392,7 +392,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       a.toggleAttribute("aria-current", a.dataset.page === (page ? id : n ? "-" : ""));
 
     if (page) {
-      if (frame.dataset.src !== page.file) { frame.src = page.file; frame.dataset.src = page.file; }
+      openInFrame(page.file);
       frame.hidden = false;
       home.hidden = true;
       current.textContent = page.title;
@@ -400,7 +400,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       setExport(false);
       document.title = `${page.title} · Chalk Book`;
     } else if (n) {
-      if (frame.dataset.src !== n.file) { frame.src = n.file; frame.dataset.src = n.file; }
+      openInFrame(n.file);
       frame.hidden = false;
       home.hidden = true;
       current.textContent = `${projects[n.project]?.name} · ${pad(n.n)} ${n.title}`;
@@ -442,6 +442,15 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     catch { frame.contentWindow.postMessage("chalk:print", "*"); }
   }
 
+  // Loads a page into the viewer. A new page starts as an empty white document while its scripts load, so the frame
+  // stays hidden (the dark shell shows) until it has loaded; note.js then keeps the note hidden until it's styled
+  function openInFrame(file) {
+    if (frame.dataset.src === file) return;
+    frame.style.visibility = "hidden";
+    frame.src = file;
+    frame.dataset.src = file;
+  }
+
   // Removes a footer button whose page isn't there. Served over http, ask the server; opened from disk,
   // the browser can't check files, and the private pages are there anyway, so the button stays
   // onDisk: what to do when opened from disk, where nothing can be checked (true keeps it)
@@ -479,6 +488,9 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     else if (f.private) dropIfMissing(li, PAGES.backlog.file);
     return li;
   }));
+  // The centred nav's width, so the note title beside it (.current, app.css) stops short of it
+  const siteNav = document.querySelector(".site-nav");
+  if (siteNav) new ResizeObserver(() => document.body.style.setProperty("--nav-w", `${siteNav.offsetWidth}px`)).observe(siteNav);
   exportMenu.replaceChildren(...EXPORTS.map(x => {
     const b = el("button", `export-item ${x.color}`);
     b.type = "button";
@@ -501,6 +513,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   $("search-rail").addEventListener("click", openSearch);
   $("scrim").addEventListener("click", () => setMenu(false));
   frame.addEventListener("load", sendHighlight);
+  frame.addEventListener("load", () => { frame.style.visibility = ""; });
   exportBtn.addEventListener("click", e => { e.stopPropagation(); setExport(exportMenu.hidden); });
   document.addEventListener("click", e => { if (!exportMenu.hidden && !e.target.closest(".export")) setExport(false); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !exportMenu.hidden) { setExport(false); exportBtn.focus(); } });
@@ -525,12 +538,25 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   });
   addEventListener("hashchange", () => show(decodeURIComponent(location.hash.slice(1))));
 
-  $("footer-marks").replaceChildren(...HOME_MARKS.map(m => {
-    const n = window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, item = el("span", "footer-mark", n);
-    item.title = `${n} notes ${m.title}`;
+  const footerMarks = (count, title) => $("footer-marks").replaceChildren(...HOME_MARKS.map(m => {
+    const n = count(m), item = el("span", "footer-mark", n);
+    item.title = title(n, m);
     item.prepend(gitMark(m.kind));
     return item;
   }));
+  footerMarks(m => window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, (n, m) => `${n} notes ${m.title}`);
+  // Served inside a site that keeps /git-pages.json, count that site's pages instead, as its own footer does
+  if (location.protocol.startsWith("http")) {
+    const KIND = { green: "", yellow: "butter", red: "ignored" };
+    const PAGE_TITLE = { "": "on GitHub", butter: "published, not on GitHub", ignored: "local copy only" };
+    fetch("/git-pages.json", { cache: "no-cache" })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(pages => {
+        const kinds = Object.values(pages).map(g => KIND[g]);
+        footerMarks(m => kinds.filter(k => k === m.kind).length, (n, m) => `${n} pages ${PAGE_TITLE[m.kind]}`);
+      })
+      .catch(() => {});
+  }
   const soonItem = (s, text) => {
     const li = el("li", "", text);
     li.prepend(gitMark(SOON_MARK[s.state]));
