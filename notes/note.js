@@ -52,7 +52,7 @@ function highlight(q) {
                                  a raw <span class="eyebrow"> or <h1> line first replaces the made one
      ## Title {class}            section; the five standard titles get their id and colour by themselves
      ### Remote · Title {class}  step heading with a tag chip ({class} only for an unusual tag); starts a keep group;
-                                 "· risk 0–6" at the end of the title grades the step (site/risk.js)
+                                 its risk tile comes from the entry's steps field: { "words in the title": 0–6 }
      #### Bug · name             bug card: then "cause: …" and "fix: …" lines; what follows goes in the card
      {keep}                      the next heading or element starts a group that never splits across pages
      ---                         ends the open group or bug card early (otherwise the next heading ends it)
@@ -135,7 +135,7 @@ function renderChalk(src) {
   const title = entry ? entry.title : id;
   const eyebrow = entry ? `<span class="eyebrow">${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
     .filter(Boolean).join(" · "))}</span>` : "";
-  const risk = Number.isInteger(entry?.risk) ? riskTile(entry.risk, "hero-risk") : "";
+  const risk = Number.isInteger(entry?.risk) && entry.riskHeader !== false ? riskTile(entry.risk, "hero-risk") : "";
   let out = `<header class="hero">${risk}${own.span ?? eyebrow}${own.h1 ?? `<h1${project?.italic ? ' style="font-style: italic"' : ""}>${esc(title)}</h1>`}`
     + (intro[0] ? `<p class="sub">${md(intro[0])}</p>` : "") + intro.slice(1).map(p => `<p>${md(p)}</p>`).join("")
     + "</header>";
@@ -159,7 +159,7 @@ function renderChalk(src) {
     }
     if ((m = l.match(/^### (.+?)(?: \{(\w+)\})?$/))) {
       i++; group('<div class="keep">', "</div>");
-      const r = m[1].match(/^(.+) · risk ([0-6])$/), title = r ? r[1] : m[1], step = r ? riskTile(+r[2], "step-risk") : "";
+      const title = m[1], g = Object.entries(entry?.steps ?? {}).find(([k]) => title.includes(k))?.[1], step = Number.isInteger(g) ? riskTile(g, "step-risk") : "";
       const t = title.match(/^(.+?) · (.+)$/);
       tag = (t && (m[2] || TAGS[t[1].toLowerCase()])) || "";
       body += tag ? `<h3><span class="tag ${tag}">${esc(t[1])}</span>${md(t[2])}${step}</h3>` : `<h3>${md(title)}${step}</h3>`;

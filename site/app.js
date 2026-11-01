@@ -175,11 +175,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     const t = el("span", "t", n.title);
     if (n.italic || projects[n.project]?.italic) t.style.fontStyle = "italic";  // italic: true on a note or a whole project
     b.append(el("span", "num", pad(n.n)));
-    if (grade) {
-      const tile = el("span", "risk");
-      tile.append(Object.assign(document.createElement("img"), { src: `site/${RISK.tiles}#t${n.risk}`, alt: `Risk ${n.risk}` }));
-      b.append(tile);
-    }
     b.append(t);
     if (hits) b.append(el("span", "hits", `${hits}×`));
     if (showProject) paint(b, projects[n.project]?.color);

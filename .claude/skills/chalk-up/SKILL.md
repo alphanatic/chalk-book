@@ -89,8 +89,8 @@ and `skills` (tools, topics and every distinctive command in the note: what peop
 ask before setting that module's `status` to `"done"`.
 
 **Grade it:** `risk`, 0–6, from `site/risk.js` (or `site/risk-local.js` where it exists): the grade of the riskiest
-step the session took, not of how it turned out. Grade the risky steps too, with `· risk N` at the end of their
-`###` title, so a reader sees where the risk sat. Tell the user the grade and the step behind it in one line. From
+step the session took, not of how it turned out. Grade the risky steps too, in the entry's `steps` field
+(`steps: { "Force push": 4 }`: words from the `###` title, grade 4), never in the note's text; the browser draws their tiles. Tell the user the grade and the step behind it in one line. From
 grade 3 (orange) up, offer once to review the security around the subject before the note is done.
 
 **Every new note starts pending**: public or private is not decided yet. Its entry goes in `site/notes-local.js`

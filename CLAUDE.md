@@ -101,6 +101,7 @@ chalk-book/
 | `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
 | `anthropic` | Anthropic | The claude.ai account: cloud skills, sync, and what reaches the local tools |
 | `web-skeleton` | Web Skeleton | Serverless site hosting on AWS (S3, CloudFront, Terraform), packaged as a hosting offer |
+| `wow` | World of Warcraft | WoW addon and UI setups, e.g. boss-mod layouts measured from stream clips |
 | `meta` | Chalk Book | Notes about the chalk book itself |
 | *(private)* | *(private)* | A work course; its slug, name and roadmap live only in `site/notes-local.js` |
 
@@ -172,10 +173,13 @@ What each grade means is defined once, in `site/risk.js`; the tiles are `site/ri
 drawn by `.claude/skills/chalk-up/risk-tiles.py`.
 
 - **The riskiest step decides**, not the outcome: a force push that went fine is still darkred.
-- **Where it shows:** the note's `risk` field in the catalogue puts its tile in the header and in the site's menu,
-  where the Risk sort lists the riskiest first. A step can carry its own grade: `### Remote · Title · risk 5`.
+- **Where it shows:** the note's `risk` field in the catalogue puts its tile in the note's header (`riskHeader: false` leaves it out, as on
+  cover letters; the site's menu shows no tiles; its Risk sort lists the riskiest first). A step can carry its own grade in the
+  same entry, `steps: { "Force push": 5 }` (the `###` heading whose title holds those words): metadata only, never written in the note's text;
+  the browser draws the step's tile on screen and in the PDF.
 - **Required** on notes dated 2026-11-01 or later; older notes may stay ungraded. `check.sh` (check 8) fails on a
-  missing or invalid grade, or a note graded below one of its steps.
+  missing or invalid grade, a note graded below one of its steps, or a
+  `steps` key that matches no `###` heading, or more than one.
 - **Your own scale:** copy `site/risk.js` to `site/risk-local.js` (gitignored, uploaded by `deploy.sh`) and change it
   there; it replaces the default wherever it loads. Keep 7 grades, 0–6.
 
