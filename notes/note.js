@@ -133,7 +133,7 @@ function renderChalk(src) {
     else p += (p ? "\n" : "") + L[i];
   }
   const title = entry ? entry.title : id;
-  const eyebrow = entry ? `<span class="eyebrow">${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
+  const eyebrow = entry ? `<span class="eyebrow"${Number.isInteger(entry.risk) ? ` data-grade="${entry.risk}"` : ""}>${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
     .filter(Boolean).join(" · "))}</span>` : "";
   const risk = Number.isInteger(entry?.risk) && entry.riskHeader !== false ? riskTile(entry.risk, "hero-risk") : "";
   let out = `<header class="hero">${risk}${own.span ?? eyebrow}${own.h1 ?? `<h1${project?.italic ? ' style="font-style: italic"' : ""}>${esc(title)}</h1>`}`
@@ -251,6 +251,23 @@ function loadRisk() {
   load("../site/risk.js", () => load("../site/risk-local.js", apply));
 }
 loadRisk();
+
+// The owner's own eyebrow tiles, local only. site/eyebrow-local.js (gitignored) may set window.CHALK_EYEBROW to a
+// function from a grade to an image URL. Where it does and the image loads, it becomes the eyebrow's background;
+// anywhere else (a clone, a hosted copy) the eyebrow stays as is
+function eyebrowTile() {
+  const eyebrow = document.querySelector(".hero .eyebrow[data-grade]");
+  if (!eyebrow) return;
+  const apply = () => {
+    const url = window.CHALK_EYEBROW?.(+eyebrow.dataset.grade);
+    if (!url) return;
+    const img = new Image();
+    img.onload = () => { eyebrow.style.setProperty("--eyebrow-tile", `url("${url}")`); eyebrow.classList.add("tiled"); };
+    img.src = url;
+  };
+  document.head.append(Object.assign(document.createElement("script"), { src: "../site/eyebrow-local.js", onload: apply }));
+}
+eyebrowTile();
 
 // Title colours: after the yellow eyebrow chip, the title's words take blue → pink → green → yellow in turn.
 // Every "&" is purple chalk (lavender); other symbols stay white. A title that sets its own colours (e.g. the guide's Chalk Book name) is left alone.

@@ -27,6 +27,11 @@ code { background: var(--code-bg); border-radius: 3px; padding: 1px 4px; }
 .hero { background: var(--asphalt); margin: 0 -16mm 22px; padding: 30px 16mm 26px; }
 .eyebrow { display: inline-block; background: var(--butter); color: var(--butter-chip); font-size: 7pt;
   font-weight: 600; letter-spacing: .14em; padding: 3px 9px; border-radius: 4px; text-transform: uppercase; }
+/* The owner's own eyebrow tiles (note.js, eyebrowTile), local only: the grade's tile, square, behind the text */
+.eyebrow.tiled { position: relative; overflow: hidden; isolation: isolate; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+.eyebrow.tiled::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 50%; aspect-ratio: 1;
+  transform: translateY(-50%); background: var(--eyebrow-tile) center / 100% 100% no-repeat; }
+.eyebrow.tiled:is([data-grade="4"], [data-grade="5"], [data-grade="6"]) { color: var(--chalk-white); }
 h1 { color: var(--chalk-white); font-size: 24pt; margin: 10px 0 4px; letter-spacing: -.01em; }
 /* Title words, coloured in turn by note.js: blue, pink, green, yellow */
 h1 .tc-sky { color: var(--sky); }
