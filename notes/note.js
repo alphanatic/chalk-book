@@ -52,7 +52,6 @@ function highlight(q) {
                                  a raw <span class="eyebrow"> or <h1> line first replaces the made one
      ## Title {class}            section; the five standard titles get their id and colour by themselves
      ### Remote · Title {class}  step heading with a tag chip ({class} only for an unusual tag); starts a keep group;
-                                 its risk tile comes from the entry's steps field: { "words in the title": 0–6 }
      #### Bug · name             bug card: then "cause: …" and "fix: …" lines; what follows goes in the card
      {keep}                      the next heading or element starts a group that never splits across pages
      ---                         ends the open group or bug card early (otherwise the next heading ends it)
@@ -74,9 +73,6 @@ const CALLOUTS = { gotcha: "gotcha", concept: "concept", "best practice": "best"
 
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-// A risk tile (site/risk-tiles.svg). Names and meanings arrive later from site/risk.js: see loadRisk()
-const riskTile = (g, cls) => `<span class="risk ${cls}" data-risk="${g}"><img src="../site/risk-tiles.svg#t${g}" alt="">`
-  + (cls === "hero-risk" ? `<b>Risk ${g}</b>` : "") + "</span>";
 
 function inline(s, notes) {
   const code = [];
@@ -135,8 +131,7 @@ function renderChalk(src) {
   const title = entry ? entry.title : id;
   const eyebrow = entry ? `<span class="eyebrow"${Number.isInteger(entry.risk) ? ` data-grade="${entry.risk}"` : ""}>${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
     .filter(Boolean).join(" · "))}</span>` : "";
-  const risk = Number.isInteger(entry?.risk) && entry.riskHeader !== false ? riskTile(entry.risk, "hero-risk") : "";
-  let out = `<header class="hero">${risk}${own.span ?? eyebrow}${own.h1 ?? `<h1${project?.italic ? ' style="font-style: italic"' : ""}>${esc(title)}</h1>`}`
+  let out = `<header class="hero">${own.span ?? eyebrow}${own.h1 ?? `<h1${project?.italic ? ' style="font-style: italic"' : ""}>${esc(title)}</h1>`}`
     + (intro[0] ? `<p class="sub">${md(intro[0])}</p>` : "") + intro.slice(1).map(p => `<p>${md(p)}</p>`).join("")
     + "</header>";
 
@@ -159,7 +154,7 @@ function renderChalk(src) {
     }
     if ((m = l.match(/^### (.+?)(?: \{(\w+)\})?$/))) {
       i++; group('<div class="keep">', "</div>");
-      const title = m[1], g = Object.entries(entry?.steps ?? {}).find(([k]) => title.includes(k))?.[1], step = Number.isInteger(g) ? riskTile(g, "step-risk") : "";
+      const title = m[1], step = "";  // no per-step marks
       const t = title.match(/^(.+?) · (.+)$/);
       tag = (t && (m[2] || TAGS[t[1].toLowerCase()])) || "";
       body += tag ? `<h3><span class="tag ${tag}">${esc(t[1])}</span>${md(t[2])}${step}</h3>` : `<h3>${md(title)}${step}</h3>`;
@@ -229,28 +224,6 @@ function renderChalk(src) {
 }
 const chalkSource = document.querySelector('script[type="text/chalk"]');
 if (chalkSource) renderChalk(chalkSource.textContent);
-
-// Graded notes load the risk scale: site/risk.js, then site/risk-local.js (gitignored) if there is one, which
-// replaces it. Each tile then gets its grade's name and meaning as a tooltip, and the scale's own tiles file.
-function loadRisk() {
-  const tiles = document.querySelectorAll("[data-risk]");
-  if (!tiles.length) return;
-  document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: "../site/risk.css" }));
-  const apply = () => {
-    const scale = window.CHALK_RISK;
-    if (!scale) return;
-    for (const t of tiles) {
-      const g = +t.dataset.risk, grade = scale.grades[g];
-      t.querySelector("img").src = `../site/${scale.tiles}#t${g}`;
-      t.title = grade ? `Risk ${g} · ${grade.name}: ${grade.means}` : `Risk ${g}`;
-      const label = t.querySelector("b");
-      if (label && grade) label.textContent = `Risk ${g} · ${grade.name}`;
-    }
-  };
-  const load = (src, next) => document.head.append(Object.assign(document.createElement("script"), { src, onload: next, onerror: next }));
-  load("../site/risk.js", () => load("../site/risk-local.js", apply));
-}
-loadRisk();
 
 // The owner's own eyebrow tiles, local only. site/eyebrow-local.js (gitignored) may set window.CHALK_EYEBROW to a
 // function from a grade to an image URL. Where it does and the image loads, it becomes the eyebrow's background;

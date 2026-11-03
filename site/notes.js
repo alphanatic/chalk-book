@@ -112,6 +112,18 @@ window.CHALK_NOTES = [
     skills: ["svc-deploy", "deploy user", "useradd", "install -d", "/dev/stdin", "authorized_keys", "ssh-keygen", "HostKeyAlias", "rsync", "--delete", "Vite", "base", "npm run build", "dist", "React", "nginx location", "return 301", "trailing slash", "curl", "pacman"],
   },
   {
+    id: "tinker-town-14-explore-aws-credits", project: "tinker-town", n: 14, context: "Free plan", date: "2026-10-26", risk: 5,
+    title: "Explore AWS Credits",
+    summary: "The four remaining Explore AWS activities for $80: Lambda function URL, cost budget, Aurora Serverless, Bedrock playground; Nova when Claude fails.",
+    skills: ["AWS Free plan", "Explore AWS", "credits", "Start activity", "Lambda", "function URL", "blueprint", "FunctionUrlConfig", "AuthType NONE", "SAM", "template.yaml", "API Gateway", "AWS Budgets", "monthly cost budget", "RDS", "Aurora", "Aurora Serverless", "ACU", "Express configuration", "delete cluster", "final snapshot", "Bedrock", "playground", "Claude Haiku", "Nova Lite", "AWS Marketplace", "ServiceUnavailableException", "use case form", "Anthropic API", "subscription"],
+  },
+  {
+    id: "tinker-town-15-ec2-termination-protection", project: "tinker-town", n: 15, context: "Cleanup", date: "2026-10-28", risk: 5,
+    title: "EC2 Termination Protection",
+    summary: "A terminate refused by disableApiTermination; turning protection off in Instance settings; stop protection; which EBS volumes outlive an instance.",
+    skills: ["EC2", "terminate", "termination protection", "disableApiTermination", "modify-instance-attribute", "describe-instance-attribute", "terminate-instances", "stop protection", "shutdown behavior", "Instance settings", "EBS", "volumes", "Delete on termination", "unattached volume", "delete volume", "snapshot"],
+  },
+  {
     id: "pokedex-00-pokeggdex-at-a-glance", project: "pokedex", n: 0, context: "Cover", date: "2026-10-20", risk: 4,
     title: "Pokéggdex at a Glance",
     summary: "The project's cover: the anime pokeggdex in a pixel-art S.S. Anne cabin, how to run and ship it, its parts, its story, and pastel Pokéball marks.",
@@ -220,6 +232,18 @@ window.CHALK_NOTES = [
     skills: ["footer", "private links", "FOOTER", "dropIfMissing", "sort colours", "pending", "CLAUDE.md", "guide", "git archive", "tar", "rsync --delete", "rsync --checksum", "web deploy", "/var/www/web", "headless brave", "devtools protocol", "cdp", "remote-debugging-port", "Page.captureScreenshot", "Runtime.evaluate", "localStorage", "websocket", "node"],
   },
   {
+    id: "meta-16-coming-soon-cipher", project: "meta", n: 16, context: "Site", date: "2026-10-30", risk: 4,
+    title: "Coming Soon Cipher & Partial Commit",
+    summary: "Open Coming soon entries as reshuffling cipher glyphs, monospace and centred on one line; committing only one session's hunks; a hex check on a quoted note; deploys ship only pushed work.",
+    skills: ["coming soon", "SOON", "cipher", "scramble", "setInterval", "textContent", "text node", "prefers-reduced-motion", "aria-label", "monospace", "jitter", "max-content", "translateX", "nowrap", "git hash-object", "git update-index", "--cacheinfo", "git restore --staged", "partial commit", "check.sh", "hex colour", "git archive", "origin/main", "deploy.sh", "s3 sync", "cloudfront"],
+  },
+  {
+    id: "meta-17-cream-sheet-sortable-tables", project: "meta", n: 17, context: "Notes", date: "2026-10-31", risk: 3,
+    title: "Cream Sheet & Sortable Tables",
+    summary: "Every note on a light cream sheet, on screen and in PDFs; dark asphalt table headers; click any header to sort, with data-sort-key for custom order.",
+    skills: ["note-layout.css", "note.js", "@page", "background", "--band-text", "--asphalt", "th", "table sort", "sortableTables", "data-sort-key", "aria-sort", "localeCompare", "tabindex", "print", "pdf", "compare.sh", "cache", "fetch cache reload", "{keep}", "chalk markup", "ugrep", "backreference"],
+  },
+  {
     id: "claude-code-01-skill-vetting", project: "claude-code", n: 1, date: "2026-10-13", risk: 2,
     title: "Skill & Plugin Vetting",
     summary: "Quarantine, SkillSpector scan, human review, then install at local scope or delete; a CLAUDE.md rule and ask gate.",
@@ -260,6 +284,36 @@ window.CHALK_NOTES = [
     title: "Obsidian IDE Connection",
     summary: "Claude Code IDE plugin + /ide connects the CLI to Obsidian; native install on Arch; ZDOTDIR hid ~/.zshrc; the npm copy removed.",
     skills: ["claude code", "obsidian", "plugin", "claude code ide", "/ide", "claude --ide", "mcp", "websocket", "lock file", "~/.claude/ide", "jq", "install.sh", "curl", "npm", "npm view", "npm config", "npm uninstall", "allowScripts", "postinstall", "zsh", "ZDOTDIR", "whence", "sed -i", "find -empty", "parse error", "arch linux"],
+  },
+  {
+    id: "claude-code-08-suspended-sessions", project: "claude-code", n: 8, context: "Sessions", date: "2026-10-22", risk: 3,
+    title: "Suspended Sessions & Job Control",
+    summary: "Ctrl+Z, jobs and fg; finding paused Claude sessions by PID through /proc and ~/.claude/sessions; reading and stopping them.",
+    skills: ["claude code", "ctrl+z", "jobs", "fg", "bg", "job control", "sigtstp", "suspended", "/proc", "cwd", "readlink", "ps", "pgrep", "kill", "sigkill", "sigcont", "~/.claude/sessions", "transcript", "jsonl", "jq", "claude --resume", "kitty", "zsh"],
+  },
+  {
+    id: "claude-code-09-sonnet-opus-model-fit", project: "claude-code", n: 9, context: "Models", date: "2026-10-26", risk: 2,
+    title: "Sonnet vs Opus & Model Fit",
+    summary: "Sonnet 5.5 against Opus 5.5 on price, speed and thinking; when handing work to another model pays; a global Model fit rule.",
+    skills: ["claude code", "models", "sonnet", "opus", "haiku", "fable", "claude-sonnet-5-5", "claude-opus-5-5", "pricing", "effort", "between_tools", "adaptive thinking", "fast mode", "subagents", "delegation", "prompt cache", "/model", "claude-api skill", "memory", "MEMORY.md", "claude.md", "rm", "grep"],
+  },
+  {
+    id: "claude-code-11-codex-deny-read", project: "claude-code", n: 11, context: "Codex", date: "2026-10-29", risk: 2,
+    title: "Codex Deny-Read Profile & Soft Rule",
+    summary: "A Codex permission profile to hide the web-skeleton notes hit a bwrap bug with two denied files; rolled back to a soft AGENTS.md rule.",
+    skills: ["codex", "permission profile", "default_permissions", "extends", ":workspace", "deny", "deny-read", "glob", "codex sandbox", "codex doctor", "bwrap", "Bad file descriptor", "config.toml", "toml tables", "tomllib", "AGENTS.md", "soft rule", "rollback"],
+  },
+  {
+    id: "claude-code-13-skillspector-recheck", project: "claude-code", n: 13, context: "Security", date: "2026-10-29", risk: 2,
+    title: "SkillSpector Recheck & Vetting Doc",
+    summary: "The local NVIDIA SkillSpector checked: official, v2.12.0, 574 commits behind; what its verdict is worth and what it sends out; the red/amber/green rule written as company documentation.",
+    skills: ["skillspector", "nvidia", "skill vetting", "agent skills", "prompt injection", "--no-llm", "osv.dev", "yara", "static analysis", "untrusted content", "red amber green", "vetting.log", "CLAUDE.md", "git fetch", "git rev-list --count", "git log --format", "uniq -c", "command -v", "zsh equals expansion"],
+  },
+  {
+    id: "claude-code-14-cursor-extension-trojan", project: "claude-code", n: 14, context: "Security", date: "2026-10-31", risk: 3,
+    title: "Cursor Extension Trojan & Install Check",
+    summary: "A tampered Claude Code 2.1.313 (and 2.1.312) on Cursor's marketplace planted an SSH backdoor; who could publish it, its indicators and VirusTotal report, how this Code - OSS install was checked and found clean, and how it was hardened: no extension auto-update and an nftables firewall that drops SSH.",
+    skills: ["supply chain", "vs code extension", "cursor", "open vsx", "code - oss", "anthropic.claude-code", "2.1.313", "2.1.312", "virustotal", "ghostssh", "indicators of compromise", "ioc", "sha-256", "ssh key fingerprint", "smt.cmd", "jq -r", "sandbox", "morphisec", "stepsecurity","authorized_keys", "reverse ssh tunnel", "persistence", "crontab", "launchagent", "beacon", "auto-update", "extensions.json", "product.json", "serviceUrl", "pacman -Qo", "code --version", "date -d @", "python3 -I", "zsh glob", "nullglob", "firecrawl", "prompt injection", "hardening", "nftables", "nft list table", "nft -c", "firewall", "policy drop", "tcp dport 22", "tailscale", "tailscale0", "41641", "tailscale ping", "systemctl enable --now", "extensions.autoUpdate"],
   },
   {
     id: "javascript-01-footer-vs-tabs", project: "javascript", n: 1, date: "2026-10-13", risk: 1,

@@ -1,0 +1,109 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+When a cheaper model fits, and a global rule to say so
+
+Compared Sonnet 5.5 with Opus 5.5 using the `claude-api` skill's model table, then asked whether the default model is good at handing work down. It isn't automatic, so a global **Model fit** rule now makes every session say in one line when another model suits a task better.
+
+A reference for picking a model: what each costs, what it's good at, and when splitting work across models pays off.
+
+## What we covered
+
+- Sonnet 5.5 costs half as much as Opus 5.5: $2 / $10 against $4 / $20 per million tokens
+- Both have a 1M context window and 128K max output
+- Sonnet wins on price, speed and latency, not quality; Opus stays the pick for the hardest long work
+- Only Sonnet 5.5 can skip extended thinking (`between_tools`); Opus 5.5 can only lower its effort
+- The main model doesn't choose a subagent's model: the agent definition or settings do
+- Handing work down trades quality for cost; one model at lower effort is the first thing to measure
+- The rule was first saved as memory, which only loads in the folder it was saved from
+- It moved to a `## Model fit` section in `~/.claude/CLAUDE.md`, loaded in every session
+
+{keep}
+## Sonnet 5.5 vs Opus 5.5 {concept}
+| | Sonnet 5.5 | Opus 5.5
+| **Model ID** | `claude-sonnet-5-5` | `claude-opus-5-5`
+| **Input / output, per 1M tokens** | $2 / $10 | $4 / $20
+| **Cache reads, per 1M tokens** | $0.20 | $0.20
+| **Context / max output** | 1M / 128K | 1M / 128K
+| **Default effort** | `high` | `medium`
+| **Thinking off** | `thinking: {type: "between_tools"}`, effort `high` or below | Not possible: `disabled` is a 400; lower the effort
+| **Fast mode** | No | Yes, $8 / $40 (twice the price)
+| **Good at** | Routine coding, chat, tool loops, helper agents | Hard reasoning, long autonomous runs
+
+> Concept · Prices and limits come from the `claude-api` skill's model table, cached 2026-10-06. The skill gives no benchmark numbers; it calls the earlier Sonnet 5 "near-Opus quality on coding and agentic work".
+
+{keep}
+## Which model for what {concept}
+| Work | Model | Why
+| Routine edits, chat, simple lookups | Sonnet 5.5 | Half the price, faster replies
+| Bulk extraction, high-volume simple work | Haiku 5.5 | $0.10 / $0.50, made for volume
+| Hard reasoning, long agent runs | Opus 5.5 | The default; quality first
+| The hardest problems | Fable 5.1 | $10 / $50, the most capable
+
+{keep}
+## Does the default model hand work down well? {concept}
+| Where | Who picks the model
+| Claude Code subagent | `model:` in the agent definition, else the main session's model or a default subagent model setting
+| Managed Agents | The roster of agents listed in the agent's config
+| The main model itself | Only *whether* to delegate, and from the options it was given
+
+> Concept · Smaller models rarely do a task better; they do it cheaper and faster. Each model has its own prompt cache, so mixing models pays again for context already cached. Judge cost per finished task, not per request.
+> Key rule · Delegate large work that splits cleanly: reading many files, research across sources, bulk extraction. Keep small or tightly linked work in one model, since a subagent starts with no memory of the chat.
+
+## Full command sequence
+
+### Local · Look up the current models
+1. Ask about a model in Claude Code; the `claude-api` skill loads its cached model table.
+2. For details, read the skill's `shared/models.md` and the Sonnet 5.5 section of `shared/model-migration.md`.
+```local
+grep -n -i "sonnet" shared/models.md  # -n: line numbers, -i: ignore case
+```
+
+### Local · First try: save the rule as memory
+1. Wrote `flag-better-suited-model.md` in the finance project's memory folder, type `feedback`.
+2. Added a one-line pointer to it in that folder's `MEMORY.md`.
+
+> Gotcha · Memory lives under `~/.claude/projects/<project-folder>/memory/` and only loads in sessions started in that folder. The rule was meant for every session.
+
+### Local · Move it to the global CLAUDE.md
+1. Added a `## Model fit` section after `## Chalk book` in `~/.claude/CLAUDE.md`.
+2. Deleted the memory copy, so the rule lives in one place.
+```config: ~/.claude/CLAUDE.md
+## Model fit
+
+When a new task clearly suits another Claude model better than the current one, say so in
+one line before starting it: name the model, the reason (cost, speed or capability), and that
+`/model` switches. Sonnet suits routine edits, chat and simple lookups; Haiku suits bulk
+extraction and high-volume simple work; Fable suits the hardest long reasoning. Flag only clear
+mismatches, never mid-task, then carry on unless I switch.
+```
+```local
+rm ~/.claude/projects/<project-folder>/memory/flag-better-suited-model.md \
+   ~/.claude/projects/<project-folder>/memory/MEMORY.md  # the old copy and its index line
+ls -la ~/.claude/projects/<project-folder>/memory/  # -l: long, -a: all; now empty
+```
+
+## Bugs hit & fixed
+
+#### Bug · The rule only worked in one folder
+cause: The first copy was memory in the finance project, so no other folder ever loaded it.
+fix: Moved it to `~/.claude/CLAUDE.md` and deleted the memory files.
+> Gotcha · "One step up" from `memory/` is the project's own folder under `~/.claude/projects/`, still tied to that project. Only `~/.claude/CLAUDE.md` loads everywhere.
+
+{keep}
+## Where things live
+| What | Path
+| Global rules, every session | `~/.claude/CLAUDE.md`
+| Memory for one project folder | `~/.claude/projects/<project-folder>/memory/`
+| Model table and prices | `claude-api` skill, `shared/models.md`
+| A subagent's model | `model:` in the frontmatter of `.claude/agents/*.md`
+
+{keep}
+## Best practices
+- **Pick by fit, not habit** Opus for hard work, Sonnet for routine, Haiku for volume.
+- **Measure one model first** Try it at lower effort before mixing models.
+- **Rules for every session go global** Memory only loads in its own folder.
+- **Keep one copy** Delete the old copy when a rule moves.
+
+Part of Claude Code · see [[claude-code-03-memory-access-map]] and [[claude-code-04-always-on-context]]
+</script>
+<body><script src=../site/notes.js></script><script src=../site/notes-local.js></script><script src=note.js></script>

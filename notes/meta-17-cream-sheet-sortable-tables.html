@@ -1,0 +1,88 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A cream sheet, dark table headers, and tables that sort on click
+Every note now sits on a light cream sheet, on screen and in PDFs, and every table header row is dark asphalt. A click on any header sorts the table; the PDF keeps the written order.
+
+The changes live in the shared `note-layout.css` and `note.js`, so every note picked them up at once.
+
+## What we covered
+- Note sheet and printed page background: `--paper` → `--band-text` (#F1EDE6), on screen and in PDFs
+- Table headers: pink tint → `--asphalt` with `--band-text` text, pink bottom line kept
+- `sortableTables()` in `note.js`: every table with a header row sorts by click, again to reverse
+- A cell's `data-sort-key` sorts in place of its text, so chips can sort by rank, not by name
+- Sort arrows, pointer and hover only on screen; PDFs print as written
+- `compare.sh` over all 41 committed notes: pixels differ, page counts and text unchanged
+
+## Full command sequence
+
+### Local · The cream sheet
+```config: notes/note-layout.css
+@page { background: var(--band-text); }  »  margins included, so the PDF is cream edge to edge
+body { background: var(--band-text); }  »  the sheet itself, screen and print
+```
+> Gotcha · Painting the site's view area cream instead failed: Home shares that background and its text is white. The colour belongs on the note's own sheet.
+
+### Local · Dark headers on every table
+```config: th (note-layout.css)
+background: var(--asphalt);  »  same dark as the header band
+color: var(--band-text);  »  light text
+border-bottom: 1.5px solid var(--pink);  »  kept from before
+```
+| Tried | Why it was dropped
+| `--line` cream | too close to the cream sheet
+| `--line` mixed 20% with `--peach-ink` | "oak" tint, not wanted
+| `--output-line` dark cream | replaced by asphalt, to match the dark panels
+
+### Local · Click-to-sort tables
+1. `sortableTables()` runs after the note is built; it skips tables without a full header row or with fewer than two rows.
+2. Each header gets `data-sort`, `tabindex=0`, a click handler and Enter/Space.
+3. Keys: `data-sort-key` if set, else the cell text; numbers sort as numbers, text with `localeCompare(…, "sv")`.
+4. Ties keep the written order through `data-order`.
+```config: @media screen (note-layout.css)
+th[data-sort] { cursor: pointer; }  »  clickable look
+th[data-sort]::after { content: " ↕"; }  »  faint hint
+th[aria-sort="ascending"]::after { content: " ▲"; }  »  current direction
+```
+> Concept · A note that wants its own order (rank instead of A–Ö) only sets `cell.dataset.sortKey`; the sorting itself stays in `note.js`.
+
+### Local · Check every note
+```local
+.claude/skills/chalk-up/compare.sh  # renders each note at HEAD and now, compares pages, pixels and text
+```
+```output
+tinker-town-07-vpc-networking: DIFFERS  pages 6 → 6  p1: 18456.7 px …  text lines: 0
+```
+
+## Bugs hit & fixed
+
+#### Bug · the browser kept the old note.js
+cause: After the edit, no header was sortable and the header was still pink: the page used cached `note.js` and `note-layout.css`.
+fix: Fetch both with the cache bypassed, then reload.
+```local
+fetch('note.js', {cache: 'reload'})  # in the page console; same for note-layout.css
+```
+
+#### Bug · {keep} printed as text in the header
+cause: A `{keep}` placed right before the first `##` heading sits in the summary lines, which run up to the first heading, so it was shown as text.
+fix: No `{keep}` before a note's first heading.
+
+#### Bug · regex backreference refused
+cause: Filtering the compare output with `grep -v -E 'pages ([0-9]+) → \1'` failed: `ugrep` rejects `\1` in that mode.
+fix: Filter with a few lines of Python instead.
+
+{keep}
+## Where things live
+| What | Path
+| Sheet, page and header colours | `notes/note-layout.css`
+| Sorting | `notes/note.js`, `sortableTables()`
+| Palette tokens used | `chalk-pastel.css`: `--band-text`, `--asphalt`, `--pink`
+
+{keep}
+## Best practices
+- **Colour the sheet, not the frame** The site frame is shared with Home; the note's own sheet is safe to recolour.
+- **One sorter for all tables** Notes add sort keys, never their own click handlers.
+- **Compare after shared changes** Same page count and zero text lines changed means only the look moved.
+
+Part of Chalk Book · see [[meta-07-chalk-markup]] for the markup rules
+</script>
+<body><script src=../site/notes.js></script><script src=../site/notes-local.js></script><script src=note.js></script>

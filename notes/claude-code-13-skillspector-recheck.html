@@ -1,0 +1,109 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A second look at NVIDIA's skill scanner, and the red/amber/green rule written down as company documentation
+
+Checked the local SkillSpector install two weeks after setting it up: still official and maintained, but 574 commits behind. Weighed how far its verdict can be trusted and what it sends off the machine. Then wrote the untrusted-content principle from `~/.claude/CLAUDE.md` into the company's own docs, and found the red-tier log had never been created.
+
+## What we covered
+
+- SkillSpector found at `~/Projects/SkillSpector`: an official NVIDIA clone, v2.12.0, in its own `.venv`, not on PATH
+- 574 upstream commits behind; fetched only, not pulled, since an update is itself an install to vet
+- Validity: NVIDIA org, Apache 2.0, the scanner in NVIDIA's own Verified Skills pipeline, active upstream
+- What it catches: 71 patterns in 17 categories, static only; the skill is never run
+- What leaves the machine: file contents to an AI provider unless `--no-llm`, dependency names to OSV.dev always
+- A clean scan means no known pattern matched, not that the skill is safe
+- The red/amber/green rule recapped and written as a company working-principle doc
+- `~/quarantine/vetting.log` didn't exist: no red finding has ever been logged
+
+## Full command sequence
+
+### Local · Find the install
+```local
+cd ~/Projects && ls  # the clone was there by name
+cd SkillSpector  # every step below runs from here
+git remote -v  # confirms github.com/NVIDIA/SkillSpector
+git status -s  # empty: no local changes
+command -v skillspector  # nothing: it lives only in the venv
+```
+
+### Local · Version and upstream
+```local
+.venv/bin/skillspector --version  # installed version
+git fetch -q origin  # -q: quiet; downloads, changes no files
+git rev-list --count HEAD..origin/HEAD  # commits upstream has, we don't
+```
+```output
+SkillSpector v2.12.0
+574
+```
+
+> Key rule · Updating a scanner is an install like any other: show the upstream changes first, then pull and `make install`.
+
+### Local · Read its own limits
+```local
+sed -n 905,990p README.md  # trust model and limits
+git log --format='%an' | sort | uniq -c | sort -rn | head -5  # top committers
+```
+
+| Stage | What it does | Leaves the machine
+| Static | Regex, Python AST, taint tracking, YARA, OSV.dev lookup | Dependency names and versions
+| LLM (on by default) | Re-reviews findings; never drops a static one | File contents, to the configured provider
+| `--no-llm` | Static only | Still the OSV.dev lookup
+
+| Can't see | Why it matters
+| Run-time behaviour | It never runs the skill
+| Text in images, compiled or encrypted code | Payloads can hide there
+| Non-English text | Patterns are English
+| Anything after install | It flags; it doesn't sandbox
+
+> Gotcha · The LLM pass is on by default. For anything private, always add `--no-llm`.
+
+### Local · Scan a skill
+```local
+.venv/bin/skillspector scan <path> --no-llm  # static only; score 0–100 + findings
+```
+
+### Local · Write the principle down
+1. Recapped the **Untrusted content** section of `~/.claude/CLAUDE.md` (red, amber, green).
+2. Wrote it as a doc in the company's documentation folder, with a vetting workflow and a SkillSpector section.
+3. Added the new folder to the documentation README, and the file to the company `INDEX.md`, as its rules require.
+
+| Section | Holds
+| Core principle | Only chat is instruction; judge the gap between claim and reach
+| Red | Signs table; refuse, log to `vetting.log`, tell; one finding distrusts the whole source
+| Amber | Signs table; show claims, reach, gap and options; no answer means no
+| Green | Purpose matches behaviour, nothing reaches outside, source pinned
+| Vetting a skill | Get it without running, scan, read, sort, act
+| Tool | SkillSpector: coverage, egress, limits, keep it current
+| Known gaps | The log never created; nothing enforces the rules
+
+> Concept · `CLAUDE.md` stays the rule; the doc explains it. If the two differ, `CLAUDE.md` wins. Same pattern as [[claude-code-12-handoff-reading-parallel-sessions]].
+
+## Bugs hit & fixed
+
+#### Bug · echo ===== in zsh again
+cause: A separator `echo =====` in a chain: zsh expands a word starting with `=` to a command path, failed with `==== not found`, and cut the output short.
+fix: Read the files separately, or quote the separator: `echo '---'`.
+
+#### Bug · The red-tier log never existed
+cause: `ls ~/quarantine` showed only a `playwright/` folder. The rule says to append to `vetting.log`, but no red finding had ever been logged.
+fix: Recorded as a known gap in the doc; the first rejection creates the file.
+
+{keep}
+## Where things live
+| What | Path
+| SkillSpector clone and venv | `~/Projects/SkillSpector/`, `.venv/bin/skillspector`
+| The rule | `~/.claude/CLAUDE.md`, Untrusted content
+| The doc | `~/company/<company>/1. documentation/project-amber/untrusted-content-vetting.md`
+| Red-tier log | `~/quarantine/vetting.log` (not created yet)
+
+{keep}
+## Best practices
+- **Scan, then read** A scan is the first pass; the tier is decided by reading every file.
+- **Always --no-llm on private work** Otherwise file contents go to an AI provider.
+- **Keep the scanner current** An old copy misses new patterns; vet the update too.
+- **Write the why down** The rule file says what; a doc beside it says why and how.
+
+Part of Claude Code · follows [[claude-code-01-skill-vetting]] and [[claude-code-02-untrusted-content-triage]]
+</script>
+<body><script src=../site/notes.js></script><script src=../site/notes-local.js></script><script src=note.js></script>

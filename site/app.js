@@ -100,12 +100,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { key: "az", label: "A–Ö", color: "butter", title: "A to Ö", projects: (a, b) => byName(a.name, b.name), notes: (a, b) => byName(a.title, b.title) },
     { key: "number", label: "01–99", color: "mint", title: "Catalogue order, notes by number", projects: () => 0, notes: (a, b) => a.n - b.n },
     { key: "za", label: "Ö–A", color: "coral", title: "Ö to A", projects: (a, b) => byName(b.name, a.name), notes: (a, b) => byName(b.title, a.title) },
-    { key: "risk", label: "Risk", color: "peach", title: "Riskiest first (site/risk.js); ungraded notes last", projects: () => 0,
-      notes: (a, b) => (b.risk ?? -1) - (a.risk ?? -1) || a.n - b.n },
   ];
-  // The risk scale (site/risk.js, or site/risk-local.js in its place): a graded note's tile, name and meaning
-  const RISK = window.CHALK_RISK;
-  const riskOf = n => Number.isInteger(n.risk) && RISK?.grades[n.risk];
   const SORT_KEY = "chalk.sort";
   let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS.find(s => s.key === "number");
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
@@ -169,9 +164,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     b.type = "button";
     b.dataset.id = n.id;
     const mod = moduleTitle(n);
-    const grade = riskOf(n);
     b.title = [showProject ? `${projects[n.project]?.name} · ${n.title}` : n.title, n.summary,
-      mod && `Module ${n.module} · ${mod}`, grade && `Risk ${n.risk} · ${grade.name}`, n.date].filter(Boolean).join("\n");
+      mod && `Module ${n.module} · ${mod}`, n.date].filter(Boolean).join("\n");
     const t = el("span", "t", n.title);
     if (n.italic || projects[n.project]?.italic) t.style.fontStyle = "italic";  // italic: true on a note or a whole project
     b.append(el("span", "num", pad(n.n)));

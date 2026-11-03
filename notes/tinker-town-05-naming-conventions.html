@@ -40,6 +40,14 @@ This file is a reference, not a walkthrough — check back here whenever you nam
 | Key pair | `kp` | Subnet | `snet`
 | VPC | `vpc` | Route table | `rt`
 | Internet gateway | `igw` | NAT gateway | `nat`
+| Physical server | `srv` | |
+
+>{paths} Updated rule · From 2026-11-01, outside Tinker Town, compute instances (physical servers, VMs, cloud
+  instances) share one instance counter: a number is given once, stays with its instance even when it is
+  repurposed, and is never reused. `000` is a one-time draft; `999` is the ceiling where lifecycle management
+  starts. Supporting resources (`sg`, `vpc`, `snet`) keep their own per-type numbers and link to nodes by tags.
+  Key pairs belong to a person or pipeline. Tinker Town's names stay a legacy namespace with per-type `001`s.
+> Key rule · Names use only `a-z`, `0-9` and `-`. Never a dot.
 
 ## The patterns {paths}
 

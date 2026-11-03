@@ -1,0 +1,107 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Ctrl+Z, jobs and fg, and finding sessions you can't see
+
+Two Claude Code sessions had been paused with Ctrl+Z in the same kitty terminal and were forgotten. They held a project folder open while it was about to be moved. We found them by PID, read what they had done, and stopped them.
+
+A reference for shell job control, and a recipe for finding which processes hold a folder.
+
+## What we covered
+- Ctrl+Z pauses the program in front and gives the terminal back to the shell; the shell keeps it as a job
+- `jobs`, `fg` and `bg` are zsh builtins, typed at the shell prompt, not into Claude
+- Several sessions can share one terminal; only one is in front at a time
+- `/proc/<pid>/cwd` shows which processes sit in a folder; state `T` means paused
+- `~/.claude/sessions/<pid>.json` maps a PID to its session ID, folder and name
+- Read a paused session's prompts and replies from its `.jsonl` transcript with `jq`
+- A dev server started by a paused session keeps running, with no window
+- A paused process ignores `TERM` until it runs again; `KILL` stops it at once
+- `claude --resume` reopens a stopped session's conversation from its transcript
+
+## Full command sequence
+
+### Local · Pause and resume
+```local
+jobs  # list paused jobs: [1] + suspended claude
+fg %1  # bring job 1 back to the terminal
+fg  # no number: the most recently paused job
+bg %1  # let job 1 run on in the background (not for interactive programs)
+```
+| Key or command | What it does
+| <kbd>Ctrl</kbd>+<kbd>Z</kbd> | pauses the program in front (`SIGTSTP`), back to the prompt
+| `jobs` | lists this shell's jobs, with numbers
+| `fg %n` | resumes job *n* in front
+| `/exit` | ends the Claude session in front, so the prompt is free for `fg`
+| `claude --resume` | picks an old session's conversation to reopen
+
+> Gotcha · Closing the terminal window kills every paused job in it. The conversations survive as transcripts and `claude --resume` brings them back, but anything running in them (a dev server) is gone.
+
+### Local · Find what holds a folder open
+```local
+for p in /proc/[0-9]*; do  # every process
+  c=$(readlink $p/cwd 2>/dev/null) || continue  # its working folder
+  case "$c" in *<project>*) echo "${p#/proc/} -> $c";; esac  # PID and folder
+done
+ps -o pid,ppid,stat,lstart,cmd -p 89388,1129951  # T = paused
+pgrep -af soffice  # open file, no window
+```
+```output
+  PID    PPID STAT  STARTED   CMD
+89388   88978 Tl    13:55:21  claude  # paused
+1129951 88978 Tl    20:10:07  claude  # paused
+1176514 88978 Sl+   21:24:28  claude  # this session, in front (+)
+```
+> Concept · All three had the same parent, the kitty tab's zsh. A `+` in `STAT` marks the foreground job; `T` is stopped.
+
+### Local · Which session is which
+```local
+cat ~/.claude/sessions/89388.json  # sessionId, cwd, name
+cd ~/.claude/projects/-home-critonite-Projects-<project>  # transcripts
+p=$$; while [ "$p" -gt 1 ]; do  # walk up to this session
+  [ "$(ps -o comm= -p $p)" = claude ] && { echo $p; break; }
+  p=$(ps -o ppid= -p $p | tr -d ' ')
+done
+```
+```local
+U='select(.type=="user") | .message.content'  # user turns
+T='if type=="string" then . else (map(select(.type=="text").text) | join(" ")) end'  # text
+jq -r "$U | $T | select(. != \"\")" <session-id>.jsonl  # every prompt
+A='select(.type=="assistant") | .message.content | map(select(.type=="text").text)'  # replies
+jq -r "$A | join(\"\\n\")" <session-id>.jsonl | tail -c 5000  # the last ones
+```
+> Gotcha · Prompts with images are stored as a list of blocks, not a string. A filter on string content alone missed most of them.
+
+### Local · Stop them
+```local
+kill 116756 116745  # the dev server first
+kill -TERM 89388; kill -CONT 89388  # TERM waits until CONT
+kill -KILL 89388 1129951  # still paused: KILL always works
+ps -p 89388,1129951 -o pid=,stat= || echo "all gone"  # check
+```
+
+## Bugs hit & fixed
+
+#### Bug · TERM didn't stop a paused session
+cause: A stopped process doesn't handle signals until it runs. After `kill -CONT` the session was still `Tl`: as a background job reading the terminal it was stopped again at once.
+fix: `kill -KILL`. Safe here, because the transcript is already on disk.
+
+#### Bug · pgrep found itself
+cause: `pgrep -af obsidian` ran inside a shell whose command line contained the word `obsidian`, so it matched its own wrapper.
+fix: Match the binary exactly: `pgrep -x obsidian`, or put a bracket in the pattern: `pgrep -af '[o]bsidian'`.
+
+{keep}
+## Where things live
+| What | Path
+| Running sessions, one per PID | `~/.claude/sessions/<pid>.json`
+| Transcripts, per folder | `~/.claude/projects/<path-key>/<session-id>.jsonl`
+| Auto-memory, per folder | `~/.claude/projects/<path-key>/memory/`
+| A process's working folder | `/proc/<pid>/cwd`
+
+{keep}
+## Best practices
+- **One tab per session** A new kitty tab per Claude session is easier to track than Ctrl+Z.
+- **Check before moving a folder** Look in `/proc/*/cwd` first; a paused session or a hidden program may still use it.
+- **Read before killing** The transcript tells you if a paused session left work unfinished.
+
+Part of Claude Code · see [[claude-code-03-memory-access-map]] for the per-folder memory and transcripts
+</script>
+<body><script src=../site/notes.js></script><script src=../site/notes-local.js></script><script src=note.js></script>
