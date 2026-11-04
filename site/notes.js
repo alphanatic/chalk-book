@@ -29,6 +29,7 @@ window.CHALK_PROJECTS = {
   "javascript": { name: "JavaScript", color: "mint" },
   "arch-linux": { name: "Arch Linux", color: "peri" },
   "anthropic": { name: "Anthropic", color: "peach" },
+  "ai-reelsearch": { name: "AI Reelsearch", color: "pink" },
   "meta":    { name: "Chalk Book", color: "butter" },
 };
 

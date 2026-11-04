@@ -7,7 +7,13 @@ addEventListener("keydown", e => {
   if (hard && parent !== window) { e.preventDefault(); parent.postMessage("chalk:hard-reload", "*"); }
 });
 addEventListener("message", e => {
-  if (e.data === "chalk:print") print();
+  if (e.data === "chalk:print") {
+    // Opened from disk: the PDF takes its name from the title, so use the file's own name while printing
+    const own = document.title;
+    document.title = decodeURIComponent(location.pathname.split("/").pop().replace(/\.html$/, ""));
+    print();
+    document.title = own;
+  }
   else if (e.data && e.data.type === "chalk:highlight") highlight(e.data.q || "");
 });
 

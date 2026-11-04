@@ -101,6 +101,8 @@ chalk-book/
 | `arch-linux` | Arch Linux | Installing and setting up Arch Linux on personal machines |
 | `anthropic` | Anthropic | The claude.ai account: cloud skills, sync, and what reaches the local tools |
 | `wow` | World of Warcraft | WoW addon and UI setups, e.g. boss-mod layouts measured from stream clips |
+| `ai-reelsearch` | AI Reelsearch | Vetting AI tips from reels and social media: real, oversold or hype, with links to read more |
+| `home-lab` | Home Lab | A home cluster from spare parts: the brain box, a GPU node, storage and the DevOps learning track |
 | `meta` | Chalk Book | Notes about the chalk book itself |
 | *(private)* | *(private)* | A work course; its slug, name and roadmap live only in `site/notes-local.js` |
 

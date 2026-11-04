@@ -427,8 +427,18 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   // every file is its own origin, so we ask the note to open its own print dialog instead.
   function save() {
     if (!currentId) return;
-    try { frame.contentWindow.print(); }
+    // The browser names the PDF after the page title, so both titles become the note's id (e.g.
+    // claude-code-12-handoff-reading-parallel-sessions) while the dialog is open, then go back
+    const top = document.title;
+    document.title = currentId;
+    try {
+      const doc = frame.contentWindow.document, own = doc.title;
+      doc.title = currentId;
+      frame.contentWindow.print();
+      doc.title = own;
+    }
     catch { frame.contentWindow.postMessage("chalk:print", "*"); }
+    document.title = top;
   }
 
   // Loads a page into the viewer. A new page starts as an empty white document while its scripts load, so the frame

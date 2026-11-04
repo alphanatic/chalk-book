@@ -33,5 +33,12 @@ notes/skeleton-*
 notes/claude-code-10-feature-security-audit.html
 notes/claude-code-12-handoff-reading-parallel-sessions.html
 
+# Home Lab notes are private
+notes/home-lab-*
+
 # Local-only folder: private files and the owner's own extras (eyebrow risk tiles), never committed
 .default/
+
+# Private until the risk-grading feature is published
+notes/meta-18-local-risk-eyebrow-tiles.html
+notes/claude-code-15-risk-register-recheck.html
