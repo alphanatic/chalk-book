@@ -17,7 +17,7 @@ archive/backlog-workflow/
 .vscode/
 
 # Arch Linux project notes (personal machine setup) and everything made from them — never committed
-notes/arch-linux-*
+notes/arch-linux/
 site/notes-local.js
 site/site-local.js
 site/eyebrow-local.js
@@ -26,26 +26,26 @@ site/eyebrow-local.js
 site/search-local.js
 
 # Domains project notes (own domains and servers) — never committed
-notes/domains-*
+notes/domains/
 
 # Skeleton project notes (the company's own customer setup) — never committed
-notes/skeleton-*
-notes/claude-code-10-feature-security-audit.html
-notes/claude-code-12-handoff-reading-parallel-sessions.html
+notes/critium/
+notes/claude-code/claude-code-10-feature-security-audit.html
+notes/claude-code/claude-code-12-handoff-reading-parallel-sessions.html
 
 # Home Lab notes are private
-notes/home-lab-*
+notes/home-lab/
 
 # Local-only folder: private files and the owner's own extras (eyebrow risk tiles), never committed
 .default/
 
 # Private until the risk-grading feature is published
-notes/meta-18-local-risk-eyebrow-tiles.html
-notes/claude-code-15-risk-register-recheck.html
-notes/claude-code-16-session-trail-archive.html
+notes/chalk-book/meta-18-local-risk-eyebrow-tiles.html
+notes/claude-code/claude-code-15-risk-register-recheck.html
+notes/claude-code/claude-code-16-session-trail-archive.html
 
 # AI Reelsearch notes (reel vetting): private for the time being, never committed
-notes/ai-reelsearch-*
+notes/ai-reelsearch/
 
 # Private notes saved in the private repo: a list made by chalk-book-private/collect.sh — never committed
 site/in-repo.js

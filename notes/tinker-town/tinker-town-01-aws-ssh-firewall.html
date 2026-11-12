@@ -1,0 +1,108 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Foundations & hardening
+
+Spun up a free-tier Ubuntu EC2 instance in eu-north-1, locked SSH down to key-only access from a single IP, and enabled UFW as a basic firewall.
+
+This is the foundation the rest of the lab connects to — every later day assumes this instance, this key, and this hardened SSH setup are already in place.
+
+## What we covered
+
+- Launched Ubuntu Server 24.04 LTS, x86_64, `t2.micro` / `t3.micro` (free tier)
+- Security group restricting SSH (port 22) to **My IP** only — not `0.0.0.0/0`
+- Generated an **ED25519** key pair — faster, smaller and more modern than RSA
+- Moved the key to `~/.ssh/` and renamed it to match the naming convention
+- Set up a local `~/.ssh/config` so `ssh lab-ubuntu-01` connects with zero extra flags
+- Hardened `sshd_config`: disabled root login and password auth
+- Installed and enabled UFW, allowing only OpenSSH
+
+> Naming note · Day 1 resources use the old scheme (<span class="old">aws-lab-ubuntu-01</span>). Under the current rule `<type>-<workload>-<env>-<region>-<instance>` the key would be `kp-ubuntu-lab-eun1-001` and the instance `vm-ubuntu-lab-eun1-001`.
+
+## Full command sequence
+
+### Local · Key file setup — move into ~/.ssh and rename
+```local
+mkdir -p ~/Projects/aws-lab  # -p: no error if it exists
+mv ~/Documents/aws/ubuntu-lab-key.pem ~/.ssh/  # move key into ~/.ssh
+chmod 400 ~/.ssh/ubuntu-lab-key.pem  # 400: owner read-only (required by SSH)
+mv ~/.ssh/ubuntu-lab-key.pem ~/.ssh/aws-lab-ubuntu-01.pem  # rename to naming convention
+```
+
+### Local · First connection — before the alias existed
+```local
+ssh -i ~/.ssh/aws-lab-ubuntu-01.pem ubuntu@<instance-ip>  # -i: which private key to use
+```
+
+### Local · ~/.ssh/config — connect without flags
+```local
+nano ~/.ssh/config  # open (or create) the client config
+```
+```config: ~/.ssh/config
+Host lab-ubuntu-01  »  alias you type after ssh
+    HostName <instance-ip>  »  real address (changes on stop/start)
+    User adm-kiwi  »  personal admin login
+    IdentityFile ~/.ssh/aws-lab-ubuntu-01.pem  »  key used automatically
+```
+
+---
+> Gotcha · SSH config files don't support comments at the end of a line — a `#` only works at the start of its own line. That's why the notes sit beside the config here instead of inside it.
+
+```local
+chmod 600 ~/.ssh/config  # 600: owner read/write only
+ssh lab-ubuntu-01  # connect using the alias
+```
+
+### Remote · Fix terminal rendering (Kitty terminfo)
+```remote
+export TERM=xterm-256color  # fixes "Error opening terminal: xterm-kitty"
+```
+
+### Remote · Harden sshd_config
+```remote
+sudo nano /etc/ssh/sshd_config  # edit the SSH server config as root
+```
+```config: /etc/ssh/sshd_config
+PermitRootLogin no  »  nobody logs in directly as root
+PasswordAuthentication no  »  keys only, no password guessing
+PubkeyAuthentication yes  »  allow key-based login
+```
+```remote
+sudo sshd -t  # -t: test config syntax BEFORE restarting
+sudo systemctl restart ssh  # apply the changes
+```
+
+### Remote · UFW firewall
+```remote
+sudo ufw allow OpenSSH  # allow SSH before enabling, avoids lockout
+sudo ufw enable  # turn the firewall on
+sudo ufw status  # confirm the active rules
+```
+
+### Remote · Close the session
+```remote
+exit  # or Ctrl+D
+```
+
+{keep}
+## Where things live
+| What | Path
+| Private key (local) | `~/.ssh/aws-lab-ubuntu-01.pem`
+| Local SSH config | `~/.ssh/config`
+| SSH daemon config (remote) | `/etc/ssh/sshd_config`
+| SSH config overrides (remote) | `/etc/ssh/sshd_config.d/`
+| Original key download (moved out of) | `~/Documents/aws/`
+
+{keep}
+## Best practices
+- **Scope SSH to a known IP** Never leave port 22 open to `0.0.0.0/0`.
+- **ED25519 over RSA** Smaller, faster, and no known weaknesses for new keys.
+- **Uncommenting ≠ changing** Removing `#` keeps the old value — edit the value itself.
+- **Test before restart** Run `sshd -t` before restarting anything that could lock you out.
+- **Keep a fallback session** Leave one SSH session open while testing a config change.
+- **Public IPs move** A stopped/started instance gets a new IP unless an Elastic IP is attached.
+- **Keys live in ~/.ssh/** Not in a project folder — that's where SSH tooling expects them.
+- **Lock down permissions** `400` on keys, `600` on config — SSH rejects looser ones.
+
+Part of Project Tinker Town · see [[tinker-town-05-naming-conventions]] for the naming reference
+</script>
+<body><script src=../../site/notes.js></script><script src=../note.js></script>

@@ -63,17 +63,20 @@ const chalkText = (src, id) => {
   return `${eyebrow} ${title} ${body.join(" ")}`.replace(/\s+/g, " ").trim();
 };
 
-const text = {};
-for (const file of readdirSync(join(root, "notes")).filter(f => f.endsWith(".html")).sort()) {
-  const html = readFileSync(join(root, "notes", file), "utf8"), id = file.slice(0, -5);
-  const chalk = html.match(/<script type=["']?text\/chalk["']?>([\s\S]*?)<\/script>/);
-  text[id] = chalk ? chalkText(chalk[1], id) : toText(html);
-}
+// Every note sits in its topic's folder: notes/<topic>/<id>.html
+const text = {}, dirOf = {};
+for (const dir of readdirSync(join(root, "notes"), { withFileTypes: true }).filter(e => e.isDirectory()).map(e => e.name).sort())
+  for (const file of readdirSync(join(root, "notes", dir)).filter(f => f.endsWith(".html")).sort()) {
+    const html = readFileSync(join(root, "notes", dir, file), "utf8"), id = file.slice(0, -5);
+    const chalk = html.match(/<script type=["']?text\/chalk["']?>([\s\S]*?)<\/script>/);
+    text[id] = chalk ? chalkText(chalk[1], id) : toText(html);
+    dirOf[id] = dir;
+  }
 
 // Notes matched by .gitignore, tracked or not (--no-index); exit 1 means none, anything else means no git
 const ignored = spawnSync("git", ["check-ignore", "--no-index", "--stdin"],
-  { cwd: root, encoding: "utf8", input: Object.keys(text).map(id => `notes/${id}.html`).join("\n") });
-const local = ignored.status === 0 ? ignored.stdout.split("\n").filter(Boolean).map(f => f.slice(6, -5)) : [];
+  { cwd: root, encoding: "utf8", input: Object.keys(text).map(id => `notes/${dirOf[id]}/${id}.html`).join("\n") });
+const local = ignored.status === 0 ? ignored.stdout.split("\n").filter(Boolean).map(f => f.split("/").pop().slice(0, -5)) : [];
 
 // Pending notes: entries in site/notes-local.js marked pending, kept out of the committed index until decided
 const pending = [];

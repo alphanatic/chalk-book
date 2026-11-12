@@ -1,0 +1,122 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Scheduled jobs & log rotation
+Built a scheduled disk-usage report (`disk-report.sh`) via cron, then set up logrotate so its log never grows unbounded.
+
+Along the way, migrated the whole pipeline to a dedicated `svc-disk-report` service account — verified end-to-end with a real forced rotation.
+
+## What we covered
+- Wrote `disk-report.sh` — timestamp + `df -h` output
+- Scheduled it with `crontab -e` — 5-field time syntax, per-user schedules
+- Why unbounded logs are a real problem, and how `logrotate` solves it
+- Built a `/etc/logrotate.d/` config: daily rotation, compression, 7-day retention
+- Debugged real logrotate errors (inline comments, insecure directory permissions)
+- Migrated the entire pipeline — script, log folder, cron entry, logrotate `su` — to run as `svc-disk-report`
+- Verified with a forced rotation: `disk-report.log.1.gz` was created
+
+## Full command sequence
+
+### Remote · The script
+```remote
+sudo nano /usr/local/bin/disk-report.sh  # create the script as root
+```
+```config wide: /usr/local/bin/disk-report.sh
+#!/bin/bash  »  run with bash
+echo "Disk report at $(date)" >> /var/log/disk-report/disk-report.log  »  timestamp header
+df -h >> /var/log/disk-report/disk-report.log  »  -h: human-readable sizes
+echo "---" >> /var/log/disk-report/disk-report.log  »  separator line
+```
+```remote
+sudo chmod +x /usr/local/bin/disk-report.sh  # +x: make it executable
+```
+
+### Concept · Cron's 5-field syntax
+```concept
+*    *    *    *    *    command
+│    │    │    │    │
+│    │    │    │    └─ day of week     (0-7, 0 and 7 = Sunday)
+│    │    │    └────── month           (1-12)
+│    │    └─────────── day of month    (1-31)
+│    └──────────────── hour            (0-23)
+└───────────────────── minute          (0-59)
+```
+
+### Remote · Schedule it
+```remote
+crontab -e  # -e: edit your own crontab
+```
+```config: crontab entry
+0 * * * * /usr/local/bin/disk-report.sh  »  minute 0 of every hour = hourly, on the hour
+```
+```remote
+crontab -l  # -l: list what's scheduled
+```
+
+### Remote · Logrotate config
+```remote
+sudo nano /etc/logrotate.d/disk-report  # create the rotation rule
+```
+```config: /etc/logrotate.d/disk-report
+/var/log/disk-report/disk-report.log {  »  which log this rule covers
+    su svc-disk-report svc-disk-report  »  rotate as this user + group
+    daily  »  rotate once a day
+    rotate 7  »  keep 7 old copies
+    compress  »  gzip old copies
+    missingok  »  no error if the log is missing
+    notifempty  »  skip rotation if it's empty
+    copytruncate  »  copy, then empty the live file
+}
+```
+
+## Bugs hit & fixed
+
+#### Bug · inline comments broke the config
+cause: Unlike bash, logrotate doesn't treat `#` as “ignore the rest of the line” — `rotate 7 # comment` was read as one invalid value.
+fix: Comments go on their own line, never after a setting.
+
+#### Bug · insecure directory permissions
+cause: logrotate (running as root) refused to touch a log whose parent directory wasn't strictly root-owned.
+fix: Added the `su <user> <group>` directive so logrotate rotates as the account that owns the log.
+
+#### Bug · file owned, but not the directory
+cause: Rotation *creates* a new file (`disk-report.log.1`) in the parent directory — owning only the log file wasn't enough.
+fix: Gave the log its own dedicated subfolder, owned entirely by the service account.
+
+### Remote · Migrate to svc-disk-report
+```remote
+cd /var/log  # work in /var/log
+sudo mkdir -p disk-report  # -p: no error if it exists
+sudo chown svc-disk-report:svc-disk-report disk-report  # hand folder to the svc
+sudo mv disk-report.log disk-report/disk-report.log  # move log into its folder
+sudo chown svc-disk-report:svc-disk-report disk-report/disk-report.log  # hand log to the svc
+sudo crontab -u svc-disk-report -e  # -u: the svc's crontab
+```
+
+### Remote · Test the full pipeline
+```remote
+sudo logrotate -d /etc/logrotate.d/disk-report  # -d: dry run, checks syntax only
+sudo logrotate -f /etc/logrotate.d/disk-report  # -f: force a real rotation now
+ls -la /var/log/disk-report/  # -la: list all, long format; look for .log.1.gz
+```
+
+{keep}
+## Where things live
+| What | Path
+| Report script | `/usr/local/bin/disk-report.sh`
+| Log directory (own folder per service) | `/var/log/disk-report/`
+| Logrotate config | `/etc/logrotate.d/disk-report`
+| Personal crontab | `crontab -e` / `crontab -l`
+| Another user's crontab | `sudo crontab -u <user> -e`
+
+{keep}
+## Best practices
+- **Plan rotation up front** Any log that grows unattended needs a rotation policy — decide it before it's a problem.
+- **One log folder per service** Matches real-world convention (`nginx`, `postgres` and others).
+- **Check comment rules per tool** Config files aren't always inline-comment-safe like bash — read each tool's syntax rules.
+- **Dry-run first** Always `logrotate -d` before forcing a real rotation.
+- **Jobs run as their service** Background jobs belong to their dedicated service account, not your personal sudo account.
+- **Use full paths in cron** Cron runs with a minimal environment, so absolute paths avoid “command not found”.
+
+Part of Project Tinker Town · see [[tinker-town-05-naming-conventions]] for the full naming reference
+</script>
+<body><script src=../../site/notes.js></script><script src=../note.js></script>

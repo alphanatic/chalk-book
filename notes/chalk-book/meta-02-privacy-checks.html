@@ -1,0 +1,155 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Rules that a script enforces, not memory
+
+Wrote a privacy rule into `CLAUDE.md` and masked every admin account as `adm-kiwi`, in notes and archived PDFs alike. Built `check.sh`, which every commit must pass.
+
+Backlog items 1 and 2 are done. Every later note is checked by the same script before it is committed.
+
+## What we covered
+
+- A privacy rule in `CLAUDE.md` §4: real by default, except access, location and private life
+- Every admin account written as `adm-kiwi`, live or test, with no placeholder and no explanation
+- Swapped text inside archived PDFs with PyMuPDF, in each PDF's own font
+- `check.sh`: one command for placeholders, colours, secrets, IPs, emails, admin names and the catalogue
+- An optional private block list outside the repo, for words no general check can recognise
+- Workflow rules: commit locally, push only when asked, ask before marking a backlog item done
+- Backlog: item 25 added (legends that match the page), items 1 and 2 marked done
+
+## The privacy rule
+
+{keep}
+| Kind | Rule | Example
+| **Access** | Never written, not even partly masked | keys, passwords, tokens, recovery codes
+| **Location** | Becomes a `<what-it-is>` placeholder | `<instance-ip>`, `<my-ip>`, `<vpc-id>`
+| **Private life** | Left out; when in doubt, ask | real name, home address, job search, health
+| **Admin accounts** | Always `adm-kiwi`, never a name or a pattern | `ssh adm-kiwi@<instance-ip>`
+> Concept · Private ranges (`10.0.0.0/16`), `0.0.0.0/0` and role accounts such as `svc-disk-report` are fine. They don't identify a person or a host on the internet.
+
+---
+> Gotcha · A pushed commit can't be fully taken back. GitHub may still serve it by its hash after a force-push. Keep private data out *before* the first commit.
+
+## Full command sequence
+
+### Local · Run the checks
+```local
+.claude/skills/memory-dump/check.sh  # every check; exit 1 if any problem
+.claude/skills/memory-dump/check.sh --render  # also renders changed notes, prints page counts
+```
+```html
+<div class="block output"><pre>2. Placeholders
+  notes/tinker-town-03-systemd-service.html:16:  …&#123;&#123;x&#125;&#125;…  leftover &#123;&#123;…&#125;&#125; placeholder
+8. Catalogue
+  site/notes.js: tinker-town-04-cron-logrotate has n: 7, file says 04  catalogue
+...
+✗ 55 problem(s)</pre></div>
+```
+```html
+<p class="muted">Output from the test copy with planted problems. The real repo prints <code>✓ all checks passed</code>.</p>
+```
+
+### Concept · What check.sh checks
+```html
+<table>
+<tr><th>#</th><th>Check</th><th>Scans</th></tr>
+<tr><td>1</td><td>Rebuilds the search index</td><td>—</td></tr>
+<tr><td>2</td><td>No <code>&#123;&#123;…&#125;&#125;</code> placeholders</td><td>notes</td></tr>
+<tr><td>3</td><td>No hard-coded hex colours</td><td>notes</td></tr>
+<tr><td>4</td><td>No private keys, <code>AKIA…</code> keys, <code>ghp_…</code> tokens</td><td>all committed text and PDFs</td></tr>
+<tr><td>5</td><td>No public IPs, 12-digit account IDs or emails (allowed: <code>git@github.com</code>)</td><td>all committed text and PDFs</td></tr>
+<tr><td>6</td><td>Admin accounts are only <code>adm-kiwi</code>: catches <code>adm-…</code>, <code>admin-…</code>, <code>…_admin</code></td><td>all committed text and PDFs</td></tr>
+<tr><td>7</td><td>No word from the private block list</td><td>everything, incl. the search index</td></tr>
+<tr><td>8</td><td>Every note has a catalogue entry and the reverse; ids unique; <code>n</code> matches the file</td><td><code>notes/</code>, <code>site/notes.js</code></td></tr>
+</table>
+```
+
+### Config · Private block list (outside the repo)
+```config: ~/.config/chalk-book/blocklist
+# one word per line  »  lines starting with # are skipped
+<real-username>  »  matched as a whole word, any case
+<surname>  »  fill in yourself; never in a transcript
+```
+```html
+<p class="muted">Missing file: check 7 is skipped. It lives outside the repo, so it can never be committed.</p>
+```
+
+### Local · Swap text inside a PDF (one-off recipe)
+```html
+<div class="block local"><pre>python3 -m venv ~/venv-pdf &amp;&amp; ~/venv-pdf/bin/pip install pymupdf fonttools brotli
+~/venv-pdf/bin/python -c "from fontTools.ttLib import TTFont  <span class="cmt"># woff2 → ttf for PyMuPDF</span>
+f = TTFont('inter.woff2'); f.flavor = None; f.save('Inter.ttf')"</pre></div>
+```
+```local
+for page in doc:                                         # doc = pymupdf.open(path)
+    for r in page.search_for(old):                       # every spot the text appears
+        page.add_redact_annot(r, fill=bg)                # bg: colour sampled beside the text
+    page.apply_redactions(images=0, graphics=0)          # remove the text, keep chips and lines
+    page.insert_text((r.x0, span_baseline), new, fontsize=span_size,
+                     fontfile="DejaVuSansMono.ttf", color=span_colour)   # same font, size, colour
+doc.save(tmp, garbage=4, deflate=True)                   # garbage=4: drop the old text objects
+```
+```local
+diff <(pdftotext -layout before.pdf -) <(pdftotext -layout after.pdf -)  # only the swap differs
+```
+
+## Workflow rules {best}
+
+```html
+<div class="cards">
+  <div><b>Commit, don't push</b>The AI commits once <code>check.sh</code> passes. Pushing waits for an explicit "push it".</div>
+  <div><b>Ask before done</b>The AI says when a backlog item is finished and waits for a yes before marking it.</div>
+  <div><b>Suggest, then do</b>Backlog items start as a written suggestion. Work starts on "do it".</div>
+  <div><b>Rule once, check always</b>A rule lives in <code>CLAUDE.md</code> once; the skill points to it and <code>check.sh</code> enforces it.</div>
+</div>
+```
+
+## Bugs hit & fixed
+
+#### Bug · check.sh printed problems but said "all checks passed"
+cause: `grep … | report` runs `report` in a subshell. Its `problems=$((problems+1))` was lost when the pipe ended.
+fix: Count failures in a file instead, and read the count at the end.
+```local
+fail() { echo "  $1"; echo x >> "$tmp/problems"; }                    # survives the subshell
+problems=0; [ -f "$tmp/problems" ] && problems=$(wc -l < "$tmp/problems")
+```
+
+#### Bug · clean run exited 1 with no summary
+cause: `cat missing-file | wc -l` fails, and `set -euo pipefail` stops the script there.
+fix: Test that the file exists before counting (the line above).
+
+#### Bug · swapped PDF text came out tiny, on grey boxes
+cause: The redaction's replacement text used a built-in PDF font at a fitted size, and the default fill was grey.
+fix: Restore the backups, redact with the sampled background colour, then draw the new text with `insert_text` in the original font file, size and colour.
+
+#### Bug · check.sh flagged CLAUDE.md itself
+cause: The rule's own wording showed the forbidden pattern as an example.
+fix: Reworded it to "never a placeholder", so the repo never shows the pattern at all.
+
+#### Bug · zsh: ==REAL not found
+cause: In zsh, a word starting with `=` expands to a command's path, so `echo ===REAL` fails.
+fix: Quote it, `echo "===REAL"`, or use another marker.
+
+---
+> Gotcha · Claude Code blocks an AI from editing session transcripts. To scrub a word from `~/.claude/projects/`, close every session and run the replacement yourself in a terminal.
+
+{keep}
+## Where things live
+| What | Path
+| The rules (privacy in §4, AI rules in §7) | `CLAUDE.md`
+| The check script | `.claude/skills/memory-dump/check.sh`
+| Private block list | `~/.config/chalk-book/blocklist`
+| Claude Code transcripts (deleted after 30 days by default) | `~/.claude/projects/<project-path>/*.jsonl`
+| Keep transcripts longer | `"cleanupPeriodDays": 365` in `~/.claude/settings.json`
+| Backlog and Complete Tasks (private) | `.handoffs/index.html`, `.handoffs/complete.html`
+
+{keep}
+## Open decisions {paths}
+| Item | Question | Suggested
+| 3 · Going online | GitHub Pages (public), stay local, or a private host? | Cloudflare Pages + Access: private, free, works on a phone
+| Private pages | Footer links appear only when a `.handoffs/` page exists? | A generated `.handoffs/pages.js`, from a tag in each page
+| 25 · Legends | Drop or relabel the legend in a note without blocks? | Waiting
+| Guide PDF | Keep `00-chalk-book-guide.pdf`, now mostly redundant? | Waiting
+
+Part of Chalk Book · follows [[meta-01-site-build]] · rules in [[00-chalk-book-guide]]
+</script>
+<body><script src=../../site/notes.js></script><script src=../note.js></script>

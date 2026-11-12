@@ -1,0 +1,231 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A trojanized Claude Code extension on Cursor's marketplace, and how to tell where your own copy came from
+
+Read The Hacker News report (30 Oct 2026) on a tampered `anthropic.claude-code` 2.1.313 pushed through Cursor's marketplace only. Worked out what an attacker needs to publish under someone else's name, then checked this machine: Code - OSS, extensions from Open VSX, Claude Code 2.1.316 installed after the incident. Not affected.
+
+## What we covered
+
+- The attack: version 2.1.313 under the real extension ID, Cursor's marketplace only, about 11 hours live on 29 Oct 2026
+- The payload: a 66-line JavaScript loader before the real code, run when the extension loads
+- What it did: SSH key, reverse tunnel, persistence, a host-details beacon over plain HTTP
+- Not affected: Microsoft's VS Code Marketplace, Open VSX, npm; clean version 2.1.314 and later
+- Who's to blame: still unknown; the evidence points at Cursor's marketplace, not an Anthropic leak or a mole
+- Extension code is not an AI prompt: it is a normal program running as you
+- This machine: Code - OSS 1.137.0 from Arch, Open VSX store, Claude Code 2.1.316 installed 31 Oct
+- Update: Cursor's store also served a malicious 2.1.312, for Windows and macOS only; Open VSX's 2.1.312 is clean
+- VirusTotal: the backdoored `extension.js` is flagged by 20 of 61 vendors, family label `ghostssh`
+- Indicators of compromise: file hashes and SSH key fingerprints from Cursor's notice, for checking a machine
+
+## The incident
+
+| Item | Detail
+| Package | `anthropic.claude-code` 2.1.313, the real ID, not a look-alike
+| Where | Cursor's extension marketplace only
+| When | 29 Oct 2026, about 02:27–13:35 PT
+| Reach | At most 5,000 Cursor users; auto-update did the spreading
+| Found by | OpenSourceMalware; analyses by Cursor, Socket, Microsoft
+| Clean version | 2.1.314 on Open VSX and the VS Code Marketplace
+| Also bad | 2.1.312 from Cursor's store, Windows and macOS builds (Cursor's update, 30 Oct)
+
+{keep}
+### What the loader did
+| Step | Detail
+| SSH key | Appended to `~/.ssh/authorized_keys`, labelled `svc-telemetry` to look harmless
+| SSH service | Tried to turn it on; needs admin, so failed on most macOS and Windows hosts
+| Reverse tunnel | To `<attacker-ip>`, giving the attacker a way in to local SSH
+| Persistence | crontab on Linux, scheduled task on Windows, LaunchAgent on macOS
+| Beacon | HTTP, unencrypted, to `<attacker-ip>:8099/beacon`
+
+Sent in the beacon: public IP, hostname, username, OS and CPU, home and working directory, global git email, and the *names* (not values) of up to 40 env vars containing KEY, TOKEN, SECRET, PASS, AWS or GCP.
+
+> Gotcha · Removing or updating the extension does not remove what it wrote outside its own folder. The key, the tunnel identity and the startup entries must be removed by hand.
+
+## Who could publish it
+
+> Concept · To ship code under someone else's extension ID you need either that publisher's credentials or control of the store itself. Your own copy you can change freely; it only reaches others through a store.
+
+| Clue | Points at
+| Bad version only on Cursor, nowhere else | Cursor's store, not Anthropic's publishing key
+| Anthropic: no compromise of its systems or employee laptops | Not an Anthropic leak
+| Cursor rotated *its* keys and rebuilt *its* marketplace | Cursor's store
+| Exact method | Not disclosed yet
+
+> Key rule · Extension code is not part of an AI prompt. It is JavaScript the editor runs with your user's rights; the model had no part in it. Hidden text that steers a model is a different attack: prompt injection.
+
+## Indicators & VirusTotal
+
+{keep}
+### Indicators of compromise
+| Indicator | Value
+| `extension.js` SHA-256 | `ecb58cb29078d9646ad1dcdbe51526f2d9cfea06be5fb2ab183e8ecc3ab6bf15`
+| `extension.js` MD5 | `f49bcd657ef1e626e85ce858958c1769`, 3,692,922 bytes
+| VSIX 2.1.313 darwin-arm64 | `80402fdcad8799285fd93044976973ca000da7995fb93363f819bb8e4f84ee6c`
+| VSIX 2.1.313 win32-x64 | `6786ec90cbd45949695bd7805c9fbb26cfc91bc5fc897de0183d9bcb9cb21731`
+| Backdoor key | `SHA256:0Z6R+DF64Do2nwQic8a7kkfDLNNk4IiK+2U2Rci4htk`
+| Tunnel key | `SHA256:KOAU57+ZG6u3MG4WwzPzPX2O5YEe9qdOC1Bl+6MVyDQ`
+
+The same `extension.js` sits in all four malicious VSIXs, per Cursor. Sources: Cursor's security notice, StepSecurity.
+
+{keep}
+### The VirusTotal report
+| Field | Value
+| Page | [VirusTotal file report for extension.js](https://www.virustotal.com/gui/file/ecb58cb29078d9646ad1dcdbe51526f2d9cfea06be5fb2ab183e8ecc3ab6bf15)
+| Detections | 20 / 61; family labels `ghostssh`, `bckdr`, `cijcobf`
+| Some names | Microsoft `Trojan:JS/CredTheft.MS!MTB`, Trend Micro `Backdoor.JS.GHOSTSSH.CIJCOBF`
+| Missed by | CrowdStrike, ESET, Malwarebytes, Avast, ClamAV, among others
+| Seen as | `extension.js`, `z3yk9x3.exe`
+| First seen | Submitted 30 Oct 06:33 UTC; in the wild 30 Oct 09:00 UTC
+| Tags | persistence, obfuscated, long-sleeps, macro-powershell
+| Dropped | `smt.cmd` (12 / 61), likely the Windows scheduled task; PowerShell test files
+| Network | 8 IPs, 1 domain, all Microsoft's: sandbox noise, not the attacker. Check who owns them first
+
+> Gotcha · Reports disagree. Morphisec says the bad build also went out through Open VSX; Cursor and StepSecurity say Anthropic confirmed 2.1.313 never reached it. Trust the publisher's and the store's own statements over third-party summaries.
+
+### Local · Finding the VirusTotal report
+1. Search the web for the version and "virustotal": `site:virustotal.com` alone returned nothing.
+2. Take the SHA-256 from Cursor's notice; StepSecurity confirmed the file is preserved on VirusTotal.
+3. Open `virustotal.com/gui/file/<sha-256>` with Firecrawl, a live fetch (`maxAge: 0`) after a 5 s wait.
+4. Pull the text out of the saved result:
+```local
+jq -r '.markdown' <result>.txt > vt.md  # -r: raw text, not a JSON string
+grep -v -E '^\s*$|^!\[' vt.md | head -150  # -v: drop blank lines and image lines
+```
+
+## Full command sequence
+
+### Local · Which editor and store
+```local
+which code codium cursor  # which editors are installed
+code --version | head -1  # editor version
+pacman -Qo /usr/bin/code  # Arch package that owns the binary
+grep -o '"nameLong": *"[^"]*"' /usr/lib/code/product.json  # the editor's own name
+grep -o '"serviceUrl": *"[^"]*"' /usr/lib/code/product.json  # where it fetches extensions
+```
+```output
+/usr/bin/code
+1.137.0
+/usr/bin/code is owned by code 1.137.0-1
+"nameLong": "Code - OSS"
+"serviceUrl": "https://open-vsx.org/vscode/gallery"
+```
+
+> Concept · Arch's `code` package is Code - OSS, built from Microsoft's open-source repo. It uses `~/.vscode-oss/` and Open VSX (Eclipse Foundation), not Microsoft's branded VS Code or its marketplace.
+
+### Local · Which extension version, and when
+```local
+python3 -I -c '…' ~/.vscode-oss/extensions/extensions.json  # -I: isolated; prints the entry
+date -d @1793453271  # install time (ms cut to s) as a date
+```
+```output
+{"identifier": {"id": "anthropic.claude-code"}, "version": "2.1.316", "source": "gallery", "publisher": "Anthropic", ...}
+Sat Oct 31 02:27:51 PM CET 2026
+```
+
+| Check | Result | Safe?
+| Store | Open VSX | Yes, never carried 2.1.313
+| Version | 2.1.316 | Yes, after both 2.1.313 and 2.1.314
+| Installed | 31 Oct 2026 | Yes, two days after the bad window
+
+### Local · If you were affected
+1. Isolate the machine; keep evidence before deleting anything.
+2. Remove the `svc-telemetry` line from `~/.ssh/authorized_keys`.
+3. Remove the persistence: `crontab -l`, scheduled tasks, `~/Library/LaunchAgents/`.
+4. Remove any tunnel identity and scripts it left.
+5. Rotate every credential whose name was in the env, and revoke sessions.
+
+## Bugs hit & fixed
+
+#### Bug · Article body missing from the scrape
+cause: Scraping the `?m=1` mobile URL with main-content-only returned page chrome and ads, no article text.
+fix: Scraped the desktop URL with the full page and a live fetch (`maxAge: 0`).
+
+#### Bug · zsh: no matches found
+cause: `ls -d ~/.vscode/extensions/anthropic.claude-code-*` with no match: zsh fails on an unmatched glob instead of passing it on, so the chain exited with code 2.
+fix: The rest of the output still showed the answer: the extension lives in `~/.vscode-oss/`, not `~/.vscode/`. When a glob may be empty, add the `(N)` qualifier (`…-*(N)`) or `setopt nullglob`; `2>/dev/null` doesn't help, since zsh fails before the command runs.
+
+#### Bug · VirusTotal scrape too large to return
+cause: The rendered report was about 90,000 characters, over the tool's output limit, so it was saved to a JSON file instead.
+fix: `jq -r '.markdown'` to get the page text, then `grep -v` to drop blank and image lines and read it in two parts.
+
+## Hardening
+
+> Concept · The backdoor needed a way in: an SSH key plus a running SSH service. A host firewall that always drops port 22 closes that door, even if something turns `sshd` on.
+
+{keep}
+### Local · Stop silent extension updates
+| Editor setting | Value | Effect
+| `extensions.autoUpdate` | `"off"` | New versions are not installed by themselves
+| `extensions.autoCheckUpdates` | `true` | The editor still shows when an update is out
+
+### Config · /etc/nftables.conf
+```config
+destroy table inet filter
+table inet filter {
+  chain input {
+    type filter hook input priority filter
+    policy drop
+    ct state invalid drop
+    ct state { established, related } accept
+    iif lo accept
+    meta l4proto { icmp, icmpv6 } accept
+    tcp dport 22 drop
+    iifname "tailscale0" accept
+    udp dport 41641 accept
+    ip saddr 192.168.1.0/24 accept
+    ip6 saddr fe80::/10 accept
+    counter
+  }
+  chain forward {
+    type filter hook forward priority filter
+    policy drop
+  }
+}
+```
+
+| Line | Why
+| `destroy table inet filter` | Replaces only this table; Tailscale's own tables survive a reload
+| `established, related` | Replies to connections this machine opened: browsing, apps
+| `tcp dport 22 drop` | SSH never reachable, before any accept rule can match
+| `tailscale0`, UDP 41641 | Tailnet traffic and Tailscale's direct-connection port
+| `192.168.1.0/24`, `fe80::/10` | Home network: Spotify Connect and device discovery
+| `counter` | Counts what the drop policy refuses
+
+### Local · Install and turn on
+```local
+sudo nft -c -f nftables.conf  # -c: check only, apply nothing
+sudo cp /etc/nftables.conf /etc/nftables.conf.orig  # keep Arch's default
+sudo install -m 644 nftables.conf /etc/nftables.conf  # root-owned, world-readable
+sudo systemctl enable --now nftables  # load now and at every boot
+sudo nft list table inet filter  # the rules as loaded in the kernel
+tailscale ping <tailnet-host>  # from another machine: tailnet still works
+```
+
+| Check | Result
+| `systemctl status nftables` | `inactive (dead)`, exit 0: a oneshot, the rules stay loaded
+| `nft list table inet filter` | Every rule present, `counter packets 0` at first
+| `tailscale status`, `tailscale ping` | Both machines listed, ping answers
+| Web request | `HTTP/2 200`
+
+> Gotcha · On Arch, `systemctl stop` or `restart nftables` runs `nft flush ruleset`, which also wipes Tailscale's rules. Undo with `sudo nft destroy table inet filter && sudo systemctl disable nftables`; if Tailscale misbehaves, `sudo systemctl restart tailscaled` rebuilds its rules.
+
+{keep}
+## Where things live
+| What | Path
+| Installed extensions (Code - OSS) | `~/.vscode-oss/extensions/`
+| Extension list with source and version | `~/.vscode-oss/extensions/extensions.json`
+| Editor product file, store URL | `/usr/lib/code/product.json`
+| Where the backdoor key lands | `~/.ssh/authorized_keys`
+
+{keep}
+## Best practices
+- **Know your store** Which marketplace an editor uses decides which incidents reach you.
+- **Check source, version and date** Three facts in `extensions.json` settle whether you were exposed.
+- **Watch authorized_keys** An unexpected line there is the clearest sign of this kind of backdoor.
+- **Weigh auto-update** It spreads fixes fast, and bad releases just as fast.
+- **Check the hash, not the name** A file hash on VirusTotal shows what is known about that exact file.
+- **Don't lean on one scanner** 41 of 61 engines missed this backdoor; indicators and behaviour catch more.
+
+Part of Claude Code · follows [[claude-code-02-untrusted-content-triage]] and [[claude-code-10-feature-security-audit]]
+</script>
+<body><script src=../../site/notes.js></script><script src=../../site/notes-local.js></script><script src=../note.js></script>

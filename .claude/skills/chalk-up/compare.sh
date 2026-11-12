@@ -3,7 +3,7 @@
 # and as it is now, then compares page count, every page's pixels and the PDF text.
 # Prints one line per note and exits non-zero if any note differs. Needs a Chromium-based browser,
 # pdftoppm and pdftotext (poppler) and compare (ImageMagick).
-# Usage: compare.sh [--ref <commit>] [notes/<name>.html …]    (no notes: every note)
+# Usage: compare.sh [--ref <commit>] [notes/<topic>/<name>.html …]    (no notes: every note)
 set -euo pipefail
 
 root=$(cd "$(dirname "$0")/../../.." && pwd)
@@ -17,16 +17,20 @@ tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 mkdir "$tmp/then" "$tmp/out-then" "$tmp/out-now"
 git archive "$ref" | tar -x -C "$tmp/then"      # the whole project as it was at $ref
 
+# A note sits in notes/<topic>/<name>.html (a ref from before the topic folders has it in notes/<name>.html)
+locate() { ls "$1"/notes/*/"$2".html "$1/notes/$2.html" 2>/dev/null | head -1 || true; }
+
 notes=("$@")
-[ ${#notes[@]} -gt 0 ] || mapfile -t notes < <(ls notes/*.html)
+[ ${#notes[@]} -gt 0 ] || mapfile -t notes < <(ls notes/*/*.html)
 
 differ=0
 for f in "${notes[@]}"; do
   n=$(basename "$f" .html)
-  if [ ! -f "$tmp/then/notes/$n.html" ]; then echo "  $n: new since $ref"; continue; fi
-  if [ ! -f "notes/$n.html" ]; then echo "  $n: removed"; differ=1; continue; fi
-  "$render" "$tmp/then/notes/$n.html" "$tmp/out-then" >/dev/null
-  "$render" "$root/notes/$n.html" "$tmp/out-now" >/dev/null
+  then_f=$(locate "$tmp/then" "$n"); now_f=$(locate "$root" "$n")
+  if [ -z "$then_f" ]; then echo "  $n: new since $ref"; continue; fi
+  if [ -z "$now_f" ]; then echo "  $n: removed"; differ=1; continue; fi
+  "$render" "$then_f" "$tmp/out-then" >/dev/null
+  "$render" "$now_f" "$tmp/out-now" >/dev/null
   for side in then now; do
     pdftoppm -r 70 -png "$tmp/out-$side/$n.pdf" "$tmp/out-$side/$n"
     pdftotext -layout "$tmp/out-$side/$n.pdf" "$tmp/out-$side/$n.txt"

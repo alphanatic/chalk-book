@@ -1,0 +1,160 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Same `.map()` pattern, a different job
+
+Added a footer and a Backlog page to the React todo app, then compared `Footer.jsx` with `Tabs.jsx`. Both turn a list into elements with `.map()`. The tabs change state; the footer navigates through the URL.
+
+The Backlog page holds 12 graded JavaScript fixes from the code review, each one to write by hand.
+
+## What we covered
+
+- Built `Footer.jsx`: an array of link objects, mapped to `<li><a>` elements
+- Switched pages on `#backlog` in `App.jsx` with a `hashchange` listener
+- Compared the footer with the tabs: one shared pattern, five differences
+- Buttons for actions, links for navigation
+- `aria-current` vs a class name for "you are here"
+- Keys from the data (`link.label`) vs keys from position (`tabIndex`)
+
+## Run it {local}
+
+### Local · Install, start, lint
+```local
+cd ~/Projects/todo-app
+npm install      # install react, vite and eslint into node_modules/
+npm run dev      # start Vite on http://localhost:5173, reloads on save
+npx eslint .     # lint every .js/.jsx file; prop-types errors are backlog item 12
+```
+```html
+<p class="muted">Open <code>http://localhost:5173/#backlog</code> for the Backlog page. npm warned that esbuild's install
+    script was blocked; Vite still ran.</p>
+```
+
+## The shared pattern
+
+{keep}
+```html
+<div class="chain"><span>An array</span><i>→</i><span>.map(item =&gt; …)</span><i>→</i><span>One element per item</span><i>→</i><span>React renders the list</span></div>
+```
+> Concept · Inside the `.map()` callback, both compute a value for the item first (`numOfTasks`, `isExternal`), then `return` its JSX. Both mark the active item with a ternary (`? :`).
+
+### Code · Tabs.jsx, the key lines {config}
+```config wide: src/components/Tabs.jsx
+const tabs = ['All', 'Open', 'Completed']  »  array of strings
+tabs.map((tab, tabIndex) => {  »  element + its position
+  const numOfTasks = …  »  computed per tab
+  return <button  »  a button: an action
+    onClick={() => { setSelectedTab(tab) }}  »  changes App's state
+    key={tabIndex}  »  key = position
+    className={… (tab === selectedTab ? ' tab-selected' : ' ')}>  »  active = a class
+```
+
+### Code · Footer.jsx, the key lines {config}
+```config wide: src/components/Footer.jsx
+const links = [  »  array of objects
+  { label: 'Home', href: '#' },  »  two values per item
+  { label: 'Backlog', href: '#backlog' }, …  »  read as link.label, link.href
+links.map((link) => {  »  element only, no index needed
+  const isExternal = link.href.startsWith('http')  »  computed per link
+  return <li key={link.label}>  »  key = a value from the data
+    <a href={link.href}  »  a link: the browser changes the URL
+      aria-current={isCurrent(link.href, page) ? 'page' : undefined}>  »  active = an attribute
+```
+
+{keep}
+## Side by side {paths}
+| Aspect | Tabs.jsx | Footer.jsx
+| Data | array of strings | array of objects: `label`, `href`
+| Key | `tabIndex`, the position | `link.label`, a value
+| Element | `<button>` | `<a>` inside `<li>`
+| On click | calls `setSelectedTab(tab)` | browser sets the URL hash
+| Who sets state | the child, through a setter prop | App, through a `hashchange` listener
+| Props in | `todos`, `selectedTab`, `setSelectedTab` | `page` only, read-only
+| Active marker | class `tab-selected` | attribute `aria-current="page"`
+| Active check | `tab === selectedTab` | `isCurrent(href, page)` helper
+
+## Two ways a click changes the page
+
+### Concept · Tabs change state directly
+```html
+<div class="chain"><span>Click "Open"</span><i>→</i><span>setSelectedTab('Open')</span><i>→</i><span>App re-renders</span><i>→</i><span>TodoList filters</span></div>
+```
+
+### Concept · The footer goes through the URL
+```html
+<div class="chain"><span>Click "Backlog"</span><i>→</i><span>URL ends in #backlog</span><i>→</i><span>hashchange event</span><i>→</i><span>setPage(hash)</span><i>→</i><span>App renders Backlog</span></div>
+```
+> Concept · Buttons act, links go. A button runs code on this page. A link goes somewhere: the URL changes, so Back works and the page can be bookmarked.
+
+### Code · App.jsx: listening for the URL {config}
+```config wide: src/App.jsx
+const [page, setPage] = useState(window.location.hash)  »  start from the current URL
+useEffect(() => {  »  runs after the first render
+  function handleHashChange() {  »  called on every hash change
+    setPage(window.location.hash)  »  new state → re-render
+    window.scrollTo(0, 0)  »  start the new page at the top
+  }
+  window.addEventListener('hashchange', handleHashChange)  »  start listening
+  return () => window.removeEventListener('hashchange', handleHashChange)  »  cleanup when App unmounts
+}, [])  »  []: set up once
+if (page === '#backlog') { return … <Backlog /> … }  »  early return: the other page
+```
+
+### Code · Footer.jsx: which link is current {config}
+```config wide: src/components/Footer.jsx
+function isCurrent(href, page) {  »  true for the link of the page shown
+  if (href === '#') { return page !== '#backlog' }  »  Home: any hash that isn't another page
+  return href === page  »  others: an exact match
+}
+```
+> Gotcha · Home has two URLs: no hash at all (`''`) and `'#'`. A plain `href === page` misses the first, so Home needs its own rule.
+> Concept · `aria-current="page"` tells screen readers "you are here", and CSS can target it too: `.main-footer-btn[aria-current]`. A class name only means something to CSS.
+
+---
+{keep}
+> Gotcha · On a page switched by the hash, an in-page link like `<a href="#todo-ids">` changes the hash and leaves the page. The Backlog overview stops that with `e.preventDefault()` and scrolls with `scrollIntoView()` instead.
+
+## Bugs hit & fixed
+
+#### Bug · footer links off centre
+cause: `fanta.css` gives every `ul` `padding-left: 1rem`. The footer's `.main-footer ul` rule didn't set padding, so that rule still applied. Caught while reading FantaCSS.
+fix: Set the padding in the more specific rule; `.main-footer ul` beats plain `ul`.
+```config: src/index.css
+.main-footer ul {
+  padding: 0;
+}
+```
+
+---
+```html
+<div class="bug">
+  <h4>Bug · apostrophe in JSX text</h4>
+  <dl>
+    <dt class="cause">CAUSE</dt><dd>"you're" written as plain text inside JSX in <code>Backlog.jsx</code>. ESLint:
+      <code>`'` can be escaped with `&amp;apos;`, `&amp;lsquo;`, `&amp;#39;`, `&amp;rsquo;`  react/no-unescaped-entities</code></dd>
+    <dt class="fix">FIX</dt><dd>Reworded to "you are". <code>&amp;apos;</code> would work too. Apostrophes inside JavaScript strings are fine.</dd>
+  </dl>
+  <div class="block local"><pre>npx eslint .    <span class="cmt"># re-run: only the 21 prop-types errors remain</span></pre></div>
+</div>
+```
+
+{keep}
+## Where things live
+| What | Path
+| Footer component | `src/components/Footer.jsx`
+| Tabs component | `src/components/Tabs.jsx`
+| Page switch and listener | `src/App.jsx`
+| Backlog page | `src/components/Backlog.jsx`
+| Backlog items: rank, grade, status | `src/backlog.js`
+| Footer styles | `src/index.css`
+| Backlog styles | `src/backlog.css`
+
+## Best practices
+
+- **Keys from the data** Use a value that belongs to the item, like a label or an id, not its position.
+- **Buttons act, links go** `<button>` for actions on this page, `<a href>` to go somewhere.
+- **Clean up listeners** Return a function from `useEffect` that removes what it added.
+- **One owner per state** App owns `page`; the footer only reads it.
+
+Part of JavaScript · the todo app built from the smoljames React tutorial. Backlog item 2, todo ids, builds on the keys rule here.
+</script>
+<body><script src=../../site/notes.js></script><script src=../note.js></script>

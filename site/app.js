@@ -18,7 +18,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
         frame = $("frame"), home = $("home"), current = $("current"), menuBtn = $("menu-btn"),
         exportBtn = $("export-btn"), exportMenu = $("export-menu"), menuSort = $("menu-sort");
   const projects = { ...window.CHALK_PROJECTS };
-  const notes = window.CHALK_NOTES.map(n => ({ ...n, file: `notes/${n.id}.html` }));
+  const notes = window.CHALK_NOTES.map(n => ({ ...n, file: `notes/${window.CHALK_PROJECTS[n.project]?.folder ?? n.project}/${n.id}.html` }));
   const narrow = matchMedia("(max-width: 760px)");
   const text = window.CHALK_TEXT || {};     // plain text of each note, from site/build-index.mjs
   const local = new Set(window.CHALK_LOCAL || []);   // notes git ignores: a red Git watermark
@@ -281,8 +281,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     markRailRecent();
   }
 
-  // On the rail, only the RAIL_PROJECTS projects opened last show, the latest on top, each with its mark and at most
-  // RAIL_RECENT of its notes opened last. The open menu keeps its own sort
+  // On the rail every project shows its mark, the ones opened last on top; the RAIL_PROJECTS projects opened last also
+  // show at most RAIL_RECENT of their notes opened last. The open menu keeps its own sort
   const readOpened = () => { try { return JSON.parse(localStorage.getItem(OPENED_KEY) ?? localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } };
   function markRailRecent() {
     const opened = readOpened();

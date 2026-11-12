@@ -30,7 +30,7 @@ echo "1. Search index"
 node site/build-index.mjs >/dev/null && echo "  rebuilt"
 
 echo "2. Placeholders"
-grep -nH '{{' notes/*.html | report "leftover {{…}} placeholder" || true
+grep -nH '{{' notes/*/*.html | report "leftover {{…}} placeholder" || true
 
 echo "3. Colours"
 # Committed notes only: private and pending notes are not published, so their colours are not checked here
@@ -69,23 +69,26 @@ node - <<'EOF' | report "catalogue" || true
 const fs = require("fs");
 global.window = {};
 require(process.cwd() + "/site/notes.js");
+// A note's file is notes/<topic>/<id>.html; the topic folder is its project's folder, or the project key
+const dir = n => window.CHALK_PROJECTS[n.project]?.folder ?? n.project;
 // Notes git ignores (Arch Linux, the work course) must stay out of the committed catalogue: their entries go in site/notes-local.js
 const { spawnSync } = require("child_process");
 const ignored = spawnSync("git", ["check-ignore", "--no-index", "--stdin"],
-  { encoding: "utf8", input: window.CHALK_NOTES.map(n => `notes/${n.id}.html`).join("\n") }).stdout;
-for (const f of ignored.split("\n").filter(Boolean)) console.log(`site/notes.js: ${f.slice(6, -5)} is a private note: move its entry to site/notes-local.js`);
+  { encoding: "utf8", input: window.CHALK_NOTES.map(n => `notes/${dir(n)}/${n.id}.html`).join("\n") }).stdout;
+for (const f of ignored.split("\n").filter(Boolean)) console.log(`site/notes.js: ${f.split("/").pop().slice(0, -5)} is a private note: move its entry to site/notes-local.js`);
 for (const n of window.CHALK_NOTES) if (n.pending) console.log(`site/notes.js: ${n.id} is pending: its entry belongs in site/notes-local.js until decided`);
 const publicIds = new Set(window.CHALK_NOTES.map(n => n.id));
 if (fs.existsSync("site/notes-local.js")) require(process.cwd() + "/site/notes-local.js");
 // A note listed only in site/notes-local.js is private or pending: it must not be staged or committed, ignored or not
-for (const n of window.CHALK_NOTES) if (!n.pending && !publicIds.has(n.id) && spawnSync("git", ["ls-files", "--", `notes/${n.id}.html`], { encoding: "utf8" }).stdout.trim())
-  console.log(`notes/${n.id}.html: private note is staged or committed: unstage it (git rm --cached)`);
+for (const n of window.CHALK_NOTES) if (!n.pending && !publicIds.has(n.id) && spawnSync("git", ["ls-files", "--", `notes/${dir(n)}/${n.id}.html`], { encoding: "utf8" }).stdout.trim())
+  console.log(`notes/${dir(n)}/${n.id}.html: private note is staged or committed: unstage it (git rm --cached)`);
 // Pending notes (public or private not decided yet) must not be staged or committed
-for (const n of window.CHALK_NOTES) if (n.pending && spawnSync("git", ["ls-files", "--", `notes/${n.id}.html`], { encoding: "utf8" }).stdout.trim())
-  console.log(`notes/${n.id}.html: pending note is staged or committed: decide public or private first`);
+for (const n of window.CHALK_NOTES) if (n.pending && spawnSync("git", ["ls-files", "--", `notes/${dir(n)}/${n.id}.html`], { encoding: "utf8" }).stdout.trim())
+  console.log(`notes/${dir(n)}/${n.id}.html: pending note is staged or committed: decide public or private first`);
 const ids = window.CHALK_NOTES.map(n => n.id);
-const files = fs.readdirSync("notes").filter(f => f.endsWith(".html")).map(f => f.slice(0, -5));
-for (const f of files) if (!ids.includes(f)) console.log(`notes/${f}.html: no entry in CHALK_NOTES`);
+const files = fs.readdirSync("notes", { withFileTypes: true }).filter(e => e.isDirectory())
+  .flatMap(e => fs.readdirSync("notes/" + e.name).filter(f => f.endsWith(".html")).map(f => f.slice(0, -5)));
+for (const f of files) if (!ids.includes(f)) console.log(`notes/**/${f}.html: no entry in CHALK_NOTES`);
 for (const n of window.CHALK_NOTES) {
   // Private and pending entries (only in site/notes-local.js) may have their file elsewhere, e.g. in the private repo
   if (publicIds.has(n.id) && !files.includes(n.id)) console.log(`site/notes.js: ${n.id} has no file in notes/`);
@@ -104,20 +107,20 @@ for (const n of window.CHALK_NOTES) {
   if (n.risk === undefined) { if (n.date >= "2026-11-01") console.log(`site/notes.js: ${n.id} has no risk grade (0–${top})`); }
   else if (!Number.isInteger(n.risk) || n.risk < 0 || n.risk > top) console.log(`site/notes.js: ${n.id} has risk: ${n.risk}, not 0–${top}`);
   if (!files.includes(n.id)) continue;
-  const h3s = fs.readFileSync(`notes/${n.id}.html`, "utf8").match(/^### .*$/gm) ?? [];
+  const h3s = fs.readFileSync(`notes/${dir(n)}/${n.id}.html`, "utf8").match(/^### .*$/gm) ?? [];
   for (const k of Object.keys(n.steps ?? {})) {
     const hits = h3s.filter(h => h.includes(k)).length;
     if (hits !== 1) console.log(`site/notes.js: ${n.id} grades step "${k}", which matches ${hits} ### headings, not 1`);
   }
   const steps = Object.values(n.steps ?? {});
   const worst = Math.max(-1, ...steps);
-  if (worst > top) console.log(`notes/${n.id}.html: a step has risk ${worst}, not 0–${top}`);
+  if (worst > top) console.log(`notes/${dir(n)}/${n.id}.html: a step has risk ${worst}, not 0–${top}`);
   else if (worst >= 0 && !(n.risk >= worst)) console.log(`site/notes.js: ${n.id} has risk: ${n.risk}, but a step in it has risk ${worst}`);
 }
 EOF
 
 echo "9. Viewport"
-grep -L 'name="viewport"' notes/*.html | sed 's/$/:1/' | report "no viewport tag: phones show it zoomed out" || true
+grep -L 'name="viewport"' notes/*/*.html | sed 's/$/:1/' | report "no viewport tag: phones show it zoomed out" || true
 
 echo "10. Skill descriptions"
 # The repo skill and the personal pointer skill (~/.claude/skills/chalk-up/) must describe themselves the same way

@@ -1,0 +1,84 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Why the project exists, and where the session notes live
+
+Renamed the private notes folder `personal-notes/` to `.prog/`, still kept out of git. Wrote `story.md`: the project's original question and its six big turns, committed as `30d4bf9`.
+
+The story is the place to start when someone asks "why is the Pokédex on a ship?"
+
+## What we covered
+
+- Backed up, then renamed `personal-notes/` → `.prog/`
+- Updated the ignore rule in `.git/info/exclude`, so the folder stays private
+- Pointed Claude's memory files and the progress notes at the new folder name
+- Gathered the history from the design doc, backups and memory, not just git log
+- Wrote `story.md`: the original question, six direction changes, what stayed true
+- Committed it as `30d4bf9` "Project story: original intent and direction changes", not pushed
+
+## Full command sequence
+
+### Local · Back up, then rename the folder
+```local
+B=../pokedex-backups/2026-10-13-personal-notes   # backup folder, outside the repo
+mkdir -p $B                                      # -p: create parents, no error if it exists
+cp -a personal-notes $B/                         # -a: keep dates and permissions
+mv personal-notes .prog                          # leading dot: hidden from plain ls
+```
+
+### Local · Keep it out of git under its new name
+```local
+sed -i 's#^personal-notes/$#.prog/#' .git/info/exclude   # -i: edit in place
+tail -2 .git/info/exclude                                # check the rule now reads .prog/
+git status --short                                       # empty: .prog/ is not seen as new
+```
+
+---
+```config: .git/info/exclude (last lines)
+# personal notes: kept on this machine only, never committed
+.prog/
+```
+
+> Concept · `.git/info/exclude` works like `.gitignore`, but it lives inside `.git/` and is never committed. A public repo doesn't even reveal that the folder exists.
+
+### Local · Find every old reference
+```local
+grep -rn "personal-notes" <memory-dir> .prog  # -r: recursive, -n: line numbers
+sed -i 's#personal-notes/#.prog/#g' <memory-files>  # g: every match on a line
+```
+
+---
+> Gotcha · back up first, even for a plain rename. And the first grep found one more file than expected (`pokemon-world-style.md`). Always grep again after a rename before calling it done.
+
+### Local · Scan and commit the story
+```local
+git config user.email                      # confirm the repo's noreply identity
+grep -nEi "/home/|claude.ai" story.md      # -E: extended regex, -i: any case; none = clean
+git add story.md                           # stage only the new file
+git commit -F -                            # -F -: message from stdin (a heredoc)
+```
+
+## The shape of story.md
+
+| Section | What it holds
+| Where it started | The question "what if the anime Pokédex actually worked?" Measured shape, every part does something, live PokéAPI data
+| 1. Background → room | A living room with a TV showing the same page as the Pokédex
+| 2. Never realistic | Photo backgrounds dropped; everything looks like the Pokémon world
+| 3. S.S. Anne | Game Boy Color pixel-art cabin in Vermilion, porthole visitors
+| 4. Linked screen | Poké Ball wall screen and Pokédex act as one system
+| 5. Easter eggs | Ten eggs for Red/Blue fans; public as the Pokéggdex
+| 6. Many scenes | Pokédex as its own component; more scenes, picked from a menu
+| Still true | The Pokédex is the centre, and every part still does something
+
+> Concept · git log only starts at the cabin. The earlier phases came from `design/pokedex-design-document.md`, the pre-cabin backup and Claude's memory notes.
+
+## Where things live
+
+| What | Path
+| Private session notes | `.prog/progress dd-mm-yyyy.md`, `.prog/sticky.md`
+| Ignore rule for them | `.git/info/exclude`
+| Backup of the old folder | `pokedex-backups/2026-10-13-personal-notes/`
+| The project story | `story.md` (repo root, public)
+
+Part of Pokédex · see [[pokedex-01-git-manual-push]] for how commits reach GitHub
+</script>
+<body><script src=../../site/notes.js></script><script src=../note.js></script>

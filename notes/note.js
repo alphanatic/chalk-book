@@ -103,7 +103,7 @@ function inline(s, notes) {
     .replace(/(^|[^\w*])\*([^*\s](?:[^*]*[^*\s])?)\*(?![\w*])/g, "$1<i>$2</i>")
     .replace(/\[\[([a-z0-9-]+)(?:\|([^\]]+))?\]\]/g, (m, id, text) => {
       const n = notes.find(x => x.id === id);
-      return `<a href="../chalkbook.html#${id}" target="_top">${text ?? (n ? esc(`${String(n.n).padStart(2, "0")} ${n.title}`) : id)}</a>`;
+      return `<a href="../../chalkbook.html#${id}" target="_top">${text ?? (n ? esc(`${String(n.n).padStart(2, "0")} ${n.title}`) : id)}</a>`;
     })
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => /^https?:/.test(url)
       ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`
@@ -232,7 +232,7 @@ function renderChalk(src) {
   // Shared stylesheets first, so a note's own <style> rules still win. Added by script, they don't hold back the
   // first paint, so the page stays hidden until they and the fonts have loaded (fonts given at most 1s): no flash
   // of an unstyled note
-  const sheets = ["../chalk-pastel.css", "note-layout.css"].map(href =>
+  const sheets = ["../../chalk-pastel.css", "../note-layout.css"].map(href =>
     Object.assign(document.createElement("link"), { rel: "stylesheet", href }));
   const root = document.documentElement;
   root.style.visibility = "hidden";

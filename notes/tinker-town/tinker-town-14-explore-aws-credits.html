@@ -1,0 +1,142 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+Four activities, $80 more in credits
+
+Finished the four remaining Explore AWS activities on the Free plan: a Lambda web app, a cost budget, an Aurora database and a Bedrock prompt. Each paid $20 in credits.
+
+Picks up from [[tinker-town-12-free-plan-cost-check]], which found the activities and the runway problem. The extra $80 covers the burn rate to the plan's end.
+
+## What we covered
+- Explore AWS widget: five activities, $20 each, due 2027-02-28
+- Start each one from the widget, then follow its tutorial panel to the end
+- Lambda: blueprint function with a public function URL, opened once in the browser
+- Budgets: monthly cost budget, `$10`, email alerts
+- RDS: Aurora PostgreSQL Serverless, Express configuration, 0 ACU minimum, deleted afterwards
+- Bedrock: playground prompt; Claude needed a use-case form and a Marketplace agreement, Nova Lite answered at once
+- A local SAM project switched from API Gateway to a function URL
+- Why a Claude subscription can't pay for an app's API calls
+
+{keep}
+## The activities
+| Activity | Status before | How it was done | Cost to run
+| Launch an instance using EC2 | Completed | Earlier, the lab web server | Ongoing (the server)
+| Create a web app using AWS Lambda | Not started | Blueprint + function URL | Nothing without traffic
+| Set up a cost budget using AWS Budgets | Not started | Monthly cost budget template | Free (first two budgets)
+| Create an Aurora or RDS database | Not started | Aurora Serverless, Express | Per hour until deleted
+| Use a foundation model in the Bedrock playground | Not started | One prompt to Nova Lite | A fraction of a cent
+> Key rule · Click the activity in the widget, then **Start activity**. Work done elsewhere in the console may not count.
+
+## Full command sequence
+
+### AWS Console · Lambda web app
+1. Widget → **Create a web app using AWS Lambda** → **Start activity**
+2. **Use a blueprint** → *Getting started with Lambda HTTP* (`nodejs22.x`)
+3. Function name `dice-roll`, **Create default role**, code unchanged
+4. **Function URL**: tick the acknowledgment (the URL is public) → **Create Event Function**
+5. **Dismiss** the Getting started popup → click the **Function URL** link: *Hello from AWS Lambda!*
+6. Console Home → refresh → **Completed**
+
+> Concept · A **function URL** is an HTTPS address on the function itself: browser → Lambda → handler, with no API Gateway in between.
+
+### Local · Same idea in a SAM project
+```local
+mv index.mjs lambda/  # into CodeUri
+node -e 'import("./lambda/index.mjs").then(m => m.handler({})).then(console.log)'  # one local run
+```
+```config: ~/Projects/dice-roll-api/template.yaml
+Resources:
+  DiceRollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs24.x
+      CodeUri: lambda/
+      FunctionUrlConfig:
+        AuthType: NONE
+
+Outputs:
+  DiceRollUrl:
+    Value: !GetAtt DiceRollFunctionUrl.FunctionUrl
+```
+| Change | Why
+| `Events: Type: Api` removed | That built an API Gateway route; the activity asks for a function URL
+| `FunctionUrlConfig`, `AuthType: NONE` | A public URL on the function itself
+| `!GetAtt DiceRollFunctionUrl.FunctionUrl` | SAM names the URL resource `<function>Url`
+> Concept · The handler doesn't change. Function URLs and API Gateway both pass `?sides=20` in `event.queryStringParameters`.
+
+### AWS Console · Cost budget
+1. Billing and Cost Management → **Budgets** → **Create budget**
+2. **Use a template (simplified)** → **Monthly cost budget**
+3. Amount `10`, your email → **Create budget**: `My Monthly Cost Budget`
+4. The list showed **Exceeded** at once: $34.55 used this month against $10
+
+> Gotcha · The widget's budget link, and a console search for *Set up a cost budget*, opened the AWS docs. Search **Budgets** instead and use the console page.
+
+### AWS Console · Aurora database
+1. Widget → **Create an Aurora or RDS database** → **Start activity**
+2. Engine **Aurora (PostgreSQL Compatible)**, method **Express configuration**
+3. Leave the defaults → **Create database**: cluster `database-1`, about 5 minutes
+4. Open the database once to see its connection details (tutorial step 5)
+
+{keep}
+| Express default | Value
+| Engine version | PostgreSQL 17
+| Instance type | Serverless (scales up and down)
+| Min capacity | **0 ACU**: pauses after 5 minutes idle
+| Master username | `postgres`
+
+### AWS Console · Delete the database
+1. RDS → **Databases** (region Stockholm): the cluster `database-1` and its `database-1-instance-1`
+2. Select the **instance** → **Actions → Delete**: 10–15 minutes, CPU jumps while it shuts down
+3. When the instance is gone, select the **cluster** → **Actions → Delete**
+4. Untick **Create final snapshot** and **Retain automated backups**, acknowledge, confirm
+
+> Gotcha · The list doesn't always refresh by itself. Use the refresh button before deciding a delete is stuck.
+
+### AWS Console · Bedrock playground
+1. Widget → **Use a foundation model in the Amazon Bedrock playground** → **Start activity**
+2. Region **US East (N. Virginia)**: the most models
+3. **Select model** → provider, model, inference option → **Apply**
+4. Type a prompt → **Run** → a reply, with token counts and latency
+
+{keep}
+| Try | What happened
+| Claude Haiku 4.5, Global profile | One-time use-case form for Anthropic, then a Marketplace agreement email
+| Run | `ServiceUnavailableException`, twice
+| Amazon **Nova Lite**, on-demand | Answered: 12 tokens in, 214 out, 1148 ms
+
+## Concepts
+
+### Concept · What Bedrock is
+| | Bedrock | Anthropic API directly
+| Models | Many providers through one API | Claude only
+| Billing | The AWS bill, so credits pay | A separate prepaid account
+| Access | IAM roles, like Lambda | API keys
+> Concept · Anthropic models on Bedrock are switched on by an **AWS Marketplace agreement**, one per model. No monthly fee; pay per token.
+
+### Concept · A subscription isn't an API plan
+- A Claude Pro or Max subscription covers your own use: claude.ai, the apps, Claude Code.
+- It gives no API key and can't serve other people's prompts in an app.
+- An app pays per token: the Anthropic API, or Bedrock on the AWS bill.
+- The server holds the key or IAM role and calls the model; the browser never sees it.
+
+## Bugs hit & fixed
+
+#### Bug · Lambda activity still Not started
+cause: The function was built, but the tutorial's last task, invoking the function URL, wasn't done yet.
+fix: Open the **Function URL** once, then refresh Console Home. Start each later activity from the widget.
+
+#### Bug · ServiceUnavailableException in the playground
+cause: Claude Haiku 4.5 had only just been enabled: the use-case form and Marketplace agreement were minutes old.
+fix: Switch to **Amazon → Nova Lite**. Amazon's own models need no form or agreement; any model counts.
+
+{keep}
+## Best practices
+- **Start from the widget** Click the activity, then Start activity, and finish the tutorial panel.
+- **Do RDS first** It builds for minutes; do the budget and Bedrock while it runs.
+- **Delete RDS the same day** Instance first, then cluster, no final snapshot.
+- **Amazon models for quick tests** No forms, no agreements, instant access.
+
+Part of Project Tinker Town · after [[tinker-town-13-deploy-user-react-app]]; follows up [[tinker-town-12-free-plan-cost-check]]
+</script>
+<body><script src=../../site/notes.js></script><script src=../../site/notes-local.js></script><script src=../note.js></script>

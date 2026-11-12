@@ -1,0 +1,101 @@
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1">
+<script type=text/chalk>
+A Codex permission profile that could not start, and the soft rule that replaced it
+
+Tried to make the web-skeleton notes and the search indexes unreadable to Codex with a `deny` permission profile. Codex 0.154's Linux sandbox fails as soon as two files are denied, so the hard rule was rolled back and a soft rule went into `~/.codex/AGENTS.md`.
+
+Follows the Codex audit in 10 MCP & Feature Security Audit.
+
+## What we covered
+
+- Codex permission profiles: `default_permissions`, `extends = ":workspace"`, `deny` paths and globs
+- `codex doctor` counts deny rules; `codex sandbox -c …` tests a profile without editing the config
+- One denied file works; two or more make bwrap fail before any command runs
+- Same failure in a plain terminal, so it is a Codex bug, not nesting inside Claude Code
+- Config restored from backup; a soft rule in `~/.codex/AGENTS.md` instead
+
+## Full command sequence
+
+### Local · Back up, then add the profile
+```local
+cp ~/.codex/config.toml ~/.codex/config.toml.bak-2026-10-29  # one-step rollback
+codex doctor | grep -i deny  # deny-rule counts
+```
+```config: ~/.codex/config.toml
+default_permissions = "kiwi"
+
+[permissions.kiwi]
+description = "Workspace editing, with web-skeleton chalk-book notes unreadable."
+extends = ":workspace"
+
+[permissions.kiwi.filesystem]
+"/home/critonite/Projects/chalk-book/notes/web-skeleton-*" = "deny"
+"/home/critonite/Projects/chalk-book/site/search-index.js" = "deny"
+"/home/critonite/Projects/chalk-book/site/search-local.js" = "deny"
+```
+> Concept · `extends = ":workspace"` keeps the built-in baseline: writes in the workspace, network off. `deny` blocks reads and wins over `read` or `write` on the same path.
+
+> Gotcha · The search indexes hold every note's text. Denying the notes alone leaves them readable through search.
+
+### Local · Test a profile without touching the config
+```local
+# -c: one-off config override, nothing is saved; -- ends the options, then the command to sandbox
+codex sandbox -c 'permissions.t.extends=":workspace"' \
+  -c 'permissions.t.filesystem={"<path>"="deny"}' \
+  -c 'default_permissions="t"' -- sh -c 'cat <path> && echo LEAK || echo denied'
+```
+
+| Rules in the profile | Result
+| 1 exact file | `Permission denied` on it, other files readable
+| 2 exact files | `bwrap: Can't write data to file …: Bad file descriptor`
+| 1 glob matching 16 files | same bwrap error
+| `:workspace` alone | works
+
+### Local · Roll back and fall back
+```local
+cp ~/.codex/config.toml.bak-2026-10-29 ~/.codex/config.toml  # restore the working config
+codex sandbox -- head -c 15 notes/claude-code-02-*.html  # works again
+```
+```config: ~/.codex/AGENTS.md
+Never read, search, list the contents of, summarise or quote these files, by any means:
+- ~/Projects/chalk-book/notes/web-skeleton-* (and any added later)
+- ~/Projects/chalk-book/notes/img/web-skeleton-*/
+- ~/Projects/chalk-book/site/search-index.js and site/search-local.js
+- Their history too: no git show, git log -p, git diff or git grep that would print them
+If a task needs one of them, stop and ask me.
+```
+> Key rule · A soft rule is an instruction, not a gate. Injected text can argue past it; a sandbox `deny` cannot.
+
+## Bugs hit & fixed
+
+#### Bug · default_permissions landed in the wrong table
+cause: Appended after `[projects."/home/critonite/…"]`, the key belonged to that table, not the top level. TOML has no way to close a table.
+fix: Moved the line to the top of the file, then parsed it with `tomllib` to confirm.
+```local
+sed -i '1i default_permissions = "kiwi"' ~/.codex/config.toml  # insert as line 1
+```
+
+#### Bug · bwrap fails with two denied files
+cause: Codex 0.154 masks each denied file inside bwrap. The second mask fails with `Bad file descriptor`, so no sandboxed command can start.
+fix: Not fixable locally. Rolled back to the backup and used the soft rule. Re-run the test above after a Codex update.
+
+{keep}
+## Limits
+| Gap | Why
+| Soft rule only | Codex can be talked past an AGENTS.md instruction
+| Full-access mode, MCP, browser | `deny` only covers the sandboxed shell, even when it works
+| Catalogue | `site/notes.js` still shows each note's title and summary
+
+{keep}
+## Best practices
+- **Test with `-c` first** A profile tried through `codex sandbox -c` can't break the real config.
+- **Back up before editing agent config** A dated copy makes the rollback one `cp`.
+- **Deny the copies too** Indexes, caches and git history hold the same text as the files.
+
+## For the web-skeleton {best}
+- **Read-deny is per agent** Claude Code's `deny` rules and Codex profiles are separate; set both for customer secrets
+- **Prefer exact paths** until Codex fixes multi-file masks on Linux, keep one denied file or none per profile
+
+Part of Claude Code · see [[claude-code-01-skill-vetting]] for vetting and [[claude-code-02-untrusted-content-triage]] for soft versus hard guards
+</script>
+<body><script src=../../site/notes.js></script><script src=../../site/notes-local.js></script><script src=../note.js></script>

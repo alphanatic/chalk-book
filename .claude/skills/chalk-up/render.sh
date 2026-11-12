@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Render a chalk-book note to an A4 PDF: notes/<name>.html → <name>.pdf
-# Usage: render.sh notes/<name>.html [out-dir]    (out-dir defaults to the project root)
+# Render a chalk-book note to an A4 PDF: notes/<topic>/<name>.html → <name>.pdf
+# Usage: render.sh notes/<topic>/<name>.html [out-dir]    (out-dir defaults to the project root)
 set -euo pipefail
 
 src=$(realpath "$1")
-root=$(dirname "$(dirname "$src")")
+root=$(dirname "$(dirname "$(dirname "$src")")")      # notes/<topic>/<name>.html → the project root
 outdir=$(realpath "${2:-$root}")
 out="$outdir/$(basename "${src%.html}").pdf"
 

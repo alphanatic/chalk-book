@@ -345,3 +345,6 @@ window.CHALK_PROJECTS["arch-linux"].mark = "<path fill='black' stroke='none' fil
 window.CHALK_PROJECTS["anthropic"].mark = "<path fill='black' stroke='none' d='M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5527h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z'/>";
 window.CHALK_PROJECTS["ai-reelsearch"].mark = "<circle cx='12' cy='12' r='10'/><circle fill='black' stroke='none' cx='12' cy='12' r='1.8'/><circle fill='black' stroke='none' cx='12' cy='6' r='1.6'/><circle fill='black' stroke='none' cx='12' cy='18' r='1.6'/><circle fill='black' stroke='none' cx='6' cy='12' r='1.6'/><circle fill='black' stroke='none' cx='18' cy='12' r='1.6'/>";
 window.CHALK_PROJECTS["meta"].mark = "<path d='M12 6.5C10 5 7 4.5 3.5 4.5v14c3.5 0 6.5.5 8.5 2 2-1.5 5-2 8.5-2v-14C17 4.5 14 5 12 6.5zM12 6.5v14'/>";
+
+/* A topic's folder in notes/ when it differs from its key above (app.js, check.sh, build-index.mjs read it) */
+window.CHALK_PROJECTS["meta"].folder = "chalk-book";

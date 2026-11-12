@@ -6,7 +6,7 @@
 
 This file is the source of truth for how the chalk book works. It is written for any
 future AI assistant or person picking up the project. A human-friendly copy is the guide
-note, `notes/00-chalk-book-guide.html`.
+note, `notes/chalk-book/00-chalk-book-guide.html`.
 
 ---
 
@@ -55,8 +55,9 @@ chalk-book/
 │   ├── progress.css, progress.js ← shared layout, filter and sorting of the private Backlog, Complete Tasks and Linux
 │   └── pages/                    ← the site's own pages: contact (page.css styles it)
 ├── notes/                        ← one file per note, chalk markup in an HTML shell: the source of truth for content
-│   ├── tinker-town-01-aws-ssh-firewall.html …
-│   ├── 00-chalk-book-guide.html  ← this guide as a note
+│   ├── <topic>/                  ← one folder per topic (kebab-case, no date or number): tinker-town/, chalk-book/, claude-code/ …
+│   │   ├── tinker-town-01-aws-ssh-firewall.html …
+│   │   └── 00-chalk-book-guide.html ← (in chalk-book/) this guide as a note
 │   ├── note-layout.css           ← shared layout and components
 │   ├── note.js                   ← turns chalk markup into the page; lets the site print it and highlight search hits
 │   ├── img/<note-id>/            ← a note's images, one folder per note
@@ -89,6 +90,11 @@ chalk-book/
   private and pending notes); the note's header and footer are made from it.
 - `00-` with no project is reserved for meta files about the chalk book itself. `<project>-00-` is that project's
   cover note, e.g. `pokedex-00-pokeggdex-at-a-glance`.
+- **Every topic has its own folder in `notes/`**: `notes/<folder>/<id>.html`, kebab-case, no date and no number. The
+  folder is the project's slug unless the catalogue gives it a `folder` (a line `window.CHALK_PROJECTS["slug"].folder = "…"`
+  in `site/notes.js`, or in `site/notes-local.js` for private topics); `meta` and the guide note live in `chalk-book/`.
+  Shared files (`note.js`, `note-layout.css`, `fonts/`, `img/`) stay in `notes/`, so a note loads them as `../note.js`
+  and `../img/<id>/…`, and the catalogue as `../../site/notes.js`. The private repo mirrors the folders.
 
 ### Projects
 
@@ -110,7 +116,7 @@ Add a row before using a new project, and the same project to `CHALK_PROJECTS` i
 A project can carry a roadmap of modules there; the site shows unfinished modules as planned.
 
 **Arch Linux and the work course are private.** Their notes and everything made from them are never committed:
-the notes (`notes/arch-linux-*` in `.gitignore`; the work course's in each clone's `.git/info/exclude`, so its slug
+the notes (`notes/arch-linux/` in `.gitignore`; the work course's in each clone's `.git/info/exclude`, so its slug
 stays out of the repo), their catalogue entries (`site/notes-local.js`, not `site/notes.js`) and their search text
 (`site/search-local.js`, written by `build-index.mjs`). The work course is defined in `site/notes-local.js` too,
 roadmap included, so neither its name nor its slug reaches the repo. Each private note loads
@@ -300,7 +306,7 @@ goes through an AI session.
 2. While it is fresh, say **"chalk up"** (`/chalk-up`), "chalk that up" or similar. A personal pointer skill in
    `~/.claude/skills/chalk-up/` makes this work in every folder and leads back to this project.
    An AI may also offer a dump; when is each user's own preference.
-3. The skill plans the note(s), copies `template.html` into `notes/`, fills it in following this
+3. The skill plans the note(s), copies `template.html` into `notes/<topic>/`, fills it in following this
    guide, adds it as pending to `site/notes-local.js` (§2), rebuilds the search index, checks every page, then hands over
    following the user's own git preferences (§7).
 4. Check the note on the site; ask for any changes in the same session.
@@ -314,7 +320,7 @@ goes through an AI session.
 Notes are built by `note.js` and printed to A4 by a headless Chromium-based browser (Brave here):
 
 ```
-.claude/skills/chalk-up/render.sh notes/<name>.html [out-dir]   # → <name>.pdf, default: project root
+.claude/skills/chalk-up/render.sh notes/<topic>/<name>.html [out-dir]   # → <name>.pdf, default: project root
 ```
 
 PDFs are not kept in the project; the site makes them on demand. `archive/` keeps the PDFs from before
@@ -327,7 +333,7 @@ the HTML rebuild and the last guide PDF (2026-10-13), unchanged and no longer up
 - Match the existing notes' structure and look exactly; open one as a reference if unsure.
 - **Read little first.** To find something, stop at the first step that answers it: the catalogue (`site/notes.js`)
   → hits with context, `grep -o -i -P '.{0,150}<word>.{0,150}' site/search-index.js` → one section,
-  `sed -n '/^## Bugs/,/^## /p' notes/<name>.html` → the whole note only when the task needs all of it
+  `sed -n '/^## Bugs/,/^## /p' notes/<topic>/<name>.html` → the whole note only when the task needs all of it
   (redoing a recipe, editing a note, a privacy check, a new note in its style).
 - Never edit, rename or delete an existing note or archived PDF unless the user asks.
 - Change this guide only when the user asks, and keep `CLAUDE.md` and the guide's HTML in sync.
