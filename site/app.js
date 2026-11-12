@@ -114,7 +114,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS.find(s => s.key === "number");
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
   // Every note opened in this browser, newest first: the rail shows the last few of each project
-  const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3;
+  const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3, RAIL_PROJECTS = 4;
   // Menu projects opened with their dot; the rest start folded
   const FOLD_KEY = "chalk.open-projects";
   // A reload (F5) keeps the menu as it was in this tab. A hard reload (Ctrl+F5, Shift+F5, Ctrl+Shift+F5,
@@ -215,7 +215,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       group.classList.toggle("open", open);
       b.setAttribute("aria-expanded", open);
       b.setAttribute("aria-label", `${open ? "Hide" : "Show"} ${name} notes`);
-      b.title = open ? "Fold" : "Unfold";
+      b.title = name;
     };
     set(readOpen().has(key));
     // On the rail the dot is a plain ball: it opens the menu with the project unfolded and centred.
@@ -252,6 +252,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       if (!items.length && !todo.length) continue;
 
       const group = el("section", "group foldable");
+      group.dataset.project = key;
       paint(group, p.color);
       const h = heading(p.name, items.length);
       const fold = foldButton(group, key, p.name);
@@ -280,11 +281,17 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     markRailRecent();
   }
 
-  // On the rail, each project shows only its notes opened last in this browser, at most RAIL_RECENT
-  // Until a note is opened with this list in place, start from Recently viewed
+  // On the rail, only the RAIL_PROJECTS projects opened last show, the latest on top, each with its mark and at most
+  // RAIL_RECENT of its notes opened last. The open menu keeps its own sort
   const readOpened = () => { try { return JSON.parse(localStorage.getItem(OPENED_KEY) ?? localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } };
   function markRailRecent() {
     const opened = readOpened();
+    const order = [...new Set(opened.map(projectOf).filter(Boolean))];
+    for (const g of menuList.querySelectorAll(".group[data-project]")) {
+      const rank = order.indexOf(g.dataset.project);
+      g.classList.toggle("rail-top", rank >= 0 && rank < RAIL_PROJECTS);
+      g.style.order = rank >= 0 ? rank : order.length;
+    }
     for (const b of menuList.querySelectorAll("button.file[data-id]")) {
       const p = projectOf(b.dataset.id);
       const rank = opened.filter(id => projectOf(id) === p).indexOf(b.dataset.id);
@@ -622,4 +629,16 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   renderSearch();
   show(decodeURIComponent(location.hash.slice(1)));
   if (menuWasOpen) setMenu(true);
+
+  // A reload (F5) also keeps how far the open menu was scrolled, in this tab; a hard reload clears it with the rest
+  const MENU_SCROLL_KEY = "chalk.menu-scroll";
+  const menuPane = menuEl.querySelector(".panel-body");
+  if (menuWasOpen) {
+    let y = 0;
+    try { y = Number(sessionStorage.getItem(MENU_SCROLL_KEY)) || 0; } catch {}
+    requestAnimationFrame(() => { menuPane.scrollTop = y; });
+  }
+  menuPane.addEventListener("scroll", () => {
+    if (menuOpen()) try { sessionStorage.setItem(MENU_SCROLL_KEY, String(menuPane.scrollTop)); } catch {}
+  }, { passive: true });
 })();

@@ -203,15 +203,18 @@ body:not(.recent-open) .panel.right { display: none; }
 .rail .panel.left .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
 .rail .panel.left :is(.file .t, .file .state, .file .hits, .file .git, .progress, .panel-foot, .group h2 .count, .search, .sort) { display: none; }
 .rail .panel.left .search-rail { display: flex; margin-bottom: 14px; }
-.rail .panel.left .group h2 { justify-content: center; gap: 0; font-size: 0; margin-bottom: 6px; }
+.rail .panel.left .group h2 { justify-content: center; gap: 0; font-size: 0; margin-bottom: 3px; }
 /* On the rail the fold dot is a plain ball, larger and centred, with the project's last opened notes under it */
-.rail .panel.left .fold { width: 20px; height: 20px; margin: 0; -webkit-mask: none; mask: none; }
+.rail .panel.left .fold { width: 22px; height: 22px; margin: 0; }
+.rail .panel.left .group:not(.marked) .fold { -webkit-mask: none; mask: none; }
+.rail .panel.left .group.marked .fold { border-radius: 0; opacity: 1; }
 .rail .panel.left .group.foldable .file:not(.rail-recent) { display: none; }
 .rail .panel.left .group.foldable .file.rail-recent { display: flex; }
-/* The dots stay hidden on the rail: only the recent notes show, and a project with none takes no space */
-.rail .panel.left .group.foldable h2 { display: none; }
+/* On the rail each shown project is its mark in the project colour (a plain ball without one) over its recent notes; a project with no recent note takes no space */
+.rail #menu-list { display: flex; flex-direction: column; }
+.rail .panel.left .group.foldable:not(.rail-top) { display: none; }
 .rail .panel.left .group.foldable:not(:has(.rail-recent)) { display: none; }
-.rail .panel.left .group + .group { margin-top: 12px; }
+.rail .panel.left .group + .group { margin-top: 2px; }
 
 .scrim { display: none; }
 

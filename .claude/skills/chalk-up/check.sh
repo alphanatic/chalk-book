@@ -33,7 +33,8 @@ echo "2. Placeholders"
 grep -nH '{{' notes/*.html | report "leftover {{…}} placeholder" || true
 
 echo "3. Colours"
-grep -nHE '(style="[^"]*|:\s*)#[0-9a-fA-F]{3,6}\b' notes/*.html notes/*.css | report "hard-coded hex colour" || true
+# Committed notes only: private and pending notes are not published, so their colours are not checked here
+git ls-files -z -- 'notes/*.html' 'notes/*.css' | xargs -0 -r grep -nHE '(style="[^"]*|:\s*)#[0-9a-fA-F]{3,6}\b' | report "hard-coded hex colour" || true
 
 echo "4. Access"
 grep -nHoE 'BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}' "${scan[@]}" | unmap | report "secret (key or token)" || true
@@ -86,7 +87,8 @@ const ids = window.CHALK_NOTES.map(n => n.id);
 const files = fs.readdirSync("notes").filter(f => f.endsWith(".html")).map(f => f.slice(0, -5));
 for (const f of files) if (!ids.includes(f)) console.log(`notes/${f}.html: no entry in CHALK_NOTES`);
 for (const n of window.CHALK_NOTES) {
-  if (!files.includes(n.id)) console.log(`site/notes.js: ${n.id} has no file in notes/`);
+  // Private and pending entries (only in site/notes-local.js) may have their file elsewhere, e.g. in the private repo
+  if (publicIds.has(n.id) && !files.includes(n.id)) console.log(`site/notes.js: ${n.id} has no file in notes/`);
   if (ids.indexOf(n.id) !== ids.lastIndexOf(n.id)) console.log(`site/notes.js: ${n.id} listed twice`);
   const m = n.id.match(/^(?:([a-z0-9-]+?)-)?(\d{2})-/);
   if (m && +m[2] !== n.n) console.log(`site/notes.js: ${n.id} has n: ${n.n}, file says ${m[2]}`);
