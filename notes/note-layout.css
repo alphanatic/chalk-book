@@ -20,19 +20,19 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { margin: 0; padding: 0 16mm; background: var(--band-text); color: var(--ink);
   font: 9.5pt/1.55 Inter, sans-serif; }
 code, pre { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; }
-code { background: var(--code-bg); border-radius: 3px; padding: 1px 4px; }
+code { background: var(--code-bg); border-radius: 0.1875rem; padding: 1px 0.25rem; }
 .old { color: var(--faded); text-decoration: line-through; }            /* legacy names */
 
 /* ── Header band ─────────────────────────────────────────── */
-.hero { background: var(--asphalt); margin: 0 -16mm 22px; padding: 30px 16mm 26px; }
+.hero { background: var(--asphalt); margin: 0 -16mm 1.375rem; padding: 1.875rem 16mm 1.625rem; }
 .eyebrow { display: inline-block; background: var(--butter); color: var(--butter-chip); font-size: 7pt;
-  font-weight: 600; letter-spacing: .14em; padding: 3px 9px; border-radius: 4px; text-transform: uppercase; }
+  font-weight: 600; letter-spacing: .14em; padding: 0.1875rem 0.5625rem; border-radius: 0.25rem; text-transform: uppercase; }
 /* The owner's own eyebrow tiles (note.js, eyebrowTile), local only: the grade's tile, square, behind the text */
 .eyebrow.tiled { position: relative; overflow: hidden; isolation: isolate; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 .eyebrow.tiled::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: 50%; aspect-ratio: 1;
   transform: translateY(-50%); background: var(--eyebrow-tile) center / 100% 100% no-repeat; }
 .eyebrow.tiled:is([data-grade="4"], [data-grade="5"], [data-grade="6"]) { color: var(--chalk-white); }
-h1 { color: var(--chalk-white); font-size: 24pt; margin: 10px 0 4px; letter-spacing: -.01em; }
+h1 { color: var(--chalk-white); font-size: 24pt; margin: 0.625rem 0 0.25rem; letter-spacing: -.01em; }
 /* Title words, coloured in turn by note.js: blue, pink, green, yellow */
 h1 .tc-sky { color: var(--sky); }
 h1 .tc-pink { color: var(--pink); }
@@ -42,8 +42,8 @@ h1 .tc-lav { color: var(--lav); }                                         /* eve
 h1 span:not([class]) { color: inherit; }                                  /* other symbols stay white */
 h1 .wm-chalk { color: var(--sky); }                                   /* the Chalk Book name: same colours as the site */
 h1 .wm-book  { color: var(--butter); }
-.sub { color: var(--mint); margin: 0 0 10px; }
-.hero p { color: var(--band-soft); margin: 4px 0; max-width: 135mm; }
+.sub { color: var(--mint); margin: 0 0 0.625rem; }
+.hero p { color: var(--band-soft); margin: 0.25rem 0; max-width: 135mm; }
 .hero .sub { color: var(--mint); }
 .hero code { background: var(--asphalt-chip); color: var(--butter); }
 
@@ -60,98 +60,98 @@ h1 .wm-book  { color: var(--butter); }
 .tag { background: var(--c); color: var(--c-chip); }
 
 /* ── Headings ────────────────────────────────────────────── */
-h2 { font-size: 12.5pt; margin: 22px 0 10px; display: flex; align-items: center; gap: 9px; break-after: avoid; }
-h2::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--mint)); }
-h3 { font-size: 9.5pt; margin: 14px 0 6px; break-after: avoid; display: flex; align-items: center; gap: 8px; }
-.tag { font-size: 7pt; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+h2 { font-size: 12.5pt; margin: 1.375rem 0 0.625rem; display: flex; align-items: center; gap: 0.5625rem; break-after: avoid; }
+h2::before { content: ""; width: 0.625rem; height: 0.625rem; border-radius: 50%; background: var(--c, var(--mint)); }
+h3 { font-size: 9.5pt; margin: 0.875rem 0 0.375rem; break-after: avoid; display: flex; align-items: center; gap: 0.5rem; }
+.tag { font-size: 7pt; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 999px; }
 .keep { break-inside: avoid; }                                          /* wrap a heading + its block */
 
 /* ── Checklist ───────────────────────────────────────────── */
 ul.check { list-style: none; padding: 0; margin: 0; }
-ul.check li { padding: 5px 0 5px 20px; border-bottom: 1px dashed var(--line); position: relative; }
-ul.check li::before { content: "✓"; position: absolute; left: 2px; color: var(--mint-ink); font-weight: 700; }
+ul.check li { padding: 0.3125rem 0 0.3125rem 1.25rem; border-bottom: 1px dashed var(--line); position: relative; }
+ul.check li::before { content: "✓"; position: absolute; left: 0.125rem; color: var(--mint-ink); font-weight: 700; }
 
 /* ── Code blocks: <div class="block remote"><pre>…</pre></div> ─ */
-.block { border-left: 3px solid var(--c); background: var(--c-bg); border-radius: 0 6px 6px 0;
-  padding: 9px 12px; margin: 8px 0; break-inside: avoid; }
+.block { border-left: 0.1875rem solid var(--c); background: var(--c-bg); border-radius: 0 0.375rem 0.375rem 0;
+  padding: 0.5625rem 0.75rem; margin: 0.5rem 0; break-inside: avoid; }
 .block pre { margin: 0; white-space: pre-wrap; }
-.block .file { font-family: "DejaVu Sans Mono", monospace; font-size: 7.5pt; color: var(--c-ink); margin-bottom: 5px; }
+.block .file { font-family: "DejaVu Sans Mono", monospace; font-size: 7.5pt; color: var(--c-ink); margin-bottom: 0.3125rem; }
 .cmt { color: var(--c-ink); opacity: .75; }                             /* # comments after commands */
 .block.output { --c: var(--output-line); --c-bg: var(--paper); }
 .block.output .cmt { color: var(--output-ink); opacity: 1; }
 
 /* Config file with notes beside it: each .row is "line | note" */
-.annotated .row { display: grid; grid-template-columns: 1fr 42%; gap: 12px; }
+.annotated .row { display: grid; grid-template-columns: 1fr 42%; gap: 0.75rem; }
 .annotated .row pre { margin: 0; }
 .annotated .row span { font-size: 8pt; color: var(--c-ink); }
-.annotated .gap { height: 6px; }
+.annotated .gap { height: 0.375rem; }
 .annotated.wide .row { grid-template-columns: 1fr 22%; }                   /* long code lines, short notes */
 
 /* ── Callouts: <div class="callout gotcha"><b>Gotcha ·</b> …</div> ─ */
-.callout { background: var(--c-bg); border: 1px solid var(--c); border-radius: 7px;
-  padding: 9px 12px; margin: 10px 0; break-inside: avoid; }
+.callout { background: var(--c-bg); border: 1px solid var(--c); border-radius: 0.4375rem;
+  padding: 0.5625rem 0.75rem; margin: 0.625rem 0; break-inside: avoid; }
 .callout > b:first-child { color: var(--c-ink); }
 
 /* ── Bug cards ───────────────────────────────────────────── */
-.bug { background: var(--peach-bg); border: 1px solid var(--peach); border-radius: 8px;
-  padding: 10px 12px; margin: 10px 0; break-inside: avoid; }
-.bug h4 { margin: 0 0 6px; font-size: 9pt; color: var(--peach-ink); }
-.bug dl { display: grid; grid-template-columns: 38px 1fr; gap: 3px 8px; margin: 0; }
-.bug dt { font-size: 7pt; font-weight: 700; letter-spacing: .06em; padding-top: 2px; }
+.bug { background: var(--peach-bg); border: 1px solid var(--peach); border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem; margin: 0.625rem 0; break-inside: avoid; }
+.bug h4 { margin: 0 0 0.375rem; font-size: 9pt; color: var(--peach-ink); }
+.bug dl { display: grid; grid-template-columns: 2.375rem 1fr; gap: 0.1875rem 0.5rem; margin: 0; }
+.bug dt { font-size: 7pt; font-weight: 700; letter-spacing: .06em; padding-top: 0.125rem; }
 .bug dt.cause { color: var(--bug-cause); }
 .bug dt.fix { color: var(--mint-ink); }
 .bug dd { margin: 0; }
 
 /* ── Tables ──────────────────────────────────────────────── */
-table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 8.5pt; break-inside: avoid; }
+table { width: 100%; border-collapse: collapse; margin: 0.375rem 0 0.25rem; font-size: 8.5pt; break-inside: avoid; }
 th { text-align: left; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
-  background: var(--asphalt); color: var(--band-text); padding: 5px 8px; border-bottom: 1.5px solid var(--pink); }
-td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  background: var(--asphalt); color: var(--band-text); padding: 0.3125rem 0.5rem; border-bottom: 1.5px solid var(--pink); }
+td { padding: 0.375rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 td:first-child { font-weight: 600; }
-.sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px;
+.sw { display: inline-block; width: 0.5625rem; height: 0.5625rem; border-radius: 50%; margin-right: 0.375rem;
   vertical-align: -1px; background: var(--c); }
 
 /* ── Concept chain: Disk → PV → VG → LV ──────────────────── */
-.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0; }
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; margin: 0.5rem 0; }
 .chain span { background: var(--peri-bg); border: 1px solid var(--peri); color: var(--peri-chip);
-  border-radius: 6px; padding: 4px 10px; font-size: 8.5pt; font-weight: 600; }
+  border-radius: 0.375rem; padding: 0.25rem 0.625rem; font-size: 8.5pt; font-weight: 600; }
 .chain i { color: var(--peri-arrow); font-style: normal; }
 
 /* ── Cards & numbered steps ──────────────────────────────── */
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; break-inside: avoid; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; break-inside: avoid; }
 .card { background: var(--c-bg, var(--chalk-white)); border: 1px solid var(--c, var(--line));
-  border-radius: 8px; padding: 10px 12px; }
-.card h4 { margin: 0 0 4px; font-size: 9.5pt; }
-.card p { margin: 0 0 4px; font-size: 8.5pt; }
-.steps { counter-reset: s; list-style: none; padding: 0; margin: 4px 0; }
-.steps li { counter-increment: s; padding: 4px 0 4px 28px; position: relative; }
-.steps li::before { content: counter(s); position: absolute; left: 0; top: 4px; width: 18px; height: 18px;
+  border-radius: 0.5rem; padding: 0.625rem 0.75rem; }
+.card h4 { margin: 0 0 0.25rem; font-size: 9.5pt; }
+.card p { margin: 0 0 0.25rem; font-size: 8.5pt; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0.25rem 0; }
+.steps li { counter-increment: s; padding: 0.25rem 0 0.25rem 1.75rem; position: relative; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 0.25rem; width: 1.125rem; height: 1.125rem;
   border-radius: 50%; background: var(--c); color: var(--c-chip); font-size: 7.5pt; font-weight: 700;
   display: flex; align-items: center; justify-content: center; }
 .muted { color: var(--ink-soft); font-size: 8.5pt; }
 
 /* Best-practice cards: a short bold title, then one line. .four = four narrow columns */
-.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.375rem 0; }
 .cards.three { grid-template-columns: repeat(3, 1fr); }
 .cards.four { grid-template-columns: repeat(4, 1fr); }
-.cards > div { background: var(--c-bg, var(--mint-bg)); border: 1px solid var(--c, var(--mint)); border-radius: 7px;
-  padding: 8px 11px; font-size: 8.5pt; break-inside: avoid; }
-.cards b { display: block; color: var(--c-ink, var(--mint-ink)); font-size: 8.5pt; margin-bottom: 2px; }
+.cards > div { background: var(--c-bg, var(--mint-bg)); border: 1px solid var(--c, var(--mint)); border-radius: 0.4375rem;
+  padding: 0.5rem 0.6875rem; font-size: 8.5pt; break-inside: avoid; }
+.cards b { display: block; color: var(--c-ink, var(--mint-ink)); font-size: 8.5pt; margin-bottom: 0.125rem; }
 
 /* Closing line: which project the note belongs to, and related notes */
-.part-of { margin: 18px 0 0; padding-top: 8px; border-top: 1px solid var(--line); text-align: center;
+.part-of { margin: 1.125rem 0 0; padding-top: 0.5rem; border-top: 1px solid var(--line); text-align: center;
   color: var(--ink-soft); font-size: 8pt; }
 .part-of a { color: var(--pink-ink); }
 
 /* Search hits marked by note.js; on screen only, never printed */
-mark.chalk-hit { background: var(--peach); color: var(--ink); border-radius: 2px; box-shadow: 0 0 0 1px var(--peach); }
+mark.chalk-hit { background: var(--peach); color: var(--ink); border-radius: 0.125rem; box-shadow: 0 0 0 1px var(--peach); }
 @media print { mark.chalk-hit { background: none; box-shadow: none; color: inherit; } }
 
 /* ── On screen (the chalk-book site): an A4 sheet on the dark site background. PDFs are unaffected ── */
 @media screen {
   :root { color-scheme: dark; }          /* matches the site, so the frame around the note stays see-through */
   html { background: linear-gradient(transparent, transparent); }   /* see-through, and stops body's paper spreading to the edges */
-  body { max-width: 210mm; min-height: calc(100vh - 48px); margin: 24px auto; }
+  body { max-width: 210mm; min-height: calc(100vh - 3rem); margin: 1.5rem auto; }
   /* Every table sorts by a click on its header (note.js); the PDF keeps the written order */
   th[data-sort] { cursor: pointer; user-select: none; }
   th[data-sort]:hover, th[data-sort]:focus-visible { color: var(--chalk-white); }
@@ -160,15 +160,15 @@ mark.chalk-hit { background: var(--peach); color: var(--ink); border-radius: 2px
   th[aria-sort="descending"]::after { content: " ▼"; opacity: 1; }
 }
 
-/* ── On a phone: one column and 16px sides. Screen only, so PDFs stay exactly as they are ── */
-@media screen and (max-width: 600px) {
-  body { padding: 0 16px; margin: 0 auto; min-height: 100vh; }
-  .hero { margin: 0 -16px 20px; padding: 24px 16px 22px; }
+/* ── On a phone: one column and 1rem sides. Screen only, so PDFs stay exactly as they are ── */
+@media screen and (max-width: 37.5rem) {
+  body { padding: 0 1rem; margin: 0 auto; min-height: 100vh; }
+  .hero { margin: 0 -1rem 1.25rem; padding: 1.5rem 1rem 1.375rem; }
   h1 { font-size: 20pt; }
   .hero p { max-width: none; }
   .two, .cards, .cards.three, .cards.four { grid-template-columns: 1fr; }
   .annotated .row, .annotated.wide .row { grid-template-columns: 1fr; gap: 0; }
-  .annotated .row span:not(:empty) { display: block; padding: 0 0 4px 12px; }    /* the note sits under its line */
+  .annotated .row span:not(:empty) { display: block; padding: 0 0 0.25rem 0.75rem; }    /* the note sits under its line */
   pre { overflow-wrap: anywhere; }                                      /* long paths and UUIDs break too */
   table { display: block; overflow-x: auto; }                          /* wide tables scroll in their own box */
 }

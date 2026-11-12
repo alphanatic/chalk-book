@@ -3,15 +3,15 @@
 
 /* Note header: the tile and its grade, top right of the dark band */
 .hero { position: relative; }
-.hero-risk { position: absolute; top: 24px; right: 16mm; display: flex; align-items: center; gap: 8px; }
-.hero-risk img { width: 40px; height: 40px; display: block; }
+.hero-risk { position: absolute; top: 1.5rem; right: 16mm; display: flex; align-items: center; gap: 0.5rem; }
+.hero-risk img { width: 2.5rem; height: 2.5rem; display: block; }
 .hero-risk b { color: var(--band-soft); font-size: 7pt; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
-@media screen and (max-width: 600px) { .hero-risk { top: 20px; right: 16px; } .hero-risk b { display: none; } }
+@media screen and (max-width: 37.5rem) { .hero-risk { top: 1.25rem; right: 1rem; } .hero-risk b { display: none; } }
 
 /* A graded step: a small tile after the step's title */
-.step-risk { display: inline-flex; margin-left: 2px; }
-.step-risk img { width: 14px; height: 14px; display: block; }
+.step-risk { display: inline-flex; margin-left: 0.125rem; }
+.step-risk img { width: 0.875rem; height: 0.875rem; display: block; }
 
 /* Site menu: the tile after the note's number */
 .file .risk { flex: none; display: flex; }
-.file .risk img { width: 14px; height: 14px; display: block; }
+.file .risk img { width: 0.875rem; height: 0.875rem; display: block; }

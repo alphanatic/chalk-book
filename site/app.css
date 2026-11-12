@@ -6,9 +6,9 @@
 @font-face { font-family: Inter; font-weight: 700; src: url(../notes/fonts/inter-latin-700-normal.woff2) format("woff2"); }
 
 :root {
-  --panel: 280px;   /* a side panel when expanded */
+  --panel: 17.5rem;   /* a side panel when expanded */
   --rail: 52px;     /* a side panel when collapsed: numbers and colour bars only */
-  --top-h: 56px;
+  --top-h: 3.5rem;
 }
 
 * { box-sizing: border-box; }
@@ -16,26 +16,26 @@
 html, body { height: 100%; }
 body {
   margin: 0; background: var(--shell-bg); color: var(--shell-text);
-  font: 14px/1.5 Inter, system-ui, sans-serif;
+  font: 0.875rem/1.5 Inter, system-ui, sans-serif;
   display: grid; --left-w: var(--panel); --right-w: var(--rail);
   grid-template: "top top top" var(--top-h) "left view right" 1fr "foot foot foot" auto / var(--left-w) 1fr var(--right-w);
   transition: grid-template-columns .3s ease;
 }
 body.left-collapsed { --left-w: var(--rail); }
 button { font: inherit; }
-kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
-:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+kbd { font: 600 0.6875rem Inter, sans-serif; padding: 1px 0.375rem; border-radius: 0.25rem; }
+:focus-visible { outline: 0.125rem solid var(--pink); outline-offset: 0.125rem; }
 
 /* ── Top bar ─────────────────────────────────────────────── */
-.topbar { grid-area: top; position: relative; display: flex; align-items: center; gap: 14px; padding: 0;
+.topbar { grid-area: top; position: relative; display: flex; align-items: center; gap: 0.875rem; padding: 0;
   background: var(--shell-side); border-bottom: 1px solid var(--shell-line); }
 .topbar-rail { width: var(--rail); flex: none; display: grid; place-items: center; }   /* ☰ sits centred over the rail */
-.icon-btn { width: 36px; height: 36px; display: grid; place-items: center; flex: none;
-  border: 0; border-radius: 8px; background: none; color: var(--shell-text); cursor: pointer; }
+.icon-btn { width: 2.25rem; height: 2.25rem; display: grid; place-items: center; flex: none;
+  border: 0; border-radius: 0.5rem; background: none; color: var(--shell-text); cursor: pointer; }
 .icon-btn:hover { background: var(--shell-raise); }
-.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.icon-btn svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 /* Menu button: three chalk sticks lying down */
-.icon-btn :is(.chalk-sticks, .chalk-clock) { width: 24px; height: 24px; }
+.icon-btn :is(.chalk-sticks, .chalk-clock) { width: 1.5rem; height: 1.5rem; }
 .chalk-sticks rect { stroke: none; }
 .chalk-sticks .pink { fill: var(--pink); }
 .chalk-sticks .butter { fill: var(--butter); }
@@ -45,30 +45,30 @@ kbd { font: 600 11px Inter, sans-serif; padding: 1px 6px; border-radius: 4px; }
 .chalk-clock .butter { fill: var(--butter); }
 .chalk-clock .pink { fill: var(--pink); }
 /* The name hugs the left, next to the menu button, and links Home */
-.brand { font-weight: 700; font-size: 17px; color: var(--shell-text); white-space: nowrap; text-decoration: none; }
+.brand { font-weight: 700; font-size: 1.0625rem; color: var(--shell-text); white-space: nowrap; text-decoration: none; }
 /* <chalk-wordmark>: the one name used everywhere — Chalk in blue, Book in yellow. Size comes from where it sits */
 chalk-wordmark { white-space: nowrap; }
 chalk-wordmark .chalk { color: var(--sky); }
 chalk-wordmark .book  { color: var(--butter); }
-.current { flex: 0 1 auto; max-width: max(0px, calc(50% - var(--nav-w, 0px) / 2 - 290px)); min-width: 0; margin-left: auto;
+.current { flex: 0 1 auto; max-width: max(0px, calc(50% - var(--nav-w, 0px) / 2 - 18.125rem)); min-width: 0; margin-left: auto;
   text-align: right; color: var(--shell-text-soft);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.btn { width: 180px; aspect-ratio: 20 / 3; flex: none; border-radius: 8px; cursor: pointer;
+.btn { width: 11.25rem; aspect-ratio: 20 / 3; flex: none; border-radius: 0.5rem; cursor: pointer;
   border: 0; background: var(--mint); color: var(--mint-chip); font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 6px; }
-.btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  display: flex; align-items: center; justify-content: center; gap: 0.375rem; }
+.btn svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .btn:hover:not(:disabled) { background: var(--mint-bg); }
 .btn:disabled { background: var(--shell-raise); color: var(--shell-text-muted); cursor: default; }
 
 /* Export menu: dark grey, each option in its own pastel chalk colour */
 .export { position: relative; flex: none; }
-.export-menu { position: absolute; z-index: 5; top: calc(100% + 8px); right: 0; min-width: 200px; padding: 6px;
-  background: var(--shell-raise); border: 1px solid var(--shell-line); border-radius: 10px;
-  box-shadow: 0 10px 28px var(--shell-side); }
-.export-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 7px;
+.export-menu { position: absolute; z-index: 5; top: calc(100% + 0.5rem); right: 0; min-width: 12.5rem; padding: 0.375rem;
+  background: var(--shell-raise); border: 1px solid var(--shell-line); border-radius: 0.625rem;
+  box-shadow: 0 0.625rem 1.75rem var(--shell-side); }
+.export-item { display: flex; align-items: center; gap: 0.625rem; width: 100%; padding: 0.5625rem 0.625rem; border: 0; border-radius: 0.4375rem;
   background: none; color: var(--c, var(--shell-text)); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
 .export-item:hover, .export-item:focus-visible { background: var(--shell-raise-hover); }
-.export-item svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8;
+.export-item svg { width: 1.125rem; height: 1.125rem; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8;
   stroke-linecap: round; stroke-linejoin: round; }
 .export-item.mint { --c: var(--mint); }
 
@@ -87,16 +87,16 @@ body.recent-open { --right-w: var(--panel); }
 /* Closed, or away from Home: hidden, and its column closes */
 body:not(.recent-open) { --right-w: 0px; }
 body:not(.recent-open) .panel.right { display: none; }
-.panel-body { flex: 1; overflow: hidden auto; overscroll-behavior: contain; padding: 14px;
+.panel-body { flex: 1; overflow: hidden auto; overscroll-behavior: contain; padding: 0.875rem;
   scrollbar-color: var(--shell-line) transparent; }
 /* The menu scrolls with no scrollbar showing, so its tiles keep their width however long the list gets */
 .panel.left .panel-body { scrollbar-width: none; }
 .panel.left .panel-body::-webkit-scrollbar { display: none; }
 
-.group + .group { margin-top: 20px; }
-.group h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--shell-text-soft);
-  font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
-.group h2::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--pink)); flex: none; }
+.group + .group { margin-top: 1.25rem; }
+.group h2 { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem; color: var(--shell-text-soft);
+  font-size: 0.6875rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.group h2::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--c, var(--pink)); flex: none; }
 .group h2 .count { margin-left: auto; letter-spacing: 0; color: var(--shell-text-muted); }
 .panel.right .group h2::before { background: var(--peri); }
 
@@ -106,60 +106,60 @@ body:not(.recent-open) .panel.right { display: none; }
 .group.foldable h2::before { content: none; }
 .group.foldable:not(.open) :is(.file, .progress .label) { display: none; }
 .group.foldable:not(.open) .progress .bar { margin-top: 0; }
-.fold { flex: none; width: 11px; height: 11px; margin: 0 -1.5px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+.fold { flex: none; width: 0.6875rem; height: 0.6875rem; margin: 0 -0.09375rem; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
   background: var(--c); --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cmask id='m'%3E%3Ccircle cx='8' cy='8' r='8' fill='white'/%3E%3Cpath d='M6.5 0h3v6.5H16v3H9.5V16h-3V9.5H0v-3h6.5z'/%3E%3C/mask%3E%3Ccircle cx='8' cy='8' r='8' mask='url%28%23m%29'/%3E%3Ccircle cx='8' cy='8' r='7.5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
   -webkit-mask: var(--fold-mark) center / 100% no-repeat; mask: var(--fold-mark) center / 100% no-repeat; }
 .group.open .fold { --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cmask id='m'%3E%3Ccircle cx='8' cy='8' r='8' fill='white'/%3E%3Cpath d='M0 6.5h16v3H0z'/%3E%3C/mask%3E%3Ccircle cx='8' cy='8' r='8' mask='url%28%23m%29'/%3E%3Ccircle cx='8' cy='8' r='7.5' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E"); }
 .fold:hover { filter: brightness(1.15); }
 
 /* Roadmap progress under a project heading */
-.progress { margin: -2px 0 10px 16px; font-size: 11px; color: var(--shell-text-muted); white-space: nowrap; }
-.progress .bar { height: 3px; margin-top: 4px; border-radius: 2px; background: var(--shell-raise); overflow: hidden; }
+.progress { margin: -0.125rem 0 0.625rem 1rem; font-size: 0.6875rem; color: var(--shell-text-muted); white-space: nowrap; }
+.progress .bar { height: 0.1875rem; margin-top: 0.25rem; border-radius: 0.125rem; background: var(--shell-raise); overflow: hidden; }
 .progress .bar i { display: block; height: 100%; background: var(--c); }
 
 /* A file button: 20 wide by 3 tall, a dark tile with its project's chalk colour */
-.file { display: flex; align-items: center; gap: 8px; width: 100%; aspect-ratio: 20 / 3;
-  margin-bottom: 6px; padding: 0 10px 0 8px; cursor: pointer; text-align: left;
-  border: 0; border-left: 4px solid var(--c); border-radius: 8px;
-  background: var(--shell-raise); color: var(--shell-text); font-size: 13px; }
+.file { display: flex; align-items: center; gap: 0.5rem; width: 100%; aspect-ratio: 20 / 3;
+  margin-bottom: 0.375rem; padding: 0 0.625rem 0 0.5rem; cursor: pointer; text-align: left;
+  border: 0; border-left: 0.25rem solid var(--c); border-radius: 0.5rem;
+  background: var(--shell-raise); color: var(--shell-text); font-size: 0.8125rem; }
 .file:hover { background: var(--shell-raise-hover); }
 .file[aria-current] { background: var(--c); color: var(--c-chip); font-weight: 600; }
-.file .num { flex: none; font-size: 11px; font-weight: 600; padding: 1px 5px; border-radius: 4px;
+.file .num { flex: none; font-size: 0.6875rem; font-weight: 600; padding: 1px 0.3125rem; border-radius: 0.25rem;
   background: var(--c); color: var(--c-chip); }
 .file[aria-current] .num { background: var(--paper); }
 .file .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file .state { flex: none; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.file .state { flex: none; font-size: 0.625rem; letter-spacing: .08em; text-transform: uppercase; }
 
 /* Planned roadmap modules: same shape, outlined instead of filled, not clickable */
 .file.planned { cursor: default; background: none; color: var(--shell-text-muted);
-  border: 1px dashed var(--shell-line); border-left: 4px dashed var(--shell-line); }
+  border: 1px dashed var(--shell-line); border-left: 0.25rem dashed var(--shell-line); }
 .file.planned .num { background: var(--shell-raise); color: var(--shell-text-muted); }
 .file.planned.active { color: var(--shell-text-soft); border-left-color: var(--pink); }
 .file.planned.active .state { color: var(--pink); }
 
-.panel-foot { margin: 14px 2px 0; font-size: 12px; color: var(--shell-text-muted); white-space: nowrap; }
+.panel-foot { margin: 0.875rem 0.125rem 0; font-size: 0.75rem; color: var(--shell-text-muted); white-space: nowrap; }
 
 /* The right panel mirrors the left: colour bar and number on the right edge */
-.panel.right .file { flex-direction: row-reverse; text-align: right; padding: 0 8px 0 10px;
-  border-left: 0; border-right: 4px solid var(--c); }
-.panel.right .file.planned { border-left: 1px dashed var(--shell-line); border-right: 4px dashed var(--shell-line); }
+.panel.right .file { flex-direction: row-reverse; text-align: right; padding: 0 0.5rem 0 0.625rem;
+  border-left: 0; border-right: 0.25rem solid var(--c); }
+.panel.right .file.planned { border-left: 1px dashed var(--shell-line); border-right: 0.25rem dashed var(--shell-line); }
 .panel.right .file.planned.active { border-right-color: var(--pink); }
 .panel.right .group h2 { flex-direction: row-reverse; }
 .panel.right .group h2 .count { margin: 0 auto 0 0; }
 .panel.right .panel-foot { text-align: right; }
 /* Recently viewed: the project's name in a chip centred on the tile's top edge, half over it */
-.panel.right .file { margin-top: 14px; }
+.panel.right .file { margin-top: 0.875rem; }
 .file .proj { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); max-width: 85%;
-  padding: 1px 7px; border-radius: 4px; box-shadow: 0 0 0 2px var(--shell-side);
-  background: var(--c); color: var(--c-chip); font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  padding: 1px 0.4375rem; border-radius: 0.25rem; box-shadow: 0 0 0 0.125rem var(--shell-side);
+  background: var(--c); color: var(--c-chip); font-size: 0.5625rem; font-weight: 700; letter-spacing: .1em;
   line-height: 1.4; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* The search field is a file button turned inside out: light paper fill, dark text, same 20:3 shape */
-.search { display: flex; align-items: center; gap: 8px; width: 100%; aspect-ratio: 20 / 3; margin-bottom: 16px;
-  padding: 0 8px 0 10px; border-radius: 8px; border-left: 4px solid var(--pink);
+.search { display: flex; align-items: center; gap: 0.5rem; width: 100%; aspect-ratio: 20 / 3; margin-bottom: 1rem;
+  padding: 0 0.5rem 0 0.625rem; border-radius: 0.5rem; border-left: 0.25rem solid var(--pink);
   background: var(--paper); color: var(--ink-soft); cursor: text; }
-.search:focus-within { outline: 2px solid var(--pink); outline-offset: 2px; }
-.search svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.search:focus-within { outline: 0.125rem solid var(--pink); outline-offset: 0.125rem; }
+.search svg { width: 1rem; height: 1rem; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .search input { flex: 1; min-width: 0; width: 0; border: 0; outline: 0; background: none;
   color: var(--ink); font: inherit; color-scheme: light; }
 .search input::placeholder { color: var(--ink-soft); }
@@ -169,25 +169,25 @@ body:not(.recent-open) .panel.right { display: none; }
 
 /* Menu sort: a row of small chips under the search field; the chosen one is lit in its colour, dark on light
    like the GitHub marks: yellow A–Ö, green 01–99, red Ö–A */
-.sort { display: flex; gap: 4px; margin: -6px 0 14px; }
-.sort-btn { flex: 1; padding: 3px 0; border: 0; border-radius: 6px; cursor: pointer;
-  background: var(--shell-raise); color: var(--shell-text-muted); font-size: 11px; font-weight: 600; }
+.sort { display: flex; gap: 0.25rem; margin: -0.375rem 0 0.875rem; }
+.sort-btn { flex: 1; padding: 0.1875rem 0; border: 0; border-radius: 0.375rem; cursor: pointer;
+  background: var(--shell-raise); color: var(--shell-text-muted); font-size: 0.6875rem; font-weight: 600; }
 .sort-btn:hover { background: var(--shell-raise-hover); color: var(--shell-text); }
 .sort-btn[aria-pressed="true"] { background: var(--c); color: var(--c-chip); }
 
 /* Search tile for the rail: a diagonal chalk stick, the same size as a note tile; hidden while expanded */
 .search-rail { display: none; --c: var(--pink); }
-.chalk-stick { width: 22px; height: 22px; }
+.chalk-stick { width: 1.375rem; height: 1.375rem; }
 .chalk-stick rect { fill: var(--pink); }
 .chalk-stick .tip { fill: var(--pink-bg); }      /* the worn, lighter end */
 
 /* Hit count on a search result */
-.file .hits { flex: none; font-size: 10px; font-weight: 600; color: var(--shell-text-muted); }
+.file .hits { flex: none; font-size: 0.625rem; font-weight: 600; color: var(--shell-text-muted); }
 .file[aria-current] .hits { color: var(--c-chip); }
 
 /* GitHub watermark on a menu note kept in git: the mark fills its circle, laid over the right end of the tile */
 .file { position: relative; }
-.file .git { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px;
+.file .git { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); width: 0.875rem; height: 0.875rem;
   opacity: .5; pointer-events: none; }
 .git svg { display: block; width: 100%; height: 100%; }
 .git .cat { fill: var(--git-mark); }
@@ -223,36 +223,36 @@ body:not(.recent-open) .panel.right { display: none; }
 .view iframe { display: block; width: 100%; height: 100%; border: 0; }
 /* Centred on the window, like the name in the top bar, not just on the space between the panels */
 .home { position: relative; left: calc((var(--right-w) - var(--left-w)) / 2);
-  max-width: 560px; margin: 12vh auto 0; padding: 0 24px; text-align: center; }
-.home h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -.01em; }
-.home p { color: var(--shell-text-soft); margin: 6px 0; }
+  max-width: 35rem; margin: 12vh auto 0; padding: 0 1.5rem; text-align: center; }
+.home h1 { font-size: 2.125rem; margin: 0 0 0.5rem; letter-spacing: -.01em; }
+.home p { color: var(--shell-text-soft); margin: 0.375rem 0; }
 .home .hint { color: var(--shell-text-muted); }
 /* Coming soon: future projects in white chalk cursive, each with a Git mark for its state (SOON, site/app.js) */
 .home .soon { font-family: "Kalam", "Itim", cursive; color: var(--shell-text); text-align: left; }
-.home .soon h2 { margin: 0 0 6px; font-size: 40px; font-weight: 700; text-align: center; opacity: .92; text-shadow: 0 0 1px currentColor, 1px 1px 2px #ffffff22; }
+.home .soon h2 { margin: 0 0 0.375rem; font-size: 2.5rem; font-weight: 700; text-align: center; opacity: .92; text-shadow: 0 0 1px currentColor, 1px 1px 0.125rem #ffffff22; }
 .home .soon ul { width: fit-content; margin: 0 auto; padding: 0; list-style: none; }
-.home .soon li { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 400; line-height: 1.3; }
-.home .soon li .git { flex: none; width: 20px; height: 20px; }
+.home .soon li { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 400; line-height: 1.3; }
+.home .soon li .git { flex: none; width: 1.25rem; height: 1.25rem; }
 /* Encrypted entries: monospace so the reshuffling glyphs keep each line's width steady */
-.home .soon li.encrypted { font-family: ui-monospace, "DejaVu Sans Mono", monospace; font-size: 20px; letter-spacing: 1px; opacity: .85; }
+.home .soon li.encrypted { font-family: ui-monospace, "DejaVu Sans Mono", monospace; font-size: 1.25rem; letter-spacing: 0.0625rem; opacity: .85; }
 /* The encrypted list grows past the section to fit its longest line unbroken, centred on the section */
 .home .soon #soon-list { width: max-content; min-width: 100%; position: relative; left: 50%; transform: translateX(-50%); }
 .home .soon #soon-list li { justify-content: center; white-space: nowrap; }
-.home .soon #soon-done { margin-top: 18px; }
+.home .soon #soon-done { margin-top: 1.125rem; }
 .home .soon #soon-done:empty { display: none; }
 /* The portfolio under the name: one tile per site, its icon over its name */
-.home-apps { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 18px 0 20px; }
-.home-app { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-  min-width: 96px; padding: 14px 12px 10px; border-radius: 10px; background: var(--shell-raise);
-  color: var(--shell-text); font-size: 13px; font-weight: 600; text-decoration: none; }
-.home-app svg { height: 32px; transition: transform .2s ease; }
+.home-apps { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin: 1.125rem 0 1.25rem; }
+.home-app { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+  min-width: 6rem; padding: 0.875rem 0.75rem 0.625rem; border-radius: 0.625rem; background: var(--shell-raise);
+  color: var(--shell-text); font-size: 0.8125rem; font-weight: 600; text-decoration: none; }
+.home-app svg { height: 2rem; transition: transform .2s ease; }
 /* The droplet tile: a water droplet, always in its own green */
-.home-app.drop svg { width: 25px; }
+.home-app.drop svg { width: 1.5625rem; }
 .home-app.drop:hover svg { transform: rotate(-12deg) scale(1.1); }
 .home-app.drop .body { fill: var(--drop-green); }
 .home-app.drop .shine { fill: none; stroke: var(--shell-text); stroke-width: 1.6; stroke-linecap: round; }
 /* The Pokéggdex tile: a folk zigzag Easter egg Poké Ball, two-tone in coral like the private mark */
-.home-app.game svg { width: 30px; }
+.home-app.game svg { width: 1.875rem; }
 .home-app.game:hover svg { transform: rotate(-20deg) scale(1.1); }
 .home-app.game .shell { fill: var(--coral-bg); }
 .home-app.game .cap, .home-app.game .pip { fill: var(--coral); }
@@ -263,7 +263,7 @@ body:not(.recent-open) .panel.right { display: none; }
 .home-app.game .rim { fill: none; stroke: var(--coral-chip); stroke-width: 4; }
 .home-app.game .knob { fill: var(--coral-bg); stroke: var(--coral-chip); stroke-width: 4; }
 /* The review tile: a flower in the reviewed concepts' palette, its petals and leaves turning together */
-.home-app.flower svg { width: 32px; }
+.home-app.flower svg { width: 2rem; }
 .home-app.flower .spin { transition: transform .4s ease; }
 .home-app.flower:hover .spin { transform: rotate(60deg); }
 .home-app.flower .leaf { fill: var(--review-moss); }
@@ -273,18 +273,18 @@ body:not(.recent-open) .panel.right { display: none; }
 .home .hint kbd { background: var(--shell-raise); color: var(--shell-text); }
 
 /* ── Main footer: the persistent footer on every page, with the GitHub marks centred on the window ── */
-.main-footer { grid-area: foot; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
-  min-height: 32px; padding: 4px 16px; background: var(--shell-side); border-top: 1px solid var(--shell-line); }
-.footer-marks { grid-column: 2; display: flex; gap: 14px; margin: 0; }
-.footer-mark { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--shell-text); }
-.footer-mark .git { width: 15px; height: 15px; }
+.main-footer { grid-area: foot; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.75rem;
+  min-height: 2rem; padding: 0.25rem 1rem; background: var(--shell-side); border-top: 1px solid var(--shell-line); }
+.footer-marks { grid-column: 2; display: flex; gap: 0.875rem; margin: 0; }
+.footer-mark { display: flex; align-items: center; gap: 0.3125rem; font-size: 0.75rem; font-weight: 600; color: var(--shell-text); }
+.footer-mark .git { width: 0.9375rem; height: 0.9375rem; }
 /* ── Site nav: the site's own pages, centred in the top bar. Scrolls sideways when the bar is too narrow ── */
 /* Its width is kept in --nav-w (site/app.js), so the open note's title stops short of it */
 .site-nav { position: absolute; left: 50%; transform: translateX(-50%); max-width: calc(100% - 2 * (var(--rail) + 200px));
   overflow-x: auto; scrollbar-width: none; }
-.site-nav ul { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; white-space: nowrap; }
+.site-nav ul { display: flex; gap: 0.375rem; margin: 0; padding: 0; list-style: none; white-space: nowrap; }
 /* Links are bold and coloured like note titles, in turn: blue, pink, green, yellow (new links continue it) */
-.main-footer-btn { display: inline-block; padding: 3px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;
+.main-footer-btn { display: inline-block; padding: 0.1875rem 0.75rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 700;
   color: var(--c); text-decoration: none; }
 .site-nav li:nth-child(4n+1) { --c: var(--sky); }
 .site-nav li:nth-child(4n+2) { --c: var(--pink); }
@@ -295,20 +295,20 @@ body:not(.recent-open) .panel.right { display: none; }
 
 /* ── Top bar on smaller windows: the name goes first, then the note title;
       the menu button and Export stay to the end ── */
-@media (max-width: 820px) { .brand { display: none; } }
-@media (max-width: 600px) { .current { display: none; } }
+@media (max-width: 51.25rem) { .brand { display: none; } }
+@media (max-width: 37.5rem) { .current { display: none; } }
 
 /* ── Narrow screens: panels stay rails in the layout; expanding one slides it over the note ── */
-@media (max-width: 760px) {
+@media (max-width: 47.5rem) {
   body, body.left-collapsed { grid-template-columns: var(--rail) 1fr 0; }
   .panel { z-index: 2; }
   body:not(.left-collapsed) .panel.left { position: fixed; top: var(--top-h); bottom: 0; left: 0; width: var(--panel); }
   .panel.right { display: none; }
   .scrim { display: block; position: fixed; z-index: 1; inset: var(--top-h) 0 0; background: var(--shell-side); opacity: .7; }
   body.left-collapsed .scrim { display: none; }
-  .topbar { gap: 8px; padding: 0 8px 0 0; }
+  .topbar { gap: 0.5rem; padding: 0 0.5rem 0 0; }
   .home { left: 0; }
-  .topbar .btn { width: auto; aspect-ratio: auto; height: 38px; padding: 0 14px; }
+  .topbar .btn { width: auto; aspect-ratio: auto; height: 2.375rem; padding: 0 0.875rem; }
   .export { margin-left: auto; }
   .site-nav { position: static; transform: none; flex: 0 1 auto; max-width: none; min-width: 0; }
   .topbar-rail.right { display: none; }
@@ -316,7 +316,7 @@ body:not(.recent-open) .panel.right { display: none; }
 
 /* Whole heading is the toggle (app.js). Each project's own mark (its `mark` in the catalogue, drawn by app.js)
    replaces the old plus/minus, dimmed while folded; a project without one gets a chevron that turns when open. The rail keeps its plain ball. */
-.panel.left .group.foldable > h2 { cursor: pointer; border-radius: 6px; }
+.panel.left .group.foldable > h2 { cursor: pointer; border-radius: 0.375rem; }
 .panel.left .group.foldable > h2:hover { color: var(--shell-text); }
 body:not(.rail) .group.foldable .fold { width: 14px; height: 14px; margin: 0; border-radius: 0; opacity: .7;
   transition: transform .15s, opacity .15s; --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 3 10.5 8 5.5 13' stroke-width='2.2'/%3E%3C/svg%3E"); }
