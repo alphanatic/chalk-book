@@ -175,11 +175,13 @@ body:not(.recent-open) .panel.right { display: none; }
 .sort-btn:hover { background: var(--shell-raise-hover); color: var(--shell-text); }
 .sort-btn[aria-pressed="true"] { background: var(--c); color: var(--c-chip); }
 
-/* Search tile for the rail: a diagonal chalk stick, the same size as a note tile; hidden while expanded */
+/* Search tile for the rail: a tilted monocle-magnifier with a short detective handle and a thin balloon-string cord; hidden while expanded */
 .search-rail { display: none; --c: var(--pink); }
-.chalk-stick { width: 1.375rem; height: 1.375rem; }
-.chalk-stick rect { fill: var(--pink); }
-.chalk-stick .tip { fill: var(--pink-bg); }      /* the worn, lighter end */
+.monocle { width: 1.375rem; height: 1.375rem; fill: none; stroke: var(--pink); stroke-linecap: round; }
+.monocle .glass { stroke-width: 1.7; fill: var(--pink); fill-opacity: .12; }
+.monocle .glint { stroke-width: 1; opacity: .6; }
+.monocle .handle { stroke-width: 2.6; }
+.monocle .cord { stroke-width: .6; }
 
 /* Hit count on a search result */
 .file .hits { flex: none; font-size: 0.625rem; font-weight: 600; color: var(--shell-text-muted); }
@@ -202,19 +204,17 @@ body:not(.recent-open) .panel.right { display: none; }
 .rail .panel.left .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
 .rail .panel.left .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
 .rail .panel.left :is(.file .t, .file .state, .file .hits, .file .git, .progress, .panel-foot, .group h2 .count, .search, .sort) { display: none; }
-.rail .panel.left .search-rail { display: flex; margin-bottom: 14px; }
+.rail .panel.left .search-rail { display: flex; margin-bottom: 14px; background: none; }   /* just the pen and its pink left edge */
 .rail .panel.left .group h2 { justify-content: center; gap: 0; font-size: 0; margin-bottom: 3px; }
 /* On the rail the fold dot is a plain ball, larger and centred, with the project's last opened notes under it */
 .rail .panel.left .fold { width: 22px; height: 22px; margin: 0; }
 .rail .panel.left .group:not(.marked) .fold { -webkit-mask: none; mask: none; }
 .rail .panel.left .group.marked .fold { border-radius: 0; opacity: 1; }
-.rail .panel.left .group.foldable .file:not(.rail-recent) { display: none; }
-.rail .panel.left .group.foldable .file.rail-recent { display: flex; }
-/* On the rail each shown project is its mark in the project colour (a plain ball without one) over its recent notes; a project with no recent note takes no space */
+.rail .panel.left .group.foldable .file { display: none; }
+.rail .panel.left .group.foldable.rail-top .file.rail-recent { display: flex; }
+/* On the rail every project shows its mark in the project colour (a plain ball without one); the ones opened last come first, with their recent notes under them */
 .rail #menu-list { display: flex; flex-direction: column; }
-.rail .panel.left .group.foldable:not(.rail-top) { display: none; }
-.rail .panel.left .group.foldable:not(:has(.rail-recent)) { display: none; }
-.rail .panel.left .group + .group { margin-top: 2px; }
+.rail .panel.left .group + .group { margin-top: 0.625rem; }
 
 .scrim { display: none; }
 
@@ -312,6 +312,16 @@ body:not(.recent-open) .panel.right { display: none; }
   .export { margin-left: auto; }
   .site-nav { position: static; transform: none; flex: 0 1 auto; max-width: none; min-width: 0; }
   .topbar-rail.right { display: none; }
+  /* Touch targets: at least 44px (2.75rem) for everything a thumb taps; the rail keeps its small icons */
+  .icon-btn { width: 2.75rem; height: 2.75rem; }
+  .topbar .btn { height: 2.75rem; }
+  body:not(.rail) .panel.left .file { aspect-ratio: auto; min-height: 2.75rem; }
+  .sort-btn { padding: 0.75rem 0; }
+  .export-item { min-height: 2.75rem; }
+  .home .soon li.encrypted { font-size: 0.875rem; overflow-wrap: anywhere; }   /* the scrambled lines were wider than the screen */
+  .home .soon { overflow-x: clip; }
+  body:not(.rail) .panel.left .group.foldable > h2 { min-height: 2.75rem; }
+  .search input { font-size: 1rem; }      /* 16px, so iOS does not zoom in on focus */
 }
 
 /* Whole heading is the toggle (app.js). Each project's own mark (its `mark` in the catalogue, drawn by app.js)
