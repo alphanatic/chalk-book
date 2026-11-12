@@ -22,7 +22,12 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const narrow = matchMedia("(max-width: 760px)");
   const text = window.CHALK_TEXT || {};     // plain text of each note, from site/build-index.mjs
   const local = new Set(window.CHALK_LOCAL || []);   // notes git ignores: a red Git watermark
-  const markOf = n => n.pending ? "butter" : local.has(n.id) ? "ignored" : "";   // "" is green: on GitHub
+  // Green only for the public catalogue (site/notes.js); lavender for private notes saved in the private repo
+  // (site/in-repo.js, local only); red for the rest, which exist on this disk alone
+  const pub = window.CHALK_PUBLIC && new Set(window.CHALK_PUBLIC), inRepo = new Set(window.CHALK_IN_REPO || []);
+  const markOf = n => n.pending ? "butter"
+    : pub ? (pub.has(n.id) && !local.has(n.id) ? "" : inRepo.has(n.id) ? "lav" : "ignored")
+    : local.has(n.id) ? "ignored" : "";   // "" is green: on GitHub
   const MIN_QUERY = 2;
   // The site's own pages, opened from the footer; anything else in the address is a note id
   const PAGES = {
@@ -77,20 +82,24 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   const HOME_MARKS = [
     { kind: "", title: "on GitHub" },
     { kind: "butter", title: "pending: public or private not decided" },
-    { kind: "ignored", title: "private" },
+    { kind: "ignored", title: "private, on this disk only" },
   ];
   // Coming soon on Home: each entry is a future project. state: "red" not in the brain yet, "yellow" the project was
   // started, "green" done, which moves it to the Complete list below
   const SOON = [
+    { title: "chalk book", state: "green", plain: true },
     { title: "llm integration", state: "red" },
-    { title: "custom dash board", state: "red" },
-    { title: "build your own IT department", state: "red" },
+    { title: "custom dash board", state: "red", mark: "yellow" },
+    { title: "build your own IT department", state: "red", mark: "yellow" },
     { title: "gather and share notes with your group", state: "red" },
-    { title: "design your own agent", state: "red" },
-    { title: "e-mail pay-as-you-go", state: "red" },
+    { title: "design your own agent", state: "red", mark: "yellow" },
+    { title: "e-mail pay-as-you-go", state: "yellow", plain: true },
     { title: "chalk-mind", state: "yellow" },
+    { title: "critium.se", state: "red", mark: "lav" },
   ];
-  const SOON_MARK = { red: "ignored", yellow: "butter", green: "" };
+  // mark: optional colour for the Git mark only (red, yellow or lav), so a sealed entry can wear another colour and stay encrypted.
+  // plain: reads the entry in plain text where it stands in the list; a green one is not moved to Complete
+  const SOON_MARK = { red: "ignored", yellow: "butter", lav: "lav", green: "" };
   // The menu's sort buttons, in order, each lit in its chalk colour when chosen: projects and their notes by name, or by catalogue order and number.
   // The colours are the user's choice and unrelated to the Git marks' meaning.
   // Swedish collation, so å, ä and ö come after z. 01–99 is the default until another is chosen;
@@ -230,6 +239,10 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     pane.scrollTo({ top: pane.scrollTop + g.top - p.top - Math.max(0, (p.height - g.height) / 2), behavior: "smooth" });
   }
 
+  // A project's menu mark: the inside of a 24×24 line-art SVG from its catalogue entry, as a mask URL
+  const markUrl = inner => `url("data:image/svg+xml,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+    "stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>" + inner + "</svg>")}")`;
+
   // ── Left: every note, grouped by project, with roadmaps, in the chosen sort order ──
   function renderMenu() {
     menuList.replaceChildren();
@@ -241,7 +254,11 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       const group = el("section", "group foldable");
       paint(group, p.color);
       const h = heading(p.name, items.length);
-      h.prepend(foldButton(group, key, p.name));
+      const fold = foldButton(group, key, p.name);
+      h.prepend(fold);
+      if (p.mark) { group.classList.add("marked"); fold.style.setProperty("--fold-mark", markUrl(p.mark)); }
+      // The whole heading toggles, not only the dot
+      h.addEventListener("click", e => { if (e.target !== fold) fold.click(); });
       group.append(h);
       if (items.length) {
         // Notes carrying the green GitHub mark, out of every note in the project
@@ -429,11 +446,15 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     if (!currentId) return;
     // The browser names the PDF after the page title, so both titles become the note's id (e.g.
     // claude-code-12-handoff-reading-parallel-sessions) while the dialog is open, then go back
+    // The note says its own PDF name (note.js, pdfName): the id, or for the job documents their eyebrow and name
+    const fallback = notes.find(n => n.id === currentId)?.eyebrowNumber === false ? currentId.replace(/-\d+-/, "-") : currentId;
+    let name = fallback;
+    try { name = frame.contentWindow.chalkPdfName?.() || fallback; } catch {}
     const top = document.title;
-    document.title = currentId;
+    document.title = name;
     try {
       const doc = frame.contentWindow.document, own = doc.title;
-      doc.title = currentId;
+      doc.title = name;
       frame.contentWindow.print();
       doc.title = own;
     }
@@ -558,20 +579,23 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   }
   const soonItem = (s, text) => {
     const li = el("li", "", text);
-    li.prepend(gitMark(SOON_MARK[s.state]));
+    li.prepend(gitMark(SOON_MARK[s.mark || s.state]));
     return li;
   };
   // Open entries show as cipher text: each letter becomes a random glyph, spaces stay, and a few glyphs reshuffle on a tick
   const CIPHER = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#$%&*+=?@§¤ΔΣΩψλ";
   const glyph = () => CIPHER[Math.floor(Math.random() * CIPHER.length)];
   const encrypt = t => [...t].map(c => (c === " " ? " " : glyph())).join("");
-  const sealed = SOON.filter(s => s.state !== "green").map(s => {
+  const sealed = [];
+  const rows = SOON.filter(s => s.state !== "green" || s.plain).map(s => {
+    if (s.plain) return soonItem(s, s.title);
     const li = soonItem(s, encrypt(s.title));
     li.classList.add("encrypted");
     li.setAttribute("aria-label", "encrypted project");
+    sealed.push(li);
     return li;
   });
-  $("soon-list").replaceChildren(...sealed);
+  $("soon-list").replaceChildren(...rows);
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
     setInterval(() => sealed.forEach(li => {
       const text = li.lastChild;
@@ -581,7 +605,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       text.data = chars.join("");
     }), 90);
   }
-  $("soon-done").replaceChildren(...SOON.filter(s => s.state === "green").map(s => soonItem(s, `Complete: ${s.title}`)));
+  $("soon-done").replaceChildren(...SOON.filter(s => s.state === "green" && !s.plain).map(s => soonItem(s, `Complete: ${s.title}`)));
   const apps = APPS.map(a => {
     const link = el("a", `home-app ${a.kind}`);
     Object.assign(link, { href: a.href, target: "_blank", rel: "noopener", title: a.title });

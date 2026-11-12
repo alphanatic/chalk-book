@@ -6,11 +6,26 @@ addEventListener("keydown", e => {
   const hard = (e.key === "F5" && (e.ctrlKey || e.shiftKey)) || (e.shiftKey && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "r");
   if (hard && parent !== window) { e.preventDefault(); parent.postMessage("chalk:hard-reload", "*"); }
 });
+// The PDF's file name (the browser takes it from the page title). A note whose catalogue entry sets pdfFromHeader (so
+// far the CV) is named from its eyebrow and the first heading (h1), in kebab-case without a running number:
+// "CV · 2026-11-01" + "Fredrik Karlsson" → cv-2026-11-01-fredrik-karlsson. Any other note is named after its id,
+// without the number when its eyebrow hides it. The site calls this too, as chalkPdfName
+function pdfName() {
+  const file = decodeURIComponent(location.pathname.split("/").pop().replace(/\.html$/, ""));
+  const entry = (window.CHALK_NOTES || []).find(n => n.id === file);
+  const head = [".eyebrow", "h1"].map(q => document.querySelector(q)?.textContent).filter(Boolean).join(" ");
+  if (entry?.pdfFromHeader && head) {
+    return head.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+  return entry?.eyebrowNumber === false ? file.replace(/-\d+-/, "-") : file;
+}
+window.chalkPdfName = pdfName;
+
 addEventListener("message", e => {
   if (e.data === "chalk:print") {
-    // Opened from disk: the PDF takes its name from the title, so use the file's own name while printing
+    // Opened from disk: the PDF takes its name from the title, so use the PDF name while printing
     const own = document.title;
-    document.title = decodeURIComponent(location.pathname.split("/").pop().replace(/\.html$/, ""));
+    document.title = pdfName();
     print();
     document.title = own;
   }
@@ -90,7 +105,9 @@ function inline(s, notes) {
       const n = notes.find(x => x.id === id);
       return `<a href="../chalkbook.html#${id}" target="_top">${text ?? (n ? esc(`${String(n.n).padStart(2, "0")} ${n.title}`) : id)}</a>`;
     })
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => /^https?:/.test(url)
+      ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`
+      : `<a href="${url}">${text}</a>`);
   return s.replace(/\u0000(\d+)\u0000/g, (m, k) => `<code>${esc(code[k])}</code>`);
 }
 
@@ -135,7 +152,8 @@ function renderChalk(src) {
     else p += (p ? "\n" : "") + L[i];
   }
   const title = entry ? entry.title : id;
-  const eyebrow = entry ? `<span class="eyebrow"${Number.isInteger(entry.risk) ? ` data-grade="${entry.risk}"` : ""}>${esc([project?.name, nn, entry.module ? `Module ${entry.module}` : entry.context, entry.date]
+  const eyebrow = entry ? `<span class="eyebrow">${esc([entry.eyebrowName ?? project?.name, entry.eyebrowNumber === false ? "" : nn, entry.module ? `Module ${entry.module}` : entry.context,
+    entry.eyebrowDate === "today" ? new Date().toLocaleDateString("sv-SE") : entry.date]
     .filter(Boolean).join(" · "))}</span>` : "";
   let out = `<header class="hero">${own.span ?? eyebrow}${own.h1 ?? `<h1${project?.italic ? ' style="font-style: italic"' : ""}>${esc(title)}</h1>`}`
     + (intro[0] ? `<p class="sub">${md(intro[0])}</p>` : "") + intro.slice(1).map(p => `<p>${md(p)}</p>`).join("")
@@ -209,7 +227,7 @@ function renderChalk(src) {
   close();
 
   // Page title, footer on printed pages, stylesheets, then the page itself
-  const name = document.title || (entry ? `${(project?.name || "").replace(/^Project /, "")} ${nn} — ${title}` : title);
+  const name = document.title || (entry ? `${(project?.name || "").replace(/^Project /, "")}${entry.eyebrowNumber === false ? "" : ` ${nn}`} — ${title}` : title);
   document.title = name;
   // Shared stylesheets first, so a note's own <style> rules still win. Added by script, they don't hold back the
   // first paint, so the page stays hidden until they and the fonts have loaded (fonts given at most 1s): no flash
@@ -231,22 +249,17 @@ function renderChalk(src) {
 const chalkSource = document.querySelector('script[type="text/chalk"]');
 if (chalkSource) renderChalk(chalkSource.textContent);
 
-// The owner's own eyebrow tiles, local only. site/eyebrow-local.js (gitignored) may set window.CHALK_EYEBROW to a
-// function from a grade to an image URL. Where it does and the image loads, it becomes the eyebrow's background;
-// anywhere else (a clone, a hosted copy) the eyebrow stays as is
-function eyebrowTile() {
-  const eyebrow = document.querySelector(".hero .eyebrow[data-grade]");
-  if (!eyebrow) return;
-  const apply = () => {
-    const url = window.CHALK_EYEBROW?.(+eyebrow.dataset.grade);
-    if (!url) return;
-    const img = new Image();
-    img.onload = () => { eyebrow.style.setProperty("--eyebrow-tile", `url("${url}")`); eyebrow.classList.add("tiled"); };
-    img.src = url;
-  };
-  document.head.append(Object.assign(document.createElement("script"), { src: "../site/eyebrow-local.js", onload: apply }));
+// The eyebrow chip takes its project's palette colour as its backdrop (the catalogue's project colour: Tinker Town is lav),
+// with the colour's chip ink as text. A note of no known project keeps the default butter chip. The risk grade no longer
+// shows on the eyebrow
+function eyebrowColour() {
+  const file = decodeURIComponent(location.pathname.split("/").pop().replace(/\.html$/, ""));
+  const entry = (window.CHALK_NOTES || []).find(n => n.id === file);
+  const colour = entry && (window.CHALK_PROJECTS || {})[entry.project]?.color;
+  const eyebrow = document.querySelector(".hero .eyebrow");
+  if (colour && eyebrow) { eyebrow.style.background = `var(--${colour})`; eyebrow.style.color = `var(--${colour}-chip)`; }
 }
-eyebrowTile();
+eyebrowColour();
 
 // Title colours: after the yellow eyebrow chip, the title's words take blue → pink → green → yellow in turn.
 // Every "&" is purple chalk (lavender); other symbols stay white. A title that sets its own colours (e.g. the guide's Chalk Book name) is left alone.

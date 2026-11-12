@@ -195,6 +195,8 @@ body:not(.recent-open) .panel.right { display: none; }
 .git .edge { fill: none; stroke: var(--git-ring); stroke-width: 1.1; }
 .git.ignored { --git-mark: var(--git-ignored-mark); --git-ring: var(--git-ignored-ring); }
 .git.butter { --git-mark: var(--git-butter-mark); --git-ring: var(--git-butter-ring); }
+.git.lav { --git-mark: var(--git-lav-mark); --git-ring: var(--git-lav-ring); }
+.git.sky { --git-mark: var(--git-sky-mark); --git-ring: var(--git-sky-ring); }
 
 /* ── Collapsed menu: a rail showing only each number and its colour bar ── */
 .rail .panel.left .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
@@ -308,3 +310,12 @@ body:not(.recent-open) .panel.right { display: none; }
   .site-nav { position: static; transform: none; flex: 0 1 auto; max-width: none; min-width: 0; }
   .topbar-rail.right { display: none; }
 }
+
+/* Whole heading is the toggle (app.js). Each project's own mark (its `mark` in the catalogue, drawn by app.js)
+   replaces the old plus/minus, dimmed while folded; a project without one gets a chevron that turns when open. The rail keeps its plain ball. */
+.panel.left .group.foldable > h2 { cursor: pointer; border-radius: 6px; }
+.panel.left .group.foldable > h2:hover { color: var(--shell-text); }
+body:not(.rail) .group.foldable .fold { width: 14px; height: 14px; margin: 0; border-radius: 0; opacity: .7;
+  transition: transform .15s, opacity .15s; --fold-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 3 10.5 8 5.5 13' stroke-width='2.2'/%3E%3C/svg%3E"); }
+body:not(.rail) .group.foldable.open .fold { opacity: 1; }
+body:not(.rail) .group.foldable.open:not(.marked) .fold { transform: rotate(90deg); }

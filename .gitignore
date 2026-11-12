@@ -42,3 +42,10 @@ notes/home-lab-*
 # Private until the risk-grading feature is published
 notes/meta-18-local-risk-eyebrow-tiles.html
 notes/claude-code-15-risk-register-recheck.html
+notes/claude-code-16-session-trail-archive.html
+
+# AI Reelsearch notes (reel vetting): private for the time being, never committed
+notes/ai-reelsearch-*
+
+# Private notes saved in the private repo: a list made by chalk-book-private/collect.sh — never committed
+site/in-repo.js

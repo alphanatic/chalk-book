@@ -103,9 +103,11 @@
 <div class="scrim" id="scrim"></div>
 
 <script src="site/notes.js"></script>
+<script>window.CHALK_PUBLIC = window.CHALK_NOTES.map(n => n.id)</script>  <!-- before the local entries join -->
 <script src="site/notes-local.js"></script>
 <script src="site/search-index.js"></script>
 <script src="site/search-local.js"></script>
+<script src="site/in-repo.js"></script>  <!-- local-only: notes saved in the private repo, gitignored -->
 <script src="site/site-local.js"></script>  <!-- local-only Home tiles and dev menu, gitignored -->
 <script src="site/app.js"></script>
 </body>

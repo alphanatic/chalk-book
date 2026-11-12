@@ -335,3 +335,13 @@ window.CHALK_NOTES = [
     skills: ["guide", "conventions", "naming", "design"],
   },
 ];
+
+// Menu marks: each project's icon on its menu heading, as the inside of a 24×24 line-art SVG (app.js draws it)
+window.CHALK_PROJECTS["tinker-town"].mark = "<circle cx='12' cy='12' r='4'/><path stroke-width='2.6' d='M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22M4.9 4.9l2.5 2.5M16.6 16.6l2.5 2.5M19.1 4.9l-2.5 2.5M7.4 16.6l-2.5 2.5'/>";
+window.CHALK_PROJECTS["pokedex"].mark = "<circle cx='12' cy='12' r='10.4'/><circle cx='12' cy='12' r='3.2'/><path d='M2 12h6.8M15.2 12H22'/>";
+window.CHALK_PROJECTS["claude-code"].mark = "<path stroke-width='2.4' d='M12 2v20M2 12h20M5 5l14 14M19 5 5 19'/>";
+window.CHALK_PROJECTS["javascript"].mark = "<rect x='3' y='3' width='18' height='18' rx='3'/><path stroke-width='1.6' d='M12 8v6.5a2 2 0 0 1-3.5 1.3M18 8.8c-.5-.6-1.2-.8-2-.8-1.1 0-2 .6-2 1.6 0 2.2 4 1.2 4 3.4 0 1-.9 1.8-2.1 1.8-.9 0-1.6-.3-2.1-1'/>";
+window.CHALK_PROJECTS["arch-linux"].mark = "<path fill='black' stroke='none' fill-rule='evenodd' d='M12 1.5 2 22.5c3.8-2.8 6.8-3.8 10-3.8s6.2 1 10 3.8zM12 9.5 8.2 17.2c1.2-.4 2.5-.6 3.8-.6s2.6.2 3.8.6z'/>";
+window.CHALK_PROJECTS["anthropic"].mark = "<path fill='black' stroke='none' d='M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5527h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z'/>";
+window.CHALK_PROJECTS["ai-reelsearch"].mark = "<circle cx='12' cy='12' r='10'/><circle fill='black' stroke='none' cx='12' cy='12' r='1.8'/><circle fill='black' stroke='none' cx='12' cy='6' r='1.6'/><circle fill='black' stroke='none' cx='12' cy='18' r='1.6'/><circle fill='black' stroke='none' cx='6' cy='12' r='1.6'/><circle fill='black' stroke='none' cx='18' cy='12' r='1.6'/>";
+window.CHALK_PROJECTS["meta"].mark = "<path d='M12 6.5C10 5 7 4.5 3.5 4.5v14c3.5 0 6.5.5 8.5 2 2-1.5 5-2 8.5-2v-14C17 4.5 14 5 12 6.5zM12 6.5v14'/>";

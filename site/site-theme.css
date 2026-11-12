@@ -16,6 +16,10 @@
   --git-ignored-ring:  var(--coral);
   --git-butter-mark:   var(--butter-chip); /* yellow on yellow: pending notes, public or private not decided */
   --git-butter-ring:   var(--butter);
+  --git-lav-mark:      var(--lav-chip);   /* lavender: private notes saved in the private repo */
+  --git-lav-ring:      var(--lav);
+  --git-sky-mark:      var(--sky-chip);   /* blue: kept in the mark library, not used yet */
+  --git-sky-ring:      var(--sky);
   --drop-green:        #10A437;   /* the droplet tile on Home: its own green, never recoloured */
   /* The review tile's flower on Home: the reviewed concepts' own palette, never recoloured */
   --review-cream:      #efe6c8;   /* the cream petals */
