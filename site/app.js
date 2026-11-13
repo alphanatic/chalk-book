@@ -83,6 +83,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     { kind: "", title: "on GitHub" },
     { kind: "butter", title: "pending: public or private not decided" },
     { kind: "ignored", title: "private, on this disk only" },
+    // Apart from the others, at the footer's far right: private notes saved in the private repo
+    { kind: "lav", title: "private, in the private repo", right: true },
   ];
   // Coming soon on Home: each entry is a future project. state: "red" not in the brain yet, "yellow" the project was
   // started, "green" done, which moves it to the Complete list below
@@ -114,7 +116,7 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   let sort = SORTS.find(s => { try { return s.key === localStorage.getItem(SORT_KEY); } catch { return false; } }) || SORTS.find(s => s.key === "number");
   const HISTORY_KEY = "chalk.history", HISTORY_MAX = 10;
   // Every note opened in this browser, newest first: the rail shows the last few of each project
-  const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_RECENT = 3, RAIL_PROJECTS = 4;
+  const OPENED_KEY = "chalk.opened", OPENED_MAX = 60, RAIL_PROJECTS = 4;
   // Menu projects opened with their dot; the rest start folded
   const FOLD_KEY = "chalk.open-projects";
   // A reload (F5) keeps the menu as it was in this tab. A hard reload (Ctrl+F5, Shift+F5, Ctrl+Shift+F5,
@@ -262,13 +264,21 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       h.addEventListener("click", e => { if (e.target !== fold) fold.click(); });
       group.append(h);
       if (items.length) {
-        // Notes carrying the green GitHub mark, out of every note in the project
+        // Notes carrying the green GitHub mark, out of every note in the project.
+        // A project with none on GitHub is private: the purple Git mark instead of "0 of N"
         const shared = items.filter(n => !markOf(n)).length;
         const prog = el("div", "progress");
-        prog.append(el("span", "label", `${shared} of ${items.length} notes on GitHub`));
-        const bar = el("div", "bar"), fill = el("i");
-        fill.style.width = `${(shared / items.length) * 100}%`;
-        bar.append(fill); prog.append(bar); group.append(prog);
+        if (!shared) {
+          prog.classList.add("private");
+          prog.title = `Private: none of its ${items.length} notes on GitHub`;
+          prog.append(gitMark("lav"), el("span", "label", "private"));
+        } else {
+          prog.append(el("span", "label", `${shared} of ${items.length} notes on GitHub`));
+          const bar = el("div", "bar"), fill = el("i");
+          fill.style.width = `${(shared / items.length) * 100}%`;
+          bar.append(fill); prog.append(bar);
+        }
+        group.append(prog);
       }
       for (const n of items) {
         const b = noteButton(n, false);
@@ -281,8 +291,8 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
     markRailRecent();
   }
 
-  // On the rail every project shows its mark, the ones opened last on top; the RAIL_PROJECTS projects opened last also
-  // show at most RAIL_RECENT of their notes opened last. The open menu keeps its own sort
+  // On the rail the RAIL_PROJECTS projects opened last show their mark, the one opened last on top; a note shows there
+  // only while it is on screen (app.css). The open menu keeps its own sort
   const readOpened = () => { try { return JSON.parse(localStorage.getItem(OPENED_KEY) ?? localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } };
   function markRailRecent() {
     const opened = readOpened();
@@ -291,11 +301,6 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
       const rank = order.indexOf(g.dataset.project);
       g.classList.toggle("rail-top", rank >= 0 && rank < RAIL_PROJECTS);
       g.style.order = rank >= 0 ? rank : order.length;
-    }
-    for (const b of menuList.querySelectorAll("button.file[data-id]")) {
-      const p = projectOf(b.dataset.id);
-      const rank = opened.filter(id => projectOf(id) === p).indexOf(b.dataset.id);
-      b.classList.toggle("rail-recent", rank >= 0 && rank < RAIL_RECENT);
     }
   }
 
@@ -565,17 +570,21 @@ customElements.define("chalk-wordmark", class extends HTMLElement {
   });
   addEventListener("hashchange", () => show(decodeURIComponent(location.hash.slice(1))));
 
-  const footerMarks = (count, title) => $("footer-marks").replaceChildren(...HOME_MARKS.map(m => {
-    const n = count(m), item = el("span", "footer-mark", n);
-    item.title = title(n, m);
-    item.prepend(gitMark(m.kind));
-    return item;
-  }));
+  const footerMarks = (count, title) => {
+    const item = m => {
+      const n = count(m), span = el("span", "footer-mark", n);
+      span.title = title(n, m);
+      span.prepend(gitMark(m.kind));
+      return span;
+    };
+    $("footer-marks").replaceChildren(...HOME_MARKS.filter(m => !m.right).map(item));
+    $("footer-right").replaceChildren(...HOME_MARKS.filter(m => m.right).map(item));
+  };
   footerMarks(m => window.CHALK_NOTES.filter(x => markOf(x) === m.kind).length, (n, m) => `${n} notes ${m.title}`);
   // Served inside a site that keeps /git-pages.json, count that site's pages instead, as its own footer does
   if (location.protocol.startsWith("http")) {
     const KIND = { green: "", yellow: "butter", red: "ignored" };
-    const PAGE_TITLE = { "": "on GitHub", butter: "published, not on GitHub", ignored: "local copy only" };
+    const PAGE_TITLE = { "": "on GitHub", butter: "published, not on GitHub", ignored: "local copy only", lav: "in a private repo" };
     fetch("/git-pages.json", { cache: "no-cache" })
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(pages => {

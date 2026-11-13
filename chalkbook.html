@@ -61,11 +61,11 @@
         aria-label="Search inside every note">
       <kbd>/</kbd>
     </label>
-    <!-- Shown instead of the field when the menu is a rail: a diagonal chalk stick -->
+    <!-- Shown instead of the field when the menu is a rail: a little looking glass -->
     <button class="file search-rail" id="search-rail" type="button" title="Search inside every note" aria-label="Search">
-      <svg class="chalk-stick" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="9.6" y="2.5" width="4.8" height="19" rx="2.1" transform="rotate(45 12 12)"/>
-        <rect class="tip" x="9.6" y="2.5" width="4.8" height="4" rx="2.1" transform="rotate(45 12 12)"/>
+      <svg class="search-glass" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"/>
+        <path d="M15.4 15.4 21 21"/>
       </svg>
     </button>
     <!-- Menu order: one button per entry in SORTS, site/app.js. Hidden on the rail and while searching -->
@@ -99,6 +99,7 @@
 <!-- Main footer: persistent on every page, links to the site's own pages; it grows with its contents -->
 <footer class="main-footer" aria-label="Main footer">
   <p class="footer-marks" id="footer-marks"></p>  <!-- one mark per entry in HOME_MARKS, site/app.js -->
+  <p class="footer-right" id="footer-right"></p>  <!-- HOME_MARKS entries marked right: the purple private mark -->
 </footer>
 <div class="scrim" id="scrim"></div>
 

@@ -116,6 +116,9 @@ body:not(.recent-open) .panel.right { display: none; }
 .progress { margin: -0.125rem 0 0.625rem 1rem; font-size: 0.6875rem; color: var(--shell-text-muted); white-space: nowrap; }
 .progress .bar { height: 0.1875rem; margin-top: 0.25rem; border-radius: 0.125rem; background: var(--shell-raise); overflow: hidden; }
 .progress .bar i { display: block; height: 100%; background: var(--c); }
+/* A private project: the purple Git mark and "private" in place of the count and bar; folded, the mark alone */
+.progress.private { display: flex; align-items: center; gap: 0.375rem; }
+.progress.private .git { flex: none; width: 0.75rem; height: 0.75rem; }
 
 /* A file button: 20 wide by 3 tall, a dark tile with its project's chalk colour */
 .file { display: flex; align-items: center; gap: 0.5rem; width: 100%; aspect-ratio: 20 / 3;
@@ -175,13 +178,9 @@ body:not(.recent-open) .panel.right { display: none; }
 .sort-btn:hover { background: var(--shell-raise-hover); color: var(--shell-text); }
 .sort-btn[aria-pressed="true"] { background: var(--c); color: var(--c-chip); }
 
-/* Search tile for the rail: a tilted monocle-magnifier with a short detective handle and a thin balloon-string cord; hidden while expanded */
+/* Search tile for the rail: a little looking glass; hidden while expanded */
 .search-rail { display: none; --c: var(--pink); }
-.monocle { width: 1.375rem; height: 1.375rem; fill: none; stroke: var(--pink); stroke-linecap: round; }
-.monocle .glass { stroke-width: 1.7; fill: var(--pink); fill-opacity: .12; }
-.monocle .glint { stroke-width: 1; opacity: .6; }
-.monocle .handle { stroke-width: 2.6; }
-.monocle .cord { stroke-width: .6; }
+.search-glass { width: 1.375rem; height: 1.375rem; fill: none; stroke: var(--pink); stroke-width: 2; stroke-linecap: round; }
 
 /* Hit count on a search result */
 .file .hits { flex: none; font-size: 0.625rem; font-weight: 600; color: var(--shell-text-muted); }
@@ -200,19 +199,19 @@ body:not(.recent-open) .panel.right { display: none; }
 .git.lav { --git-mark: var(--git-lav-mark); --git-ring: var(--git-lav-ring); }
 .git.sky { --git-mark: var(--git-sky-mark); --git-ring: var(--git-sky-ring); }
 
-/* ── Collapsed menu: a rail showing only each number and its colour bar ── */
+/* ── Collapsed menu: a rail of project icons, plus the note on screen ── */
 .rail .panel.left .panel-body { padding: 10px 6px 14px; scrollbar-width: none; }
 .rail .panel.left .file { aspect-ratio: auto; height: 36px; padding: 0; justify-content: center; }
 .rail .panel.left :is(.file .t, .file .state, .file .hits, .file .git, .progress, .panel-foot, .group h2 .count, .search, .sort) { display: none; }
 .rail .panel.left .search-rail { display: flex; margin-bottom: 14px; background: none; }   /* just the pen and its pink left edge */
 .rail .panel.left .group h2 { justify-content: center; gap: 0; font-size: 0; margin-bottom: 3px; }
-/* On the rail the fold dot is a plain ball, larger and centred, with the project's last opened notes under it */
+/* On the rail the fold dot is a plain ball, larger and centred, with the note on screen under it */
 .rail .panel.left .fold { width: 22px; height: 22px; margin: 0; }
 .rail .panel.left .group:not(.marked) .fold { -webkit-mask: none; mask: none; }
 .rail .panel.left .group.marked .fold { border-radius: 0; opacity: 1; }
 .rail .panel.left .group.foldable .file { display: none; }
-.rail .panel.left .group.foldable.rail-top .file.rail-recent { display: flex; }
-/* On the rail every project shows its mark in the project colour (a plain ball without one); the ones opened last come first, with their recent notes under them */
+.rail .panel.left .group.foldable.rail-top .file[aria-current] { display: flex; }     /* only the note on screen */
+/* On the rail every project shows its mark in the project colour (a plain ball without one); the ones opened last come first, with only the note on screen under its project */
 .rail #menu-list { display: flex; flex-direction: column; }
 .rail .panel.left .group + .group { margin-top: 0.625rem; }
 
@@ -278,6 +277,9 @@ body:not(.recent-open) .panel.right { display: none; }
 .footer-marks { grid-column: 2; display: flex; gap: 0.875rem; margin: 0; }
 .footer-mark { display: flex; align-items: center; gap: 0.3125rem; font-size: 0.75rem; font-weight: 600; color: var(--shell-text); }
 .footer-mark .git { width: 0.9375rem; height: 0.9375rem; }
+.footer-right { grid-column: 3; justify-self: end; display: flex; gap: 0.875rem; margin: 0; }
+/* The local dev menu's round button (site/site-local.js) sits in the corner: step clear of it */
+body:has(dev-menu) .footer-right { margin-right: 4.5rem; }
 /* ── Site nav: the site's own pages, centred in the top bar. Scrolls sideways when the bar is too narrow ── */
 /* Its width is kept in --nav-w (site/app.js), so the open note's title stops short of it */
 .site-nav { position: absolute; left: 50%; transform: translateX(-50%); max-width: calc(100% - 2 * (var(--rail) + 200px));
